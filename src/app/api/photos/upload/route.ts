@@ -32,6 +32,6 @@ export async function POST(req: NextRequest) {
       urls: results,
     });
   } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return NextResponse.json({ success: false, error: "上传失败" }, { status: 500 });
   }
 }

@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { Settings, Save, Users, MapPin, Building, Info, Plus, X, Pencil, Trash2, Check, Key, Navigation, RefreshCw, Database } from "lucide-react";
+import { Settings, Save, Users, MapPin, Building, Info, Plus, X, Pencil, Trash2, Check, Key, Navigation, RefreshCw, Database, Upload } from "lucide-react";
 
 const TABS = [
   { key: "basic", label: "基本信息", icon: Info },
@@ -12,6 +12,7 @@ const TABS = [
   { key: "apikeys", label: "API 密钥", icon: Key },
   { key: "gps", label: "GPS 定位", icon: Navigation },
   { key: "backup", label: "数据备份", icon: Database },
+  { key: "upgrade", label: "系统升级", icon: Upload },
 ];
 
 export default function SettingsPage() {
@@ -50,6 +51,7 @@ export default function SettingsPage() {
       {tab === "apikeys" && <ApiKeySettings />}
       {tab === "gps" && <GpsSettings />}
       {tab === "backup" && <BackupSettings />}
+      {tab === "upgrade" && <UpgradeSettings />}
     </div>
   );
 }
@@ -698,6 +700,110 @@ function BackupSettings() {
               <button onClick={doRestore}
                 className="px-6 py-2.5 bg-orange-600 text-white rounded-lg text-sm hover:bg-orange-700 flex items-center gap-1.5">
                 <RefreshCw className="w-4 h-4" /> 确认恢复
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ========== 系统升级 ==========
+
+function UpgradeSettings() {
+  const [checking, setChecking] = useState(false);
+  const [info, setInfo] = useState<any>(null);
+  const [showModal, setShowModal] = useState(false);
+  const [upgrading, setUpgrading] = useState(false);
+  const [msg, setMsg] = useState("");
+
+  useEffect(() => { checkVersion(); }, []);
+
+  const checkVersion = async () => {
+    setChecking(true); setMsg("");
+    try {
+      const r = await fetch("/api/version/check");
+      setInfo(await r.json());
+    } catch { setMsg("检测失败"); }
+    setChecking(false);
+  };
+
+  const doUpgrade = async () => {
+    if (!info?.url) return;
+    setUpgrading(true); setMsg("正在下载...");
+    try {
+      const r = await fetch("/api/system/upgrade", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: info.url }),
+      });
+      const d = await r.json();
+      setMsg(d.success ? d.message : (d.error || "升级失败"));
+      if (d.success) setTimeout(() => window.close(), 3000);
+    } catch { setMsg("升级失败"); }
+    setUpgrading(false);
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="bg-white rounded-xl border shadow-sm p-6">
+        <h2 className="text-lg font-semibold text-gray-800 mb-4">系统升级</h2>
+        <div className="grid grid-cols-2 gap-4 mb-4">
+          <div className="bg-gray-50 rounded-lg p-4">
+            <div className="text-xs text-gray-500">当前版本</div>
+            <div className="text-xl font-bold text-gray-800">V{info?.current || "—"}</div>
+          </div>
+          <div className="bg-blue-50 rounded-lg p-4">
+            <div className="text-xs text-blue-500">最新版本</div>
+            <div className="text-xl font-bold text-blue-700">{info?.latest ? "V" + info.latest : info?.offline ? "离线" : "—"}</div>
+          </div>
+        </div>
+        {info?.hasUpdate ? (
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+            <p className="text-sm font-medium text-green-800">发现新版本 V{info.latest}</p>
+            {info.notes && <p className="text-xs text-green-600 mt-1">{info.notes}</p>}
+            <button onClick={() => setShowModal(true)}
+              className="mt-3 flex items-center gap-1.5 px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700">
+              <Upload className="w-4 h-4" /> 在线升级
+            </button>
+          </div>
+        ) : (
+          <div className="bg-gray-50 rounded-lg p-4 mb-4">
+            <p className="text-sm text-gray-500">{info?.offline ? "无法连接到升级服务器" : "已是最新版本"}</p>
+          </div>
+        )}
+        <button onClick={checkVersion} disabled={checking}
+          className="flex items-center gap-1.5 px-3 py-1.5 border border-gray-300 text-gray-700 rounded-lg text-sm hover:bg-gray-50 disabled:opacity-50">
+          <RefreshCw className={"w-4 h-4" + (checking ? " animate-spin" : "")} />
+          {checking ? "检测中..." : "重新检测"}
+        </button>
+        {msg && <p className={`text-sm mt-3 ${msg.includes("失败") ? "text-red-600" : "text-green-600"}`}>{msg}</p>}
+      </div>
+      <div className="bg-gray-50 rounded-xl border p-5 text-xs text-gray-500 leading-relaxed">
+        <h3 className="font-semibold text-gray-700 mb-2">在线升级说明</h3>
+        <p>1. 系统启动时会自动检测新版本（需联网）</p>
+        <p>2. 发现新版本后，仪表盘顶部会显示升级提示</p>
+        <p>3. 升级前系统会自动备份数据到 data\backups\</p>
+        <p>4. 下载完成后系统自动退出，请手动双击「启动系统.bat」重启</p>
+        <p className="mt-2 text-gray-400">如在线升级失败，可手动下载最新压缩包覆盖安装</p>
+      </div>
+      {showModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md mx-4">
+            <h3 className="text-lg font-bold text-gray-900 mb-2">确认在线升级</h3>
+            <div className="text-sm text-gray-600 mb-4 space-y-1.5">
+              <p>✅ 升级前将自动备份数据</p>
+              <p>📥 下载最新版本安装包</p>
+              <p>🔄 升级期间系统不可用（1-2分钟）</p>
+              <p className="text-amber-600 font-medium">⚠ 升级后需手动重新双击「启动系统.bat」</p>
+            </div>
+            {msg && <p className="text-sm mb-3 text-blue-600">{msg}</p>}
+            <div className="flex gap-3 justify-end">
+              <button onClick={() => setShowModal(false)} disabled={upgrading}
+                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm disabled:opacity-50">取消</button>
+              <button onClick={doUpgrade} disabled={upgrading}
+                className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700 disabled:opacity-50">
+                {upgrading ? "升级中..." : "确认升级"}
               </button>
             </div>
           </div>

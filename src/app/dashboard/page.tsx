@@ -42,6 +42,7 @@ export default function DashboardPage() {
   const [qaItems, setQaItems] = useState<QAItem[]>([]);
   const [qaPage, setQaPage] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [updateInfo, setUpdateInfo] = useState<any>(null);
 
   useEffect(() => {
     Promise.all([
@@ -59,6 +60,13 @@ export default function DashboardPage() {
         : [];
       setQaItems(items);
     }).catch(console.error).finally(() => setLoading(false));
+  }, []);
+
+  // Version check
+  useEffect(() => {
+    fetch("/api/version/check").then(r => r.json()).then(d => {
+      if (d.hasUpdate) setUpdateInfo(d);
+    }).catch(() => {});
   }, []);
 
   // Auto-rotate QA every 5 seconds
@@ -104,6 +112,9 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
+      {/* Version update banner */}
+      {updateInfo && <UpdateBanner info={updateInfo} onDismiss={() => setUpdateInfo(null)} />}
+
       {/* Announcements */}
       {announcements.length > 0 && (
         <div className="bg-gradient-to-r from-amber-50 via-orange-50 to-amber-50 border border-amber-200 rounded-xl px-4 py-2.5 flex items-center gap-2 overflow-hidden">
@@ -313,5 +324,82 @@ function StaticQA({ title, q, a }: { title: string; q: string; a: string }) {
       <p className="text-xs font-medium text-gray-800 mt-1.5 group-hover:text-primary-700">{q}</p>
       <p className="text-[11px] text-gray-500 mt-0.5 leading-relaxed">{a}</p>
     </Link>
+  );
+}
+
+// ========== 版本升级横幅 ==========
+
+function UpdateBanner({ info, onDismiss }: { info: any; onDismiss: () => void }) {
+  const [showModal, setShowModal] = useState(false);
+  const [upgrading, setUpgrading] = useState(false);
+  const [msg, setMsg] = useState("");
+
+  const doUpgrade = async () => {
+    setUpgrading(true); setMsg("正在下载更新包...");
+    try {
+      const r = await fetch("/api/system/upgrade", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: info.url }),
+      });
+      const d = await r.json();
+      if (d.success) {
+        setMsg(d.message);
+        setTimeout(() => { window.close(); }, 2000);
+      } else {
+        setMsg(d.error || "升级失败");
+        setUpgrading(false);
+      }
+    } catch {
+      setMsg("网络错误，升级失败");
+      setUpgrading(false);
+    }
+  };
+
+  return (
+    <>
+      <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-blue-50 border border-blue-200 rounded-xl px-4 py-3 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="text-lg">🆕</span>
+          <div>
+            <p className="text-sm font-semibold text-blue-800">发现新版本 V{info.latest}</p>
+            {info.notes && <p className="text-xs text-blue-600">{info.notes}</p>}
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <button onClick={() => setShowModal(true)}
+            className="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-medium hover:bg-blue-700">
+            在线升级
+          </button>
+          <button onClick={onDismiss} className="text-gray-400 hover:text-gray-600 text-lg leading-none">&times;</button>
+        </div>
+      </div>
+
+      {showModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md mx-4">
+            <h3 className="text-lg font-bold text-gray-900 mb-2">在线升级到 V{info.latest}</h3>
+            <div className="text-sm text-gray-600 mb-4 space-y-2">
+              <p>✅ 升级前会自动备份当前数据</p>
+              <p>📥 将从服务器下载更新包（约{info.size ? (info.size / 1024 / 1024).toFixed(0) + "MB" : "未知大小"}）</p>
+              <p>🔄 升级过程中系统将暂时不可用（约1-2分钟）</p>
+              <p>📂 升级后数据完整保留</p>
+              <p className="text-amber-600 font-medium">⚠ 升级后需要手动重新双击「启动系统.bat」</p>
+            </div>
+            {msg && <p className={`text-sm mb-3 ${msg.includes("失败") ? "text-red-600" : "text-green-600"}`}>{msg}</p>}
+            <div className="flex gap-3 justify-end">
+              <button onClick={() => setShowModal(false)} disabled={upgrading}
+                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm hover:bg-gray-50 disabled:opacity-50">
+                取消
+              </button>
+              <button onClick={doUpgrade} disabled={upgrading}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 disabled:opacity-50">
+                {upgrading ? "升级中..." : "确认升级"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
