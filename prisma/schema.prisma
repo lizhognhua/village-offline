@@ -1,0 +1,457 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ========== 认证模块 ==========
+
+model User {
+  id             String    @id @default(cuid())
+  name           String
+  phone          String    @unique
+  email          String?
+  hashedPassword String
+  avatar         String?
+  role           String    @default("member")
+  isActive       Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  visits         Visit[]
+  diaries        WorkDiary[]
+  announcements  Announcement[]
+}
+
+// ========== 首页模块 ==========
+
+model CarouselImage {
+  id        String   @id @default(cuid())
+  url       String
+  title     String?
+  category  String   @default("scenery")
+  sortOrder Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+model TeamMember {
+  id        String   @id @default(cuid())
+  name      String
+  title     String?
+  intro     String?
+  avatar    String?
+  sortOrder Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model HelpProject {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  photos      String   @default("[]")
+  statusTags  String   @default("[]")
+  sortOrder   Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// ========== 村情户情模块 ==========
+
+model VillageProfile {
+  id                   String   @id @default(cuid())
+  administrativeArea   Float?
+  cultivatedLand       Float?
+  registeredHouseholds Int?
+  registeredPopulation Int?
+  residentHouseholds   Int?
+  residentPopulation   Int?
+  partyMembers         Int?
+  laborForce           Int?
+  villageIncome        Float?
+  operatingIncome      Float?
+  wubaoHouseholds      Int?
+  severeIllness        Int?
+  elderlyCount         Int?
+  poorHouseholds       Int?
+  monitoredHouseholds  Int?
+  dibaoHouseholds      Int?
+  villageSecretary     String?
+  secretaryPhone       String?
+  fillPerson           String   @default("肖慧军")
+  fillPersonPhone      String?
+  fillDate             DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+}
+
+model VillageGroup {
+  id        String    @id @default(cuid())
+  name      String
+  type      String
+  parentId  String?
+  latitude  Float?
+  longitude Float?
+  sortOrder Int       @default(0)
+  createdAt DateTime  @default(now())
+  families  Family[]
+}
+
+model Family {
+  id              String         @id @default(cuid())
+  familyCode      String?        @unique
+  headName        String
+  headGender      String?
+  headIdCard      String?
+  headPhone       String?
+  spouseName      String?
+  spousePhone     String?
+  spouseIdCard    String?
+  address         String?
+  income          String?
+  registeredAddr  String?
+  actualAddr      String?
+  population      Int            @default(0)
+  familyAttr      String?
+  residenceStatus String         @default("常住户")
+  riskLevel       String?        @default("低")
+  incomeSource    String?
+  tags            String         @default("[]")
+  photos          String         @default("[]")
+  files           String         @default("[]")
+  notes           String?
+  groupId         String?
+  group           VillageGroup?  @relation(fields: [groupId], references: [id])
+  latitude        Float?
+  longitude       Float?
+  members         FamilyMember[]
+  policies        PolicyRecord[]
+  alerts          AlertRecord[]
+  visits          Visit[]
+  condolences     Condolence[]
+  records         HouseholdRecord[]
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+}
+
+model FamilyMember {
+  id           String    @id @default(cuid())
+  name         String
+  idCard       String?
+  gender       String?
+  birthDate    DateTime?
+  phone        String?
+  relation     String
+  education    String?
+  occupation   String?
+  healthStatus String?
+  healthNote   String?
+  familyId     String
+  family       Family    @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  createdAt    DateTime  @default(now())
+}
+
+model PolicyRecord {
+  id            String    @id @default(cuid())
+  familyId      String
+  family        Family    @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  policyName    String
+  policyType    String
+  benefitAmount Float?
+  startDate     DateTime?
+  endDate       DateTime?
+  status        String    @default("享受中")
+  createdAt     DateTime  @default(now())
+}
+
+model AlertRecord {
+  id          String    @id @default(cuid())
+  familyId    String?
+  family      Family?   @relation(fields: [familyId], references: [id])
+  alertType   String
+  alertLevel  String    @default("中")
+  title       String
+  description String
+  status      String    @default("待处理")
+  handlerId   String?
+  handleNote  String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+// ========== 业务模块 ==========
+
+model Visit {
+  id         String   @id @default(cuid())
+  familyId   String
+  family     Family   @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  visitDate  DateTime
+  content    String
+  visitorId  String
+  visitor    User     @relation(fields: [visitorId], references: [id])
+  photos     String?  @default("[]")
+  statusTags String?  @default("[]")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Condolence {
+  id             String   @id @default(cuid())
+  familyId       String
+  family         Family   @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  condolenceDate DateTime
+  content        String
+  items          String?  @default("[]")
+  staff          String?
+  photos         String?  @default("[]")
+  statusTags     String?  @default("[]")
+  createdById    String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+// ========== 走访慰问统一记录 ==========
+
+model HouseholdRecord {
+  id               String   @id @default(cuid())
+  type             String
+  familyId         String
+  family           Family   @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  recordDate       DateTime @default(now())
+  content          String
+  statusTags       String?  @default("[]")
+  items            String?  @default("[]")
+  staff            String?
+  photos           String?  @default("[]")
+  createdById      String?
+  dutyTags         String   @default("[]")
+  taskTags         String   @default("[]")
+  careType         String?
+  policyPublicized Boolean  @default(false)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+// ========== 工作日记 ==========
+
+model WorkDiary {
+  id          String    @id @default(cuid())
+  date        DateTime  @default(now())
+  title       String
+  content     String
+  images      String?   @default("[]")
+  videos      String?   @default("[]")
+  isPublic    Boolean   @default(true)
+  source      String    @default("editor")
+  authorId    String
+  author      User      @relation(fields: [authorId], references: [id])
+  recordType  String?
+  dutyTags    String    @default("[]")
+  taskTags    String    @default("[]")
+  extraFields String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+// ========== 项目看板 ==========
+
+model Project {
+  id                String              @id @default(cuid())
+  title             String
+  description       String?
+  category          String              @default("industry")
+  status            String              @default("pending")
+  priority          String              @default("medium")
+  progress          Int                 @default(0)
+  startDate         DateTime?
+  endDate           DateTime?
+  deadline          DateTime?
+  budget            Float?
+  responsiblePerson String?
+  members           String?             @default("[]")
+  tags              String?             @default("[]")
+  coverUrl          String?
+  createdById       String?
+  dutyCategory      String?
+  planType          String?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  milestones        ProjectMilestone[]
+  activities        ProjectActivity[]
+}
+
+model ProjectMilestone {
+  id        String    @id @default(cuid())
+  projectId String
+  title     String
+  done      Boolean   @default(false)
+  date      DateTime?
+  project   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdAt DateTime  @default(now())
+}
+
+model ProjectActivity {
+  id        String    @id @default(cuid())
+  projectId String
+  content   String
+  createdAt DateTime  @default(now())
+  project   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+// ========== 统计与产业模块 ==========
+
+model Industry {
+  id          String    @id @default(cuid())
+  name        String
+  description String?
+  detail      String?
+  photos      String?   @default("[]")
+  statusTags  String?   @default("[]")
+  startDate   DateTime?
+  status      String    @default("进行中")
+  scale       String?
+  benefit     String?
+  icon        String?
+  sortOrder   Int       @default(0)
+  createdById String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+// ========== 本地文件管理 (替代 Paperless) ==========
+
+model FileDoc {
+  id        String   @id @default(cuid())
+  title     String
+  category  String?
+  tags      String   @default("[]")
+  filePath  String?
+  fileSize  Int?
+  mimeType  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ========== 天气预报与预警 ==========
+
+model WeatherAlert {
+  id          String    @id @default(cuid())
+  title       String
+  level       String    @default("黄色")
+  content     String
+  source      String?   @default("系统发布")
+  effectiveAt DateTime  @default(now())
+  expireAt    DateTime?
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+// ========== 公告模块 ==========
+
+model Announcement {
+  id          String    @id @default(cuid())
+  title       String
+  content     String
+  priority    String    @default("普通")
+  pinned      Boolean   @default(false)
+  publisherId String
+  publisher   User      @relation(fields: [publisherId], references: [id])
+  publishedAt DateTime  @default(now())
+  expiresAt   DateTime?
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model SystemConfig {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
+// ========== 地图标记 ==========
+
+model MapMarker {
+  id          String   @id @default(cuid())
+  name        String
+  category    String   @default("general")
+  description String?
+  latitude    Float
+  longitude   Float
+  createdBy   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// ========== 培训记录 ==========
+
+model TrainingRecord {
+  id           String   @id @default(cuid())
+  title        String?
+  time         DateTime
+  endTime      DateTime?
+  location     String
+  content      String
+  participants String
+  files        String?
+  notes        String?
+  createdById  String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+// ========== 党建模块 ==========
+
+model PartyMember {
+  id         String   @id @default(cuid())
+  name       String
+  gender     String?
+  idCard     String?
+  ethnicity  String?
+  education  String?
+  joinDate   String?
+  phone      String?
+  address    String?
+  avatar     String?
+  note       String?
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model PartyActivity {
+  id           String   @id @default(cuid())
+  type         String
+  title        String
+  date         DateTime
+  location     String?
+  participants String   @default("[]")
+  content      String?
+  photos       String   @default("[]")
+  files        String   @default("[]")
+  createdById  String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+// ========== 履职台账 ==========
+
+model AccountabilityRecord {
+  id          String   @id @default(cuid())
+  taskType    Int
+  title       String
+  description String?
+  date        DateTime
+  photos      String   @default("[]")
+  urls        String   @default("[]")
+  files       String   @default("[]")
+  createdById String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

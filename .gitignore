@@ -1,0 +1,16 @@
+node_modules/
+.next/
+data/
+.env
+.env.local
+.env.*.local
+*.env
+dist/
+prisma/prisma/
+public/uploads/photos/
+public/uploads/thumb/
+public/uploads/*.jpg
+public/uploads/*.jpeg
+public/uploads/*.png
+public/uploads/*.docx
+public/uploads/*.pdf

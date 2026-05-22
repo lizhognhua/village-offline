@@ -1,0 +1,570 @@
+"use client";
+import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { Settings, Save, Users, MapPin, Building, Info, Plus, X, Pencil, Trash2, Check, Key, Navigation, RefreshCw } from "lucide-react";
+
+const TABS = [
+  { key: "basic", label: "基本信息", icon: Info },
+  { key: "village", label: "村情概况", icon: Building },
+  { key: "groups", label: "屯组管理", icon: MapPin },
+  { key: "members", label: "队员管理", icon: Users },
+  { key: "apikeys", label: "API 密钥", icon: Key },
+  { key: "gps", label: "GPS 定位", icon: Navigation },
+];
+
+export default function SettingsPage() {
+  const { data: session } = useSession();
+  const router = useRouter();
+  const isAdmin = (session?.user as any)?.role === "admin";
+  const [tab, setTab] = useState("basic");
+
+  useEffect(() => {
+    if (session && !isAdmin) router.replace("/dashboard");
+  }, [session, isAdmin, router]);
+
+  if (!isAdmin) return null;
+
+  return (
+    <div className="max-w-4xl mx-auto space-y-6">
+      <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+        <Settings className="w-6 h-6 text-gray-600" /> 系统设置
+      </h1>
+
+      {/* Tabs */}
+      <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
+        {TABS.map(t => (
+          <button key={t.key} onClick={() => setTab(t.key)}
+            className={"flex items-center gap-1.5 px-4 py-2 rounded-md text-sm font-medium transition-colors " +
+              (tab === t.key ? "bg-white text-gray-900 shadow-sm" : "text-gray-600 hover:text-gray-900")}>
+            <t.icon className="w-4 h-4" /> {t.label}
+          </button>
+        ))}
+      </div>
+
+      {tab === "basic" && <BasicSettings />}
+      {tab === "village" && <VillageProfileSettings />}
+      {tab === "groups" && <GroupSettings />}
+      {tab === "members" && <MemberSettings />}
+      {tab === "apikeys" && <ApiKeySettings />}
+      {tab === "gps" && <GpsSettings />}
+    </div>
+  );
+}
+
+// ========== 基本信息 ==========
+
+function BasicSettings() {
+  const [settings, setSettings] = useState<Record<string, string>>({});
+  const [saving, setSaving] = useState(false);
+  const [msg, setMsg] = useState("");
+
+  useEffect(() => {
+    fetch("/api/settings").then(r => r.json()).then(setSettings).catch(() => {});
+  }, []);
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault(); setSaving(true);
+    const fd = new FormData(e.target as HTMLFormElement);
+    const data: Record<string, string> = {};
+    for (const [k, v] of fd.entries()) data[k] = v as string;
+    const r = await fetch("/api/settings", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
+    if (r.ok) { setMsg("保存成功"); setTimeout(() => setMsg(""), 3000); }
+    else setMsg("保存失败");
+    setSaving(false);
+  };
+
+  return (
+    <form onSubmit={handleSave} className="bg-white rounded-xl border shadow-sm p-6 space-y-4">
+      <h2 className="text-lg font-semibold text-gray-800">基本信息</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">工作队名称</label>
+          <input name="teamName" defaultValue={settings.teamName || ""} placeholder="如：省机关事务管理局驻村工作队"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none" />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">帮扶村名</label>
+          <input name="villageName" defaultValue={settings.villageName || ""} placeholder="如：靠山村"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none" />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">联系电话</label>
+          <input name="contactPhone" defaultValue={settings.contactPhone || ""} placeholder="工作队联系电话"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none" />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">所属乡镇</label>
+          <input name="township" defaultValue={settings.township || ""} placeholder="如：靠山乡"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none" />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">村书记姓名</label>
+          <input name="villageSecretary" defaultValue={settings.villageSecretary || ""} placeholder="村书记"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none" />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">村书记电话</label>
+          <input name="secretaryPhone" defaultValue={settings.secretaryPhone || ""} placeholder="村书记电话"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none" />
+        </div>
+      </div>
+      <div className="flex items-center gap-3 pt-2">
+        <button type="submit" disabled={saving} className="flex items-center gap-1.5 px-4 py-2 bg-primary-700 text-white rounded-lg text-sm hover:bg-primary-800 disabled:opacity-50">
+          <Save className="w-4 h-4" /> {saving ? "保存中..." : "保存"}
+        </button>
+        {msg && <span className="text-sm text-green-600">{msg}</span>}
+      </div>
+    </form>
+  );
+}
+
+// ========== 村情概况 ==========
+
+function VillageProfileSettings() {
+  const [profile, setProfile] = useState<any>({});
+  const [saving, setSaving] = useState(false);
+  const [msg, setMsg] = useState("");
+
+  useEffect(() => {
+    fetch("/api/village/stats").then(r => r.json()).then(d => setProfile(d.stats || {})).catch(() => {});
+  }, []);
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault(); setSaving(true);
+    const fd = new FormData(e.target as HTMLFormElement);
+    const data: any = {};
+    for (const [k, v] of fd.entries()) {
+      const num = Number(v);
+      data[k] = isNaN(num) || v === "" ? (v || null) : num;
+    }
+    const r = await fetch("/api/village/profile", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
+    if (r.ok) { setMsg("保存成功"); setTimeout(() => setMsg(""), 3000); }
+    else setMsg("保存失败");
+    setSaving(false);
+  };
+
+  const fields = [
+    { key: "administrativeArea", label: "行政面积(公顷)", type: "number" },
+    { key: "cultivatedLand", label: "耕地面积(亩)", type: "number" },
+    { key: "registeredHouseholds", label: "户籍户数", type: "number" },
+    { key: "registeredPopulation", label: "户籍人口", type: "number" },
+    { key: "residentHouseholds", label: "常住户数", type: "number" },
+    { key: "residentPopulation", label: "常驻人口", type: "number" },
+    { key: "partyMembers", label: "党员人数", type: "number" },
+    { key: "laborForce", label: "劳动力人数", type: "number" },
+    { key: "villageIncome", label: "村集体收入(万元)", type: "number" },
+    { key: "operatingIncome", label: "经营性收入(万元)", type: "number" },
+    { key: "wubaoHouseholds", label: "五保户数", type: "number" },
+    { key: "severeIllness", label: "重病人数", type: "number" },
+    { key: "elderlyCount", label: "高龄老人数", type: "number" },
+    { key: "poorHouseholds", label: "脱贫户数", type: "number" },
+    { key: "monitoredHouseholds", label: "监测户数", type: "number" },
+    { key: "dibaoHouseholds", label: "低保户数", type: "number" },
+  ];
+
+  return (
+    <form onSubmit={handleSave} className="bg-white rounded-xl border shadow-sm p-6 space-y-4">
+      <h2 className="text-lg font-semibold text-gray-800">村情概况</h2>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {fields.map(f => (
+          <div key={f.key}>
+            <label className="block text-xs font-medium text-gray-600 mb-1">{f.label}</label>
+            <input name={f.key} type={f.type} defaultValue={profile[f.key] ?? ""}
+              className="w-full px-2.5 py-1.5 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-primary-500 outline-none" />
+          </div>
+        ))}
+      </div>
+      <div className="flex items-center gap-3 pt-2">
+        <button type="submit" disabled={saving} className="flex items-center gap-1.5 px-4 py-2 bg-primary-700 text-white rounded-lg text-sm hover:bg-primary-800 disabled:opacity-50">
+          <Save className="w-4 h-4" /> {saving ? "保存中..." : "保存"}
+        </button>
+        {msg && <span className="text-sm text-green-600">{msg}</span>}
+      </div>
+    </form>
+  );
+}
+
+// ========== 屯组管理 ==========
+
+function GroupSettings() {
+  const [groups, setGroups] = useState<any[]>([]);
+  const [showForm, setShowForm] = useState(false);
+  const [editId, setEditId] = useState<string | null>(null);
+  const [name, setName] = useState("");
+  const [type, setType] = useState("tun");
+  const [sortOrder, setSortOrder] = useState(0);
+
+  const load = () => {
+    fetch("/api/village/groups").then(r => r.json()).then(d => setGroups(d.groups || d || [])).catch(() => {});
+  };
+  useEffect(() => { load(); }, []);
+
+  const reset = () => { setName(""); setType("tun"); setSortOrder(0); setEditId(null); setShowForm(false); };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const body = { name, type, sortOrder };
+    const url = editId ? "/api/village/groups/manage" : "/api/village/groups/manage";
+    const method = editId ? "PUT" : "POST";
+    const r = await fetch(url, {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(editId ? { id: editId, ...body } : body),
+    });
+    if (r.ok) { load(); reset(); }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("确定删除？")) return;
+    await fetch(`/api/village/groups/manage?id=${id}`, { method: "DELETE" });
+    load();
+  };
+
+  return (
+    <div className="bg-white rounded-xl border shadow-sm p-6 space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-gray-800">屯组管理</h2>
+        <button onClick={() => setShowForm(true)}
+          className="flex items-center gap-1 px-3 py-1.5 bg-primary-700 text-white rounded-lg text-sm hover:bg-primary-800">
+          <Plus className="w-4 h-4" /> 添加
+        </button>
+      </div>
+
+      {showForm && (
+        <form onSubmit={handleSubmit} className="flex items-end gap-3 p-3 bg-gray-50 rounded-lg">
+          <div>
+            <label className="block text-xs text-gray-600 mb-1">名称</label>
+            <input value={name} onChange={e => setName(e.target.value)} placeholder="如：靠山屯" required
+              className="px-2.5 py-1.5 border border-gray-300 rounded-md text-sm w-32 outline-none" />
+          </div>
+          <div>
+            <label className="block text-xs text-gray-600 mb-1">类型</label>
+            <select value={type} onChange={e => setType(e.target.value)}
+              className="px-2.5 py-1.5 border border-gray-300 rounded-md text-sm outline-none">
+              <option value="tun">屯</option>
+              <option value="zu">组</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs text-gray-600 mb-1">排序</label>
+            <input type="number" value={sortOrder} onChange={e => setSortOrder(Number(e.target.value))}
+              className="px-2.5 py-1.5 border border-gray-300 rounded-md text-sm w-16 outline-none" />
+          </div>
+          <button type="submit" className="px-3 py-1.5 bg-green-600 text-white rounded-md text-sm">保存</button>
+          <button type="button" onClick={reset} className="px-3 py-1.5 bg-gray-300 text-gray-700 rounded-md text-sm">取消</button>
+        </form>
+      )}
+
+      {groups.length === 0 ? (
+        <p className="text-gray-400 text-sm text-center py-4">暂无屯组数据</p>
+      ) : (
+        <div className="divide-y">
+          {groups.map((g: any) => (
+            <div key={g.id} className="flex items-center justify-between py-2.5">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium text-gray-800">{g.name}</span>
+                <span className="text-xs text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded">{g.type === "tun" ? "屯" : "组"}</span>
+                <span className="text-xs text-gray-400">排序: {g.sortOrder}</span>
+              </div>
+              <div className="flex gap-1">
+                <button onClick={() => { setName(g.name); setType(g.type); setSortOrder(g.sortOrder); setEditId(g.id); setShowForm(true); }}
+                  className="p-1 text-gray-400 hover:text-blue-600"><Pencil className="w-4 h-4" /></button>
+                <button onClick={() => handleDelete(g.id)}
+                  className="p-1 text-gray-400 hover:text-red-600"><Trash2 className="w-4 h-4" /></button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ========== 队员管理 ==========
+
+function MemberSettings() {
+  const [members, setMembers] = useState<any[]>([]);
+  const [showForm, setShowForm] = useState(false);
+  const [editId, setEditId] = useState<string | null>(null);
+  const [name, setName] = useState("");
+  const [title, setTitle] = useState("");
+  const [intro, setIntro] = useState("");
+  const [sortOrder, setSortOrder] = useState(0);
+  const [uploading, setUploading] = useState(false);
+  const [avatar, setAvatar] = useState("");
+
+  const load = () => {
+    fetch("/api/team-members").then(r => r.json()).then(d => setMembers(d.members || [])).catch(() => {});
+  };
+  useEffect(() => { load(); }, []);
+
+  const reset = () => { setName(""); setTitle(""); setIntro(""); setSortOrder(0); setAvatar(""); setEditId(null); setShowForm(false); };
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0]; if (!f) return;
+    setUploading(true);
+    const fd = new FormData(); fd.append("file", f);
+    const r = await fetch("/api/photos/upload", { method: "POST", body: fd });
+    const d = await r.json();
+    if (d.success) setAvatar(d.url);
+    setUploading(false);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const body: any = { name, title, intro, sortOrder, isActive: true };
+    if (avatar) body.avatar = avatar;
+    const url = editId ? `/api/team-members/${editId}` : "/api/team-members";
+    const r = await fetch(url, {
+      method: editId ? "PATCH" : "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    if (r.ok) { load(); reset(); }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("确定删除？")) return;
+    await fetch(`/api/team-members/${id}`, { method: "DELETE" });
+    load();
+  };
+
+  return (
+    <div className="bg-white rounded-xl border shadow-sm p-6 space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-gray-800">队员管理</h2>
+        <button onClick={() => setShowForm(true)}
+          className="flex items-center gap-1 px-3 py-1.5 bg-primary-700 text-white rounded-lg text-sm hover:bg-primary-800">
+          <Plus className="w-4 h-4" /> 添加队员
+        </button>
+      </div>
+
+      {showForm && (
+        <form onSubmit={handleSubmit} className="space-y-3 p-4 bg-gray-50 rounded-lg">
+          <div className="flex items-start gap-3">
+            <div className="flex-shrink-0">
+              <label className="block w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center cursor-pointer hover:bg-gray-300 overflow-hidden">
+                {avatar ? <img src={avatar} alt="" className="w-full h-full object-cover" /> : <Plus className="w-5 h-5 text-gray-400" />}
+                <input type="file" accept="image/*" onChange={handleAvatarUpload} className="hidden" disabled={uploading} />
+              </label>
+              {uploading && <p className="text-xs text-gray-400 mt-1">上传中...</p>}
+            </div>
+            <div className="flex-1 space-y-2">
+              <input value={name} onChange={e => setName(e.target.value)} placeholder="姓名 *" required
+                className="w-full px-2.5 py-1.5 border border-gray-300 rounded-md text-sm outline-none" />
+              <input value={title} onChange={e => setTitle(e.target.value)} placeholder="职务（如：队长、队员）"
+                className="w-full px-2.5 py-1.5 border border-gray-300 rounded-md text-sm outline-none" />
+              <input value={intro} onChange={e => setIntro(e.target.value)} placeholder="简介（一句话）"
+                className="w-full px-2.5 py-1.5 border border-gray-300 rounded-md text-sm outline-none" />
+              <input type="number" value={sortOrder} onChange={e => setSortOrder(Number(e.target.value))} placeholder="排序"
+                className="px-2.5 py-1.5 border border-gray-300 rounded-md text-sm w-20 outline-none" />
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <button type="submit" className="px-3 py-1.5 bg-green-600 text-white rounded-md text-sm">保存</button>
+            <button type="button" onClick={reset} className="px-3 py-1.5 bg-gray-300 text-gray-700 rounded-md text-sm">取消</button>
+          </div>
+        </form>
+      )}
+
+      {members.length === 0 ? (
+        <p className="text-gray-400 text-sm text-center py-4">暂无队员数据</p>
+      ) : (
+        <div className="divide-y">
+          {members.map((m: any) => (
+            <div key={m.id} className="flex items-center justify-between py-3">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden flex-shrink-0">
+                  {m.avatar ? <img src={m.avatar} alt="" className="w-full h-full object-cover" /> : <Users className="w-5 h-5 text-gray-400 m-2.5" />}
+                </div>
+                <div>
+                  <span className="text-sm font-medium text-gray-800">{m.name}</span>
+                  {m.title && <span className="text-xs text-gray-500 ml-1.5">{m.title}</span>}
+                  {m.intro && <p className="text-xs text-gray-400">{m.intro}</p>}
+                </div>
+              </div>
+              <div className="flex gap-1">
+                <button onClick={() => { setName(m.name); setTitle(m.title || ""); setIntro(m.intro || ""); setSortOrder(m.sortOrder); setAvatar(m.avatar || ""); setEditId(m.id); setShowForm(true); }}
+                  className="p-1 text-gray-400 hover:text-blue-600"><Pencil className="w-4 h-4" /></button>
+                <button onClick={() => handleDelete(m.id)}
+                  className="p-1 text-gray-400 hover:text-red-600"><Trash2 className="w-4 h-4" /></button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ========== API 密钥 ==========
+
+function ApiKeySettings() {
+  const [keys, setKeys] = useState<Record<string, string>>({});
+  const [saving, setSaving] = useState(false);
+  const [msg, setMsg] = useState("");
+  const [showRestart, setShowRestart] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/settings").then(r => r.json()).then(setKeys).catch(() => {});
+  }, []);
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault(); setSaving(true);
+    const fd = new FormData(e.target as HTMLFormElement);
+    const data: Record<string, string> = {};
+    for (const [k, v] of fd.entries()) data[k] = v as string;
+    const r = await fetch("/api/settings", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
+    if (r.ok) { setShowRestart(true); }
+    else setMsg("保存失败");
+    setSaving(false);
+  };
+
+  const doRestart = async () => {
+    setShowRestart(false); setMsg("系统正在重启...");
+    try { await fetch("/api/system/restart", { method: "POST" }); }
+    catch {}
+    // Poll for server to come back
+    setTimeout(() => { window.location.reload(); }, 3000);
+  };
+
+  return (
+    <div className="space-y-4">
+      <form onSubmit={handleSave} className="bg-white rounded-xl border shadow-sm p-6 space-y-4">
+        <h2 className="text-lg font-semibold text-gray-800">API 密钥配置</h2>
+        <p className="text-xs text-gray-500 mb-0">以下密钥用于地图和天气功能。修改后需重启系统生效。</p>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">天地图 API Key</label>
+            <input name="tiandituKey" defaultValue={keys.tiandituKey || ""}
+              placeholder="用于卫星地图（不填则使用 ArcGIS 备用）"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none" />
+            <p className="text-xs text-gray-400 mt-1">申请: console.tianditu.gov.cn（免费）</p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">高德地图 API Key</label>
+            <input name="amapKey" defaultValue={keys.amapKey || ""}
+              placeholder="用于交互地图（需在 .env 设置 NEXT_PUBLIC_AMAP_KEY）"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none" />
+            <p className="text-xs text-gray-400 mt-1">申请: console.amap.com（免费）</p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">和风天气 API Key</label>
+            <input name="qweatherKey" defaultValue={keys.qweatherKey || ""}
+              placeholder="用于天气卡片（不填则显示暂无天气）"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none" />
+            <p className="text-xs text-gray-400 mt-1">申请: dev.qweather.com（免费版即可）</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-3 pt-2">
+          <button type="submit" disabled={saving} className="flex items-center gap-1.5 px-4 py-2 bg-primary-700 text-white rounded-lg text-sm hover:bg-primary-800 disabled:opacity-50">
+            <Save className="w-4 h-4" /> {saving ? "保存中..." : "保存"}
+          </button>
+          {msg && <span className={"text-sm " + (msg.includes("重启") ? "text-blue-600" : "text-green-600")}>{msg}</span>}
+        </div>
+      </form>
+
+      {/* Restart confirmation modal */}
+      {showRestart && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md mx-4 text-center">
+            <RefreshCw className="w-10 h-10 text-blue-600 mx-auto mb-4" />
+            <h3 className="text-lg font-bold text-gray-900 mb-2">重启系统</h3>
+            <p className="text-sm text-gray-600 mb-6 leading-relaxed">
+              请确认 API 密钥已正确复制。<br />重启期间系统将暂时不可用（约 5-10 秒）。
+            </p>
+            <div className="flex gap-3 justify-center">
+              <button onClick={() => setShowRestart(false)}
+                className="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-lg text-sm hover:bg-gray-50 transition-colors">
+                取消，稍后重启
+              </button>
+              <button onClick={doRestart}
+                className="px-6 py-2.5 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors flex items-center gap-1.5">
+                <RefreshCw className="w-4 h-4" /> 确认重启系统
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ========== GPS 定位 ==========
+
+function GpsSettings() {
+  const [keys, setKeys] = useState<Record<string, string>>({});
+  const [saving, setSaving] = useState(false);
+  const [msg, setMsg] = useState("");
+  const [preview, setPreview] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/settings").then(r => r.json()).then(setKeys).catch(() => {});
+  }, []);
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault(); setSaving(true);
+    const fd = new FormData(e.target as HTMLFormElement);
+    const data: Record<string, string> = {};
+    for (const [k, v] of fd.entries()) data[k] = v as string;
+    const r = await fetch("/api/settings", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
+    if (r.ok) { setMsg("保存成功"); setTimeout(() => setMsg(""), 3000); }
+    else setMsg("保存失败");
+    setSaving(false);
+  };
+
+  return (
+    <form onSubmit={handleSave} className="bg-white rounded-xl border shadow-sm p-6 space-y-4">
+      <h2 className="text-lg font-semibold text-gray-800">GPS 定位设置</h2>
+      <p className="text-xs text-gray-500">设置帮扶村和驻村工作队的 GPS 坐标，用于地图自动定位。<span className="text-red-500">两项均为必填。</span></p>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+          <h3 className="text-sm font-semibold text-blue-800 mb-3">🏘 帮扶村坐标</h3>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-medium text-blue-700 mb-1">纬度 (Latitude) *</label>
+              <input name="villageLat" type="number" step="0.000001" required
+                defaultValue={keys.villageLat || "47.217881"}
+                placeholder="如: 47.217881"
+                className="w-full px-2.5 py-1.5 border border-blue-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-blue-700 mb-1">经度 (Longitude) *</label>
+              <input name="villageLng" type="number" step="0.000001" required
+                defaultValue={keys.villageLng || "127.254934"}
+                placeholder="如: 127.254934"
+                className="w-full px-2.5 py-1.5 border border-blue-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+            </div>
+          </div>
+        </div>
+        <div className="bg-red-50 rounded-lg p-4 border border-red-200">
+          <h3 className="text-sm font-semibold text-red-800 mb-3">🏠 驻村工作队坐标</h3>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-medium text-red-700 mb-1">纬度 (Latitude) *</label>
+              <input name="workTeamLat" type="number" step="0.000001" required
+                defaultValue={keys.workTeamLat || "47.220081"}
+                placeholder="如: 47.220081"
+                className="w-full px-2.5 py-1.5 border border-red-300 rounded-md text-sm focus:ring-2 focus:ring-red-500 outline-none" />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-red-700 mb-1">经度 (Longitude) *</label>
+              <input name="workTeamLng" type="number" step="0.000001" required
+                defaultValue={keys.workTeamLng || "127.261887"}
+                placeholder="如: 127.261887"
+                className="w-full px-2.5 py-1.5 border border-red-300 rounded-md text-sm focus:ring-2 focus:ring-red-500 outline-none" />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="flex items-center gap-3 pt-2">
+        <button type="submit" disabled={saving} className="flex items-center gap-1.5 px-4 py-2 bg-primary-700 text-white rounded-lg text-sm hover:bg-primary-800 disabled:opacity-50">
+          <Save className="w-4 h-4" /> {saving ? "保存中..." : "保存"}
+        </button>
+        {msg && <span className="text-sm text-green-600">{msg}</span>}
+        <span className="text-xs text-gray-400">保存后，打开卫星地图将自动定位到此处</span>
+      </div>
+    </form>
+  );
+}
