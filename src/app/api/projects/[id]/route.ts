@@ -24,8 +24,9 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   if (a.error) return a.error;
   const { id } = await params;
   try {
+    const existing = await prisma.project.findUnique({ where: { id } });
     if (!existing) {
-      return NextResponse.json({ error: "无权操作" }, { status: 403 });
+      return NextResponse.json({ error: "项目不存在" }, { status: 404 });
     }
     let body = await req.json()
     body = sanitizeObject(body);
@@ -41,8 +42,9 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
   if (a.error) return a.error;
   const { id } = await params;
   try {
+    const existing = await prisma.project.findUnique({ where: { id } });
     if (!existing) {
-      return NextResponse.json({ error: "无权操作" }, { status: 403 });
+      return NextResponse.json({ error: "项目不存在" }, { status: 404 });
     }
     await prisma.project.delete({ where: { id } });
     return NextResponse.json({ ok: true });

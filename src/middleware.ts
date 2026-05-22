@@ -13,7 +13,7 @@ export default auth((req) => {
 
   // Redirect /records and /condolences to /visits
   if (pathname.startsWith('/records') || pathname.startsWith('/condolences')) {
-    var newPath = pathname.replace(/^\/records/, '/visits').replace(/^\/condolences/, '/visits');
+    const newPath = pathname.replace(/^\/records/, '/visits').replace(/^\/condolences/, '/visits');
     return NextResponse.redirect(new URL(newPath, req.nextUrl));
   }
 

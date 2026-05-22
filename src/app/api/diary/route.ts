@@ -14,7 +14,13 @@ export async function GET(req: NextRequest) {
     if (!session?.user?.id) {
       return NextResponse.json({ diaries: [], total: 0, totalPublic: 0, totalPrivate: 0, page: 1 });
     }
-    const where: any = {};
+    // Show own diaries (public + private) + others' public diaries only
+    const where: any = {
+      OR: [
+        { authorId: session.user.id },
+        { isPublic: true },
+      ],
+    };
 
     const [diaries, total, totalPublic, totalPrivate] = await Promise.all([
       prisma.workDiary.findMany({

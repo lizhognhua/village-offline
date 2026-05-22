@@ -27,8 +27,9 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   if (a.error) return a.error;
   const { id } = await params;
   try {
+    const existing = await prisma.visit.findUnique({ where: { id } });
     if (!existing) {
-      return NextResponse.json({ error: "无权操作" }, { status: 403 });
+      return NextResponse.json({ error: "记录不存在" }, { status: 404 });
     }
     let body = await req.json()
     body = sanitizeObject(body);
