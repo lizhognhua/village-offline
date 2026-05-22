@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { Settings, Save, Users, MapPin, Building, Info, Plus, X, Pencil, Trash2, Check, Key, Navigation, RefreshCw } from "lucide-react";
+import { Settings, Save, Users, MapPin, Building, Info, Plus, X, Pencil, Trash2, Check, Key, Navigation, RefreshCw, Database } from "lucide-react";
 
 const TABS = [
   { key: "basic", label: "基本信息", icon: Info },
@@ -11,6 +11,7 @@ const TABS = [
   { key: "members", label: "队员管理", icon: Users },
   { key: "apikeys", label: "API 密钥", icon: Key },
   { key: "gps", label: "GPS 定位", icon: Navigation },
+  { key: "backup", label: "数据备份", icon: Database },
 ];
 
 export default function SettingsPage() {
@@ -48,6 +49,7 @@ export default function SettingsPage() {
       {tab === "members" && <MemberSettings />}
       {tab === "apikeys" && <ApiKeySettings />}
       {tab === "gps" && <GpsSettings />}
+      {tab === "backup" && <BackupSettings />}
     </div>
   );
 }
@@ -566,5 +568,141 @@ function GpsSettings() {
         <span className="text-xs text-gray-400">保存后，打开卫星地图将自动定位到此处</span>
       </div>
     </form>
+  );
+}
+
+// ========== 数据备份 ==========
+
+function BackupSettings() {
+  const [info, setInfo] = useState<any>(null);
+  const [backupMsg, setBackupMsg] = useState("");
+  const [restoreMsg, setRestoreMsg] = useState("");
+  const [backing, setBacking] = useState(false);
+  const [restoring, setRestoring] = useState(false);
+  const [showRestoreConfirm, setShowRestoreConfirm] = useState(false);
+  const [restoreFile, setRestoreFile] = useState<File | null>(null);
+
+  useEffect(() => {
+    fetch("/api/backup/info").then(r => r.json()).then(setInfo).catch(() => {});
+  }, []);
+
+  const handleBackup = async () => {
+    setBacking(true); setBackupMsg("");
+    try {
+      const r = await fetch("/api/backup");
+      if (!r.ok) { setBackupMsg("备份失败"); setBacking(false); return; }
+      const blob = await r.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const date = new Date().toISOString().slice(0, 10);
+      a.href = url; a.download = `village-backup-${date}.zip`;
+      a.click(); URL.revokeObjectURL(url);
+      setBackupMsg("备份成功！文件已下载到浏览器默认位置");
+      // Refresh info
+      fetch("/api/backup/info").then(r => r.json()).then(setInfo).catch(() => {});
+    } catch { setBackupMsg("备份失败"); }
+    setBacking(false);
+  };
+
+  const handleRestoreClick = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    if (f) { setRestoreFile(f); setShowRestoreConfirm(true); }
+    e.target.value = "";
+  };
+
+  const doRestore = async () => {
+    if (!restoreFile) return;
+    setRestoring(true); setShowRestoreConfirm(false);
+    const fd = new FormData(); fd.append("file", restoreFile);
+    try {
+      const r = await fetch("/api/backup/restore", { method: "POST", body: fd });
+      const d = await r.json();
+      setRestoreMsg(d.success ? "数据已恢复！请关闭窗口后重新启动系统" : (d.error || "恢复失败"));
+    } catch { setRestoreMsg("恢复失败"); }
+    setRestoring(false); setRestoreFile(null);
+  };
+
+  const fmtSize = (bytes: number) => {
+    if (!bytes || bytes === 0) return "0 KB";
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
+    return (bytes / (1024 * 1024)).toFixed(1) + " MB";
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* Status */}
+      <div className="bg-white rounded-xl border shadow-sm p-6">
+        <h2 className="text-lg font-semibold text-gray-800 mb-4">数据备份</h2>
+        <div className="grid grid-cols-3 gap-4 mb-6">
+          <div className="bg-blue-50 rounded-lg p-3 text-center">
+            <div className="text-2xl font-bold text-blue-700">{fmtSize(info?.dbSize || 0)}</div>
+            <div className="text-xs text-blue-600">数据库大小</div>
+          </div>
+          <div className="bg-green-50 rounded-lg p-3 text-center">
+            <div className="text-2xl font-bold text-green-700">{info?.fileCount || 0}</div>
+            <div className="text-xs text-green-600">上传文件数</div>
+          </div>
+          <div className="bg-purple-50 rounded-lg p-3 text-center">
+            <div className="text-2xl font-bold text-purple-700">{fmtSize(info?.totalSize || 0)}</div>
+            <div className="text-xs text-purple-600">数据总量</div>
+          </div>
+        </div>
+        {info?.lastBackup && (
+          <p className="text-xs text-gray-400 mb-4">上次备份: {info.lastBackup}</p>
+        )}
+
+        {/* Backup button */}
+        <button onClick={handleBackup} disabled={backing}
+          className="w-full flex items-center justify-center gap-2 py-3 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50">
+          <Database className="w-4 h-4" />
+          {backing ? "正在打包..." : "一键备份（下载到浏览器）"}
+        </button>
+        {backupMsg && <p className="text-xs text-green-600 mt-2 text-center">{backupMsg}</p>}
+      </div>
+
+      {/* Restore */}
+      <div className="bg-white rounded-xl border shadow-sm p-6">
+        <h2 className="text-lg font-semibold text-gray-800 mb-2">恢复数据</h2>
+        <p className="text-xs text-red-500 mb-4">⚠ 恢复将覆盖现有全部数据，请谨慎操作</p>
+        <label className="block w-full py-3 border-2 border-dashed border-gray-300 rounded-lg text-center cursor-pointer hover:border-orange-400 text-sm text-gray-500">
+          {restoring ? "正在恢复..." : "点击选择备份文件（.zip）"}
+          <input type="file" accept=".zip" onChange={handleRestoreClick} className="hidden" disabled={restoring} />
+        </label>
+        {restoreMsg && <p className={`text-xs mt-2 text-center ${restoreMsg.includes("成功") ? "text-green-600" : "text-red-500"}`}>{restoreMsg}</p>}
+      </div>
+
+      {/* Manual backup info */}
+      <div className="bg-gray-50 rounded-xl border p-5 text-xs text-gray-500 leading-relaxed">
+        <h3 className="font-semibold text-gray-700 mb-2">手动备份方法</h3>
+        <p>1. 关闭系统（关闭命令行窗口）</p>
+        <p>2. 找到系统文件夹下的 <code className="bg-gray-200 px-1 rounded">data\</code> 目录</p>
+        <p>3. 将整个 data 文件夹复制到其他位置（U盘、其他电脑）保存</p>
+        <p className="mt-2 text-gray-400">恢复时将备份的 data 文件夹复制回系统目录覆盖即可</p>
+      </div>
+
+      {/* Restore confirm modal */}
+      {showRestoreConfirm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md mx-4 text-center">
+            <Database className="w-10 h-10 text-orange-600 mx-auto mb-4" />
+            <h3 className="text-lg font-bold text-gray-900 mb-2">确认恢复数据</h3>
+            <p className="text-sm text-gray-600 mb-4">
+              即将从 <strong>{restoreFile?.name}</strong> 恢复数据。<br />
+              <span className="text-red-500">现有数据将被覆盖，此操作不可撤销。</span>
+            </p>
+            <div className="flex gap-3 justify-center">
+              <button onClick={() => { setShowRestoreConfirm(false); setRestoreFile(null); }}
+                className="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-lg text-sm hover:bg-gray-50">
+                取消
+              </button>
+              <button onClick={doRestore}
+                className="px-6 py-2.5 bg-orange-600 text-white rounded-lg text-sm hover:bg-orange-700 flex items-center gap-1.5">
+                <RefreshCw className="w-4 h-4" /> 确认恢复
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
