@@ -1,8 +1,9 @@
-# 驻村帮扶管理系统 V1.0 — 系统环境自检脚本
-# PowerShell 版本，由 系统自检.bat 调用
+# Village Assistance System — Environment Check
+# Called by system-check.bat
 
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-$ReportPath = Join-Path $ScriptDir "安装建议.txt"
+$RootDir = Split-Path $ScriptDir -Parent
+$ReportPath = Join-Path $RootDir "install-guide.txt"
 $Issues = 0
 $BestDrive = "C:\"
 $BestFree = 0.0
@@ -15,13 +16,13 @@ function Write-Report($line) {
 }
 
 Write-Host "==============================================" -ForegroundColor Cyan
-Write-Host "  驻村帮扶管理系统 V1.0 — 系统环境自检" -ForegroundColor Cyan
+Write-Host "  驻村帮扶管理系统 — 系统环境自检" -ForegroundColor Cyan
 Write-Host "==============================================" -ForegroundColor Cyan
 Write-Host ""
 
 $now = Get-Date -Format "yyyy-MM-dd HH:mm"
 Write-Report "=============================================="
-Write-Report "  驻村帮扶管理系统 V1.0 — 安装建议报告"
+Write-Report "  驻村帮扶管理系统 — 安装建议报告"
 Write-Report "  生成时间: $now"
 Write-Report "=============================================="
 Write-Report ""
@@ -89,8 +90,8 @@ Write-Host "[4/4] 检测运行环境..." -ForegroundColor Yellow
 Write-Report ""
 Write-Report "─── 运行环境 ───"
 
-$NodeExe = if (Test-Path (Join-Path $ScriptDir "nodejs\node.exe")) {
-    Join-Path $ScriptDir "nodejs\node.exe"
+$NodeExe = if (Test-Path (Join-Path $RootDir "nodejs\node.exe")) {
+    Join-Path $RootDir "nodejs\node.exe"
 } else { "node" }
 
 try {
@@ -115,7 +116,7 @@ Write-Report "  健康度: $rating (检测到 $Issues 个问题)"
 Write-Report ""
 Write-Report "─── 安装建议 ───"
 Write-Report "  推荐安装位置: ${BestDrive} 目录"
-Write-Report "  路径示例: ${BestDrive}village-system-v1.0\"
+Write-Report "  路径示例: ${BestDrive}village-system\"
 Write-Report "  确保文件夹路径不含中文或空格"
 Write-Report ""
 Write-Report "─── 局域网共享说明 ───"
@@ -139,7 +140,7 @@ Write-Report "  • 系统关机后会自动停止，下次使用需重新双击
 Write-Host "==============================================" -ForegroundColor Cyan
 Write-Host "  系统健康度: $rating  |  检测到 $Issues 个问题" -ForegroundColor $(if($Issues -eq 0){'Green'}elseif($Issues -le 2){'Yellow'}else{'Red'})
 Write-Host "  推荐安装位置: $BestDrive" -ForegroundColor White
-Write-Host "  详细报告: 安装建议.txt" -ForegroundColor Gray
+Write-Host "  详细报告: install-guide.txt" -ForegroundColor Gray
 Write-Host "==============================================" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "按任意键退出..." -ForegroundColor Gray
