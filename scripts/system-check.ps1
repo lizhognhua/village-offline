@@ -1,4 +1,4 @@
-# Village Assistance System — Environment Check
+﻿# Village Assistance System — Environment Check
 # Called by system-check.bat
 
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path

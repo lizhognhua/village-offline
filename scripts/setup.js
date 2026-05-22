@@ -46,7 +46,7 @@ fs.writeFileSync(ENV_PATH, envContent);
 
 // 运行 Prisma db push 创建表
 console.log("📦 创建数据库表...");
-execSync("npx prisma db push --skip-generate", { cwd: ROOT, stdio: "inherit" });
+execSync("npx prisma db push", { cwd: ROOT, stdio: "inherit" });
 
 // 运行种子数据
 console.log("🌱 写入初始数据...");
