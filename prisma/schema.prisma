@@ -195,6 +195,7 @@ model Visit {
   visitor    User     @relation(fields: [visitorId], references: [id])
   photos     String?  @default("[]")
   statusTags String?  @default("[]")
+  staff      String?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 }

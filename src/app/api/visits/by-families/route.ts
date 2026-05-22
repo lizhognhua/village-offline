@@ -12,7 +12,7 @@ export async function GET(req: Request) {
 
   const idArr = ids.split(",");
   const where: any = { familyId: { in: idArr } };
-  const records = await prisma.visitRecord.findMany({
+  const records = await prisma.visit.findMany({
     where,
     select: { id: true, familyId: true, visitDate: true, visitorName: true },
     orderBy: { visitDate: "desc" },

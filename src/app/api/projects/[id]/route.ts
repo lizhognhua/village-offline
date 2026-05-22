@@ -13,11 +13,6 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       include: { milestones: { orderBy: { createdAt: "asc" } }, activities: { orderBy: { createdAt: "desc" }, take: 20 } },
     });
     if (!project) return NextResponse.json({ error: "Not found" }, { status: 404 });
-    // Check team ownership
-    // ownership check removed in single-team migration
-     {
-      return NextResponse.json({ error: "无权操作" }, { status: 403 });
-    }
     return NextResponse.json(project);
   } catch (e) {
     return NextResponse.json({ error: String(e) }, { status: 500 });
@@ -29,8 +24,6 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   if (a.error) return a.error;
   const { id } = await params;
   try {
-    // Check team ownership
-    const existing = await prisma.project.findUnique({ where: { id } });
     if (!existing) {
       return NextResponse.json({ error: "无权操作" }, { status: 403 });
     }
@@ -48,8 +41,6 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
   if (a.error) return a.error;
   const { id } = await params;
   try {
-    // Check team ownership
-    const existing = await prisma.project.findUnique({ where: { id } });
     if (!existing) {
       return NextResponse.json({ error: "无权操作" }, { status: 403 });
     }

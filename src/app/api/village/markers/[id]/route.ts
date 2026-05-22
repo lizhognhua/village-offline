@@ -32,7 +32,7 @@ export async function PUT(
 
     return NextResponse.json(marker);
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "服务器内部错误" }, { status: 500 });
   }
 }
 
@@ -52,6 +52,6 @@ export async function DELETE(
     await prisma.mapMarker.delete({ where: { id } });
     return NextResponse.json({ success: true });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "服务器内部错误" }, { status: 500 });
   }
 }

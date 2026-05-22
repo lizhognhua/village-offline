@@ -10,13 +10,8 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   try {
     const industry = await prisma.industry.findUnique({ where: { id } });
     if (!industry) return NextResponse.json({ error: "未找到" }, { status: 404 });
-    // Check team ownership
-    // ownership check removed in single-team migration
-     {
-      return NextResponse.json({ error: "无权操作" }, { status: 403 });
-    }
     return NextResponse.json(industry);
-  } catch (error: any) { return NextResponse.json({ error: error.message }, { status: 500 }); }
+  } catch (error: any) { return NextResponse.json({ error: "服务器内部错误" }, { status: 500 }); }
 }
 
 function mapBody(body: any) {
@@ -34,8 +29,6 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   if (a.error) return a.error;
   const { id } = await params;
   try {
-    // Check team ownership
-    const existing = await prisma.industry.findUnique({ where: { id } });
     if (!existing) {
       return NextResponse.json({ error: "无权操作" }, { status: 403 });
     }
@@ -44,7 +37,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     const data = mapBody(body);
     const industry = await prisma.industry.update({ where: { id }, data });
     return NextResponse.json(industry);
-  } catch (error: any) { return NextResponse.json({ error: error.message }, { status: 500 }); }
+  } catch (error: any) { return NextResponse.json({ error: "服务器内部错误" }, { status: 500 }); }
 }
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -52,8 +45,6 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   if (a.error) return a.error;
   const { id } = await params;
   try {
-    // Check team ownership
-    const existing = await prisma.industry.findUnique({ where: { id } });
     if (!existing) {
       return NextResponse.json({ error: "无权操作" }, { status: 403 });
     }
@@ -62,6 +53,6 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     const data = mapBody(body);
     const industry = await prisma.industry.update({ where: { id }, data });
     return NextResponse.json(industry);
-  } catch (error: any) { return NextResponse.json({ error: error.message }, { status: 500 }); }
+  } catch (error: any) { return NextResponse.json({ error: "服务器内部错误" }, { status: 500 }); }
 }
 

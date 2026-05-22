@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/auth-utils";
+import { requireAuth, requireAdmin } from "@/lib/auth-utils";
 import { prisma } from "@/lib/prisma";
 
-// Read all settings (any logged-in user)
+// Read all settings (must be logged in)
 export async function GET() {
+  const a = await requireAuth();
+  if (a.error) return a.error;
+
   try {
     const configs = await prisma.systemConfig.findMany();
     const settings: Record<string, string> = {};
@@ -12,7 +15,7 @@ export async function GET() {
     }
     return NextResponse.json(settings);
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "服务器内部错误" }, { status: 500 });
   }
 }
 
@@ -33,6 +36,6 @@ export async function PUT(req: NextRequest) {
     }
     return NextResponse.json({ success: true });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "服务器内部错误" }, { status: 500 });
   }
 }

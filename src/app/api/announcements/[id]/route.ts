@@ -38,18 +38,13 @@ export async function PUT(
 
   const { id } = await params;
   try {
-    let body = await req.json()
+    let body = await request.json()
     body = sanitizeObject(body);
     const { title, content, priority, pinned, expiresAt, isActive } = body;
 
     const existing = await prisma.announcement.findUnique({ where: { id } });
     if (!existing) {
       return NextResponse.json({ error: "公告不存在" }, { status: 404 });
-    }
-    // Check team ownership
-    // ownership check removed in single-team migration
-     {
-      return NextResponse.json({ error: "无权操作" }, { status: 403 });
     }
 
     const updated = await prisma.announcement.update({
@@ -85,11 +80,6 @@ export async function DELETE(
     const existing = await prisma.announcement.findUnique({ where: { id } });
     if (!existing) {
       return NextResponse.json({ error: "公告不存在" }, { status: 404 });
-    }
-    // Check team ownership
-    // ownership check removed in single-team migration
-     {
-      return NextResponse.json({ error: "无权操作" }, { status: 403 });
     }
 
     await prisma.announcement.update({

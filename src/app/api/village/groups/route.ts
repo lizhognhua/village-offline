@@ -9,5 +9,5 @@ export async function GET() {
       include: { _count: { select: { families: true } } },
     });
     return NextResponse.json(groups);
-  } catch (error: any) { return NextResponse.json({ error: error.message }, { status: 500 }); }
+  } catch (error: any) { return NextResponse.json({ error: "服务器内部错误" }, { status: 500 }); }
 }

@@ -13,7 +13,7 @@ export async function GET() {
     });
     return NextResponse.json({ markers });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "服务器内部错误" }, { status: 500 });
   }
 }
 
@@ -43,6 +43,6 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(marker, { status: 201 });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "服务器内部错误" }, { status: 500 });
   }
 }

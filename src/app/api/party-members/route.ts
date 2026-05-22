@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
     });
     return NextResponse.json({ members });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "服务器内部错误" }, { status: 500 });
   }
 }
 
@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
     const member = await prisma.partyMember.create({ data: body });
     return NextResponse.json(member, { status: 201 });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "服务器内部错误" }, { status: 500 });
   }
 }
 
@@ -47,6 +47,6 @@ export async function PUT(req: NextRequest) {
     const member = await prisma.partyMember.update({ where: { id }, data });
     return NextResponse.json(member);
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "服务器内部错误" }, { status: 500 });
   }
 }

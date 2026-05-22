@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { Plus, Pencil, Trash2, X, Upload, FileText, Image, ChevronDown, ChevronRight, Users, MapPin, Calendar, Download, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import RichTextEditor from "@/components/RichTextEditor";
+import { sanitizeHtml } from "@/lib/sanitize";
 
 const ACTIVITY_TYPE = "orgLife";
 const PAGE_TITLE = "组织生活";
@@ -220,7 +221,7 @@ export default function OrgLifePage() {
                 </div>
                 {expanded === rec.id && (
                   <div className="px-4 pb-4 border-t bg-gray-50/50">
-                    {rec.content && <div className="text-sm text-gray-700 mt-3" dangerouslySetInnerHTML={{ __html: rec.content }} />}
+                    {rec.content && <div className="text-sm text-gray-700 mt-3" dangerouslySetInnerHTML={{ __html: sanitizeHtml(rec.content || "") }} />}
                     {photos.length > 0 && <div className="flex gap-2 mt-3 flex-wrap">{photos.map((url: string, i: number) => <img key={i} src={url} className="w-16 h-16 object-cover rounded border cursor-pointer" onClick={() => window.open(url, "_blank")} />)}</div>}
                     {files.length > 0 && <div className="mt-3 space-y-1">{files.map((f: any, i: number) => f.downloadUrl ? <a key={i} href={f.downloadUrl} target="_blank" className="flex items-center gap-1.5 text-xs text-blue-600"><Download size={12} />{f.fileName || f.title}</a> : <span key={i} className="flex items-center gap-1.5 text-xs text-gray-400"><FileText size={12} />{f.fileName || f.title}（处理中）</span>)}</div>}
                   </div>

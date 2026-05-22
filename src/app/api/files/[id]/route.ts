@@ -25,7 +25,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       },
     });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "服务器内部错误" }, { status: 500 });
   }
 }
 
@@ -49,6 +49,6 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     await prisma.fileDoc.delete({ where: { id } });
     return NextResponse.json({ success: true });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "服务器内部错误" }, { status: 500 });
   }
 }

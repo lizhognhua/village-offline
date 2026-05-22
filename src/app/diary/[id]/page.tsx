@@ -8,6 +8,7 @@ import { ArrowLeft, Lock, Globe, Calendar, User, Edit3, Trash2, Clock, X } from 
 import { useSession } from "next-auth/react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { sanitizeHtml } from "@/lib/sanitize";
 
 type DiaryDetail = {
   id: string; date: string; title: string; content: string; images: string;
@@ -100,7 +101,7 @@ function HtmlContentRenderer({ html }: { html: string }) {
         [&_img]:rounded-lg [&_img]:my-4 [&_img]:max-w-full [&_img]:h-auto
         [&_a]:text-primary-600 [&_a]:underline [&_a]:hover:text-primary-800
         [&_hr]:my-6 [&_hr]:border-gray-200"
-      dangerouslySetInnerHTML={{ __html: html }}
+      dangerouslySetInnerHTML={{ __html: sanitizeHtml(html || "") }}
     />
   );
 }

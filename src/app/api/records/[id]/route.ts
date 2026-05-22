@@ -15,14 +15,9 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       include: { family: { select: { headName: true, familyAttr: true, address: true } } },
     });
     if (!record) return NextResponse.json({ error: "未找到" }, { status: 404 });
-    // Check team ownership
-    // ownership check removed in single-team migration
-     {
-      return NextResponse.json({ error: "无权操作" }, { status: 403 });
-    }
     return NextResponse.json(record);
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "服务器内部错误" }, { status: 500 });
   }
 }
 
@@ -32,11 +27,6 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   const { id } = await params;
 
   try {
-    // Check team ownership
-    const existing = await prisma.householdRecord.findUnique({ where: { id } });
-    if (!existing) {
-      return NextResponse.json({ error: "无权操作" }, { status: 403 });
-    }
     let body: any;
     let photoPaths: string[] = [];
 
@@ -102,7 +92,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 
     return NextResponse.json(record);
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "服务器内部错误" }, { status: 500 });
   }
 }
 
@@ -113,16 +103,12 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
   try {
     const record = await prisma.householdRecord.findUnique({ where: { id }, select: { createdById: true } });
     if (!record) return NextResponse.json({ error: "记录不存在" }, { status: 404 });
-    // ownership check removed in single-team migration
-     {
-      return NextResponse.json({ error: "无权操作" }, { status: 403 });
-    }
     if (record.createdById !== a.session.user.id && a.session.user.role !== "admin") {
       return NextResponse.json({ error: "只能删除自己的记录" }, { status: 403 });
     }
     await prisma.householdRecord.delete({ where: { id } });
     return NextResponse.json({ success: true });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "服务器内部错误" }, { status: 500 });
   }
 }

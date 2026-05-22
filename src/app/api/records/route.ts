@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
       prisma.householdRecord.count({ where }),
     ]);
     return NextResponse.json({ records, total, page, totalPages: Math.ceil(total / limit) });
-  } catch (error: any) { return NextResponse.json({ error: error.message }, { status: 500 }); }
+  } catch (error: any) { return NextResponse.json({ error: "服务器内部错误" }, { status: 500 }); }
 }
 
 export async function POST(req: NextRequest) {
@@ -89,5 +89,5 @@ export async function POST(req: NextRequest) {
       include: { family: { select: { headName: true } } },
     });
     return NextResponse.json(record, { status: 201 });
-  } catch (error: any) { return NextResponse.json({ error: error.message }, { status: 500 }); }
+  } catch (error: any) { return NextResponse.json({ error: "服务器内部错误" }, { status: 500 }); }
 }

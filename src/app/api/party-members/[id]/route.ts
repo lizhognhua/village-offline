@@ -14,6 +14,6 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
     await prisma.partyMember.delete({ where: { id: (await params).id } });
     return NextResponse.json({ success: true });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "服务器内部错误" }, { status: 500 });
   }
 }
