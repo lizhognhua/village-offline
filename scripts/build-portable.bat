@@ -37,6 +37,9 @@ copy /y "%ROOT%prisma\schema.prisma" "%DIST%\prisma\schema.prisma" >nul
 copy /y "%ROOT%prisma\seed.js" "%DIST%\prisma\seed.js" >nul
 xcopy /e /i /y "%ROOT%scripts" "%DIST%\scripts"
 copy /y "%ROOT%启动系统.bat" "%DIST%\" >nul
+copy /y "%ROOT%系统自检.bat" "%DIST%\" >nul
+copy /y "%ROOT%安装须知.txt" "%DIST%\" >nul
+copy /y "%ROOT%★使用说明-请先读我★.txt" "%DIST%\" >nul
 copy /y "%ROOT%.env" "%DIST%\.env.example" >nul
 xcopy /e /i /y "%ROOT%public" "%DIST%\public"
 
