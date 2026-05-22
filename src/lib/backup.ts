@@ -1,5 +1,5 @@
 // 数据备份/恢复核心逻辑
-import { readdir, stat, mkdir, copyFile, unlink, rmdir as rmDir } from "fs/promises";
+import { readdir, readFile, stat, mkdir, copyFile, unlink, rmdir as rmDir } from "fs/promises";
 import { join, dirname } from "path";
 import { existsSync } from "fs";
 import AdmZip from "adm-zip";

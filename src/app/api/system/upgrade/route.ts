@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth-utils";
 import { createBackup } from "@/lib/backup";
-import { writeFile, mkdir } from "fs/promises";
+import { writeFile, mkdir, rm } from "fs/promises";
 import { join } from "path";
 import { existsSync } from "fs";
+import AdmZip from "adm-zip";
 
 export async function POST(req: NextRequest) {
   const a = await requireAdmin();
@@ -34,10 +35,22 @@ export async function POST(req: NextRequest) {
     }
 
     const zipBuf = Buffer.from(await resp.arrayBuffer());
-    const tmpZip = join(process.cwd(), "data", "_update.zip");
-    await writeFile(tmpZip, zipBuf);
 
-    // 3. 生成 update.bat
+    // 3. Extract password-protected zip and re-pack without password
+    //    (update.bat uses PowerShell Expand-Archive which doesn't support passwords)
+    const tmpDir = join(process.cwd(), "data", "_update_tmp");
+    const updZip = new AdmZip(zipBuf, "2026");
+    updZip.extractAllTo(tmpDir, true);
+
+    // Re-pack without password using addLocalFolder
+    const plainZip = new AdmZip();
+    plainZip.addLocalFolder(tmpDir);
+    await writeFile(join(process.cwd(), "data", "_update.zip"), plainZip.toBuffer());
+
+    // Clean temp extraction
+    await rmRF(tmpDir);
+
+    // 4. Generate update.bat
     const batContent = `@echo off
 chcp 65001 >nul
 title 驻村帮扶管理系统 — 升级中...
@@ -89,4 +102,8 @@ exit
   } catch (e: any) {
     return NextResponse.json({ error: "升级失败: " + (e.message || "未知错误") }, { status: 500 });
   }
+}
+
+async function rmRF(dir: string) {
+  try { await rm(dir, { recursive: true, force: true }); } catch {}
 }
