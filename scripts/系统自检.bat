@@ -1,4 +1,4 @@
-@echo off
+﻿@echo off
 chcp 65001 >nul
 title 驻村帮扶管理系统 — 系统自检
 cd /d "%~dp0"
