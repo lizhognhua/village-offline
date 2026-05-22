@@ -1,18 +1,19 @@
-// 首次运行初始化脚本
-// 检查数据库是否存在，不存在则自动创建
-const { execSync } = require("child_process");
+// First-run initialization - uses pre-generated SQL, no Prisma CLI needed
+const { PrismaClient } = require("@prisma/client");
 const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
+const { execSync } = require("child_process");
 
 const ROOT = path.resolve(__dirname, "..");
 const DATA_DIR = path.join(ROOT, "data");
 const DB_PATH = path.join(DATA_DIR, "village.db");
 const ENV_PATH = path.join(ROOT, ".env");
+const SQL_PATH = path.join(__dirname, "init-db.sql");
 
-console.log("🔍 检查系统状态...");
+console.log("Checking system status...");
 
-// 确保 data 目录存在
+// Create data directories
 if (!fs.existsSync(DATA_DIR)) {
   fs.mkdirSync(DATA_DIR, { recursive: true });
   fs.mkdirSync(path.join(DATA_DIR, "uploads"), { recursive: true });
@@ -20,22 +21,20 @@ if (!fs.existsSync(DATA_DIR)) {
   fs.mkdirSync(path.join(DATA_DIR, "files"), { recursive: true });
 }
 
-// 检查是否需要初始化
+// Skip if already initialized
 if (fs.existsSync(DB_PATH)) {
-  console.log("✅ 数据库已存在，跳过初始化");
+  console.log("Database exists, skipping init.");
   process.exit(0);
 }
 
-console.log("🆕 首次运行，正在初始化...");
+console.log("First run, initializing...");
 
-// 生成 AUTH_SECRET
+// Generate AUTH_SECRET
 const secret = crypto.randomBytes(32).toString("hex");
 
-// 更新或创建 .env
 let envContent = "";
 if (fs.existsSync(ENV_PATH)) {
   envContent = fs.readFileSync(ENV_PATH, "utf-8");
-  // 如果已有 AUTH_SECRET 就用它，否则用生成的
   if (!envContent.includes("AUTH_SECRET=")) {
     envContent += `\nAUTH_SECRET="${secret}"\n`;
   }
@@ -44,16 +43,26 @@ if (fs.existsSync(ENV_PATH)) {
 }
 fs.writeFileSync(ENV_PATH, envContent);
 
-// 运行 Prisma db push 创建表
-console.log("📦 创建数据库表...");
-execSync("npx prisma db push", { cwd: ROOT, stdio: "inherit" });
+// Create database tables from pre-generated SQL
+console.log("Creating database tables...");
+const prisma = new PrismaClient();
+const sql = fs.readFileSync(SQL_PATH, "utf-8");
 
-// 运行种子数据
-console.log("🌱 写入初始数据...");
+// Split into individual statements (Prisma DDL always ends statements with ;\n)
+const statements = sql
+  .split(/;\n/)
+  .map(s => s.trim())
+  .filter(s => s.length > 0 && s !== ";");
+
+for (const stmt of statements) {
+  await prisma.$executeRawUnsafe(stmt);
+}
+await prisma.$disconnect();
+
+// Run seed data
+console.log("Writing initial data...");
 execSync("node prisma/seed.js", { cwd: ROOT, stdio: "inherit" });
 
-console.log("\n🎉 初始化完成！");
-console.log("─────────────────────────────");
-console.log("登录账号: admin");
-console.log("登录密码: admin123");
-console.log("─────────────────────────────");
+console.log("\nInit complete!");
+console.log("Account: admin");
+console.log("Password: admin123");
