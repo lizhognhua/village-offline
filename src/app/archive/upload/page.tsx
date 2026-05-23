@@ -61,6 +61,20 @@ export default function ArchiveUploadPage() {
         </div>
 
         <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">分类</label>
+          <select name="category" className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none text-sm">
+            <option value="">未分类</option>
+            <option value="党建资料">党建资料</option>
+            <option value="村务文件">村务文件</option>
+            <option value="项目档案">项目档案</option>
+            <option value="走访记录">走访记录</option>
+            <option value="政策文件">政策文件</option>
+            <option value="培训材料">培训材料</option>
+            <option value="其他">其他</option>
+          </select>
+        </div>
+
+        <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">标签（可选，用逗号分隔）</label>
           <input
             type="text" name="tags" placeholder="如：农户档案,靠山村"

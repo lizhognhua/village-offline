@@ -43,6 +43,11 @@ export default function ArchivePage() {
     { title: "工作笔记", count: stats.diaries, icon: BookOpen, color: "text-amber-600", bg: "bg-amber-50", href: "/diary" },
   ];
 
+  // Helpers
+  const parseTags = function(tagsStr: string) {
+    try { var t = JSON.parse(tagsStr || "[]"); return Array.isArray(t) ? t : []; } catch { return []; }
+  };
+
   // Group files by category
   const groupedFiles: Record<string, any[]> = {};
   for (const f of files) {
@@ -132,6 +137,13 @@ export default function ArchivePage() {
                   <span style={{ fontSize: "11px", color: "#9ca3af" }}>
                     {file.category || "未分类"} · {file.fileSize ? (file.fileSize / 1024).toFixed(0) + " KB" : ""} · {new Date(file.createdAt).toLocaleDateString("zh-CN")}
                   </span>
+                  {parseTags(file.tags).length > 0 && (
+                    <span style={{ fontSize: "10px", display: "flex", gap: "4px", marginTop: "2px", flexWrap: "wrap" }}>
+                      {parseTags(file.tags).map(function(t: string, i: number) {
+                        return <span key={i} style={{ background: "#eff6ff", color: "#1d4ed8", padding: "1px 6px", borderRadius: "4px", whiteSpace: "nowrap" }}>{t}</span>;
+                      })}
+                    </span>
+                  )}
                 </div>
                 <button onClick={() => setPreviewFile(file)}
                   className="text-xs text-blue-600 hover:text-blue-800 px-2 py-1 rounded hover:bg-blue-50 flex-shrink-0"
