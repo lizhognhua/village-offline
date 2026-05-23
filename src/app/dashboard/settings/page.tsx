@@ -793,18 +793,20 @@ function UpgradeSettings() {
         <p>1. 系统启动时会自动检测新版本（需联网）</p>
         <p>2. 发现新版本后，仪表盘顶部会显示升级提示</p>
         <p>3. 升级前系统会自动备份数据到 data\backups\</p>
-        <p>4. 下载完成后系统自动退出，请手动双击「启动系统.bat」重启</p>
-        <p className="mt-2 text-gray-400">如在线升级失败，可手动下载最新压缩包覆盖安装</p>
+        <p>4. 系统自动关闭后，双击文件夹里的「update.bat」</p>
+        <p>5. 升级完成，系统自动启动</p>
+        <p className="mt-2 text-gray-400">整个过程约1-2分钟，数据不会丢失。如失败可手动下载覆盖安装。</p>
       </div>
       {showModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md mx-4">
             <h3 className="text-lg font-bold text-gray-900 mb-2">确认在线升级</h3>
             <div className="text-sm text-gray-600 mb-4 space-y-1.5">
-              <p>✅ 升级前将自动备份数据</p>
-              <p>📥 下载最新版本安装包</p>
-              <p>🔄 升级期间系统不可用（1-2分钟）</p>
-              <p className="text-amber-600 font-medium">⚠ 升级后需手动重新双击「启动系统.bat」</p>
+              <p>✅ 升级前自动备份数据</p>
+              <p>📥 自动下载最新版本（约52MB）</p>
+              <p>📦 下载完成后系统自动关闭</p>
+              <p className="text-blue-600 font-medium">👉 系统关闭后，双击文件夹里的「update.bat」即完成升级</p>
+              <p className="text-xs text-gray-400 mt-2">找不到 update.bat？它就是和「启动系统.bat」在同一个文件夹里。</p>
             </div>
             {msg && <p className="text-sm mb-3 text-blue-600">{msg}</p>}
             <div className="flex gap-3 justify-end">

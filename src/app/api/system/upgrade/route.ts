@@ -4,6 +4,7 @@ import { createBackup } from "@/lib/backup";
 import { writeFile, mkdir, rm } from "fs/promises";
 import { join } from "path";
 import { existsSync } from "fs";
+import https from "https";
 import AdmZip from "adm-zip";
 
 export const dynamic = "force-dynamic";
@@ -25,18 +26,19 @@ export async function POST(req: NextRequest) {
     const backupName = `auto-backup-${new Date().toISOString().slice(0, 10)}.zip`;
     await writeFile(join(backupDir, backupName), backupBuf);
 
-    // 2. 下载新版本
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 300000);
-    const fullUrl = url.startsWith("http") ? url : `https://zc.lizhonghua.vip:8002${url}`;
-    const resp = await fetch(fullUrl, { signal: controller.signal });
-    clearTimeout(timeout);
-
-    if (!resp.ok) {
-      return NextResponse.json({ error: "下载新版本失败" }, { status: 500 });
-    }
-
-    const zipBuf = Buffer.from(await resp.arrayBuffer());
+    // 2. Download via https.get (supports self-signed certs)
+    const rawUrl = url.startsWith("http") ? url : `https://zc.lizhonghua.vip:8002${url}`;
+    // Properly encode non-ASCII characters in path
+    const encodedUrl = rawUrl.replace(/[^\x00-\x7F]+/g, (s) => encodeURIComponent(s));
+    const zipBuf = await new Promise<Buffer>((resolve, reject) => {
+      https.get(encodedUrl, { rejectUnauthorized: false }, (res) => {
+        if (res.statusCode !== 200) { reject(new Error(`HTTP ${res.statusCode}`)); return; }
+        const chunks: Buffer[] = [];
+        res.on("data", (c: Buffer) => chunks.push(c));
+        res.on("end", () => resolve(Buffer.concat(chunks)));
+        res.on("error", reject);
+      }).on("error", reject);
+    });
 
     // 3. Extract password-protected zip and re-pack without password
     //    (update.bat uses PowerShell Expand-Archive which doesn't support passwords)
@@ -99,7 +101,7 @@ exit
 
     return NextResponse.json({
       success: true,
-      message: `升级包已下载（${(zipBuf.length / 1024 / 1024).toFixed(1)}MB），备份已保存。系统即将退出并开始升级。`,
+      message: `升级包已下载（${(zipBuf.length / 1024 / 1024).toFixed(1)}MB），备份已保存。系统即将关闭，关闭后双击文件夹中的「update.bat」完成升级。`,
     });
   } catch (e: any) {
     return NextResponse.json({ error: "升级失败: " + (e.message || "未知错误") }, { status: 500 });
