@@ -27,6 +27,8 @@ export default function RichTextEditor({ content, onChange, placeholder = "è¯·è¾
     extensions: [
       StarterKit.configure({
         heading: { levels: [1, 2, 3] },
+        underline: false,
+        link: false,
       }),
       Image.configure({ allowBase64: true, inline: true }),
       Placeholder.configure({ placeholder }),

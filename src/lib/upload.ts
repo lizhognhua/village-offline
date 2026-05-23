@@ -45,7 +45,7 @@ export async function saveUploadWithThumb(
   await writeFile(thumbPath, thumb);
 
   return {
-    path: `/uploads/${module}/${fileName}`,
-    thumbPath: `/uploads/thumb/${thumbName}`,
+    path: `/api/uploads/${module}/${fileName}`,
+    thumbPath: `/api/uploads/thumb/${thumbName}`,
   };
 }
