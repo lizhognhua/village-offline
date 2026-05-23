@@ -122,6 +122,13 @@ async function main() {
     }
   }
 
+  // 6. 创建默认队员
+  const memberCount = await prisma.teamMember.count();
+  if (memberCount === 0 && admin) {
+    await prisma.teamMember.create({ data: { name: admin.name, title: "队长", sortOrder: 1, isActive: true } });
+    console.log("✓ 默认队员已创建");
+  }
+
   console.log("\n🎉 数据初始化完成！");
   console.log("─────────────────────────────");
   console.log("登录账号: admin");

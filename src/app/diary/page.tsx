@@ -14,6 +14,7 @@ type DiaryItem = {
   isPublic: boolean;
   source: string;
   photos?: string;
+  images?: string;
   author: { id: string; name: string; avatar?: string };
   createdAt: string;
 };
@@ -103,7 +104,7 @@ export default function DiaryListPage() {
           {/* Card Grid — 6 per row on large screens */}
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
             {data?.diaries.map(function(diary) {
-              var photos = parsePhotos(diary.photos || "");
+              var photos = parsePhotos(diary.images || diary.photos || "");
               return (
                 <Link
                   key={diary.id}
