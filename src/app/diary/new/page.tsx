@@ -6,6 +6,7 @@ import { ArrowLeft, Save, Globe, Lock, ImageIcon, X, Upload, Tag } from "lucide-
 import Link from "next/link";
 import RichTextEditor from "@/components/RichTextEditor";
 import { RECORD_TYPES } from "@/lib/accountability";
+import type { Editor } from "@tiptap/react";
 
 export default function NewDiaryPage() {
   const router = useRouter();
@@ -16,26 +17,28 @@ export default function NewDiaryPage() {
   const [images, setImages] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
   const [recordType, setRecordType] = useState("");
+  const [error, setError] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
+  const editorRef = useRef<Editor | null>(null);
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files?.length) return;
-    setUploading(true);
+    setUploading(true); setError("");
     const formData = new FormData();
     formData.append("file", files[0]);
     try {
       const res = await fetch("/api/photos/upload", { method: "POST", body: formData });
       const data = await res.json();
       if (data.success) {
-        const imgHtml = `<img src="${data.url}" alt="${data.name || '图片'}" />`;
-        setContent(prev => prev + (prev ? "<p></p>" : "") + imgHtml);
+        // Insert image into editor and track URL
+        editorRef.current?.chain().focus().setImage({ src: data.url }).run();
         setImages(prev => [...prev, data.url]);
       } else {
-        alert(data.error || "上传失败");
+        setError(data.error || "上传失败");
       }
     } catch {
-      alert("上传失败，请重试");
+      setError("上传失败，请重试");
     } finally {
       setUploading(false);
       if (fileRef.current) fileRef.current.value = "";
@@ -43,9 +46,9 @@ export default function NewDiaryPage() {
   };
 
   const handleSave = async () => {
-    if (!title.trim()) { alert("请输入标题"); return; }
-    if (!content.trim()) { alert("请输入内容"); return; }
-    setSaving(true);
+    if (!title.trim()) { setError("请输入标题"); return; }
+    if (!content.trim()) { setError("请输入内容"); return; }
+    setSaving(true); setError("");
     try {
       const res = await fetch("/api/diary", {
         method: "POST",
@@ -58,11 +61,11 @@ export default function NewDiaryPage() {
           recordType,
         }),
       });
-      if (!res.ok) { const e = await res.json(); alert(e.error || "保存失败"); return; }
+      if (!res.ok) { const e = await res.json(); setError(e.error || "保存失败"); return; }
       const diary = await res.json();
       router.push(`/diary/${diary.id}`);
     } catch {
-      alert("保存失败，请重试");
+      setError("网络错误，保存失败");
     } finally {
       setSaving(false);
     }
@@ -105,6 +108,7 @@ export default function NewDiaryPage() {
               content={content}
               onChange={(html) => setContent(html)}
               placeholder="写下你的驻村工作记录..."
+              editorRef={editorRef}
             />
           </div>
 
@@ -121,6 +125,8 @@ export default function NewDiaryPage() {
             </button>
             <span className="text-xs text-gray-400">图片自动上传并压缩，插入到编辑器中</span>
           </div>
+
+          {error && <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-2">{error}</div>}
 
           {images.length > 0 && (
             <div className="flex gap-2 flex-wrap">

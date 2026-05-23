@@ -1,6 +1,6 @@
 "use client";
 
-import { useEditor, EditorContent } from "@tiptap/react";
+import { useEditor, EditorContent, Editor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Image from "@tiptap/extension-image";
 import Placeholder from "@tiptap/extension-placeholder";
@@ -19,9 +19,10 @@ interface RichTextEditorProps {
   content: string;
   onChange: (html: string) => void;
   placeholder?: string;
+  editorRef?: React.MutableRefObject<Editor | null>;
 }
 
-export default function RichTextEditor({ content, onChange, placeholder = "请输入内容..." }: RichTextEditorProps) {
+export default function RichTextEditor({ content, onChange, placeholder = "请输入内容...", editorRef }: RichTextEditorProps) {
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -43,6 +44,9 @@ export default function RichTextEditor({ content, onChange, placeholder = "请�
       },
     },
   });
+
+  // Expose editor instance for parent to insert images etc.
+  if (editorRef) editorRef.current = editor;
 
   const addImage = useCallback(() => {
     const url = window.prompt("输入图片URL：");
