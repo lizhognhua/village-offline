@@ -1,4 +1,5 @@
 "use client";
+export const dynamic = "force-dynamic";
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -198,31 +199,39 @@ function GroupSettings() {
   const [name, setName] = useState("");
   const [type, setType] = useState("tun");
   const [sortOrder, setSortOrder] = useState(0);
+  const [error, setError] = useState("");
 
   const load = () => {
     fetch("/api/village/groups").then(r => r.json()).then(d => setGroups(d.groups || d || [])).catch(() => {});
   };
   useEffect(() => { load(); }, []);
 
-  const reset = () => { setName(""); setType("tun"); setSortOrder(0); setEditId(null); setShowForm(false); };
+  const reset = () => { setName(""); setType("tun"); setSortOrder(0); setEditId(null); setShowForm(false); setError(""); };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault(); setError("");
     const body = { name, type, sortOrder };
-    const url = editId ? "/api/village/groups/manage" : "/api/village/groups/manage";
+    const url = "/api/village/groups/manage";
     const method = editId ? "PUT" : "POST";
-    const r = await fetch(url, {
-      method,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(editId ? { id: editId, ...body } : body),
-    });
-    if (r.ok) { load(); reset(); }
+    try {
+      const r = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(editId ? { id: editId, ...body } : body),
+      });
+      if (r.ok) { load(); reset(); }
+      else { const d = await r.json().catch(() => ({})); setError(d.error || "保存失败"); }
+    } catch { setError("网络错误"); }
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm("确定删除？")) return;
-    await fetch(`/api/village/groups/manage?id=${id}`, { method: "DELETE" });
-    load();
+    setError("");
+    try {
+      const r = await fetch(`/api/village/groups/manage?id=${id}`, { method: "DELETE" });
+      if (r.ok) { load(); }
+      else { const d = await r.json().catch(() => ({})); setError(d.error || "删除失败"); }
+    } catch { setError("网络错误"); }
   };
 
   return (
@@ -257,6 +266,7 @@ function GroupSettings() {
           </div>
           <button type="submit" className="px-3 py-1.5 bg-green-600 text-white rounded-md text-sm">保存</button>
           <button type="button" onClick={reset} className="px-3 py-1.5 bg-gray-300 text-gray-700 rounded-md text-sm">取消</button>
+          {error && <span className="text-xs text-red-600">{error}</span>}
         </form>
       )}
 
