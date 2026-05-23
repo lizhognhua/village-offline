@@ -1,5 +1,4 @@
 "use client";
-export const dynamic = "force-dynamic";
 import { useEffect, useRef, useState } from "react";
 
 // 靠山村大致坐标（绥棱县靠山乡）
