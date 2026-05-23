@@ -42,7 +42,7 @@ async function main() {
     // Update DATABASE_URL to absolute path
     envContent = envContent.replace(/^DATABASE_URL=.*$/m, `DATABASE_URL="${dbUrl}"`);
   } else {
-    envContent = `DATABASE_URL="${dbUrl}"\nAUTH_SECRET="${secret}"\nPORT=3000\n`;
+    envContent = `DATABASE_URL="${dbUrl}"\nAUTH_URL=http://localhost:3000\nAUTH_SECRET="${secret}"\nPORT=3000\n`;
   }
   fs.writeFileSync(ENV_PATH, envContent);
 

@@ -25,6 +25,7 @@ export async function POST(req: NextRequest) {
     const group = await prisma.villageGroup.create({
       data: {
         name: body.name,
+        type: body.type || "tun",
         sortOrder: parseInt(body.sortOrder) || 0,
       },
     });
