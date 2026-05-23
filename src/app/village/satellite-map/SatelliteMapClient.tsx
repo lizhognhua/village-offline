@@ -137,7 +137,7 @@ function pointInPolygon(point, polygon) {
   useEffect(()=>{
     if(!mapRef.current||loading)return;
     if(mapInstance.current)return;
-    const map = L.map(mapRef.current,{center:MAP_CENTER,zoom:teamPos.zoom,zoomControl:true});
+    const map = L.map(mapRef.current,{center:MAP_CENTER,zoom:15,zoomControl:true});
     const cfg = TILE_LAYERS[layer];
     tileLayerRef.current = L.tileLayer(cfg.url,cfg.options).addTo(map);
     markerGroupRef.current = L.layerGroup().addTo(map);
@@ -244,7 +244,7 @@ function pointInPolygon(point, polygon) {
       <div className="flex-1 relative" ref={mapRef}>
         {legendOpen?(<div className="absolute top-3 right-3 z-[1000] bg-white/95 backdrop-blur rounded-lg shadow-lg p-3 text-xs"><div className="flex items-center justify-between mb-2"><span className="font-medium text-gray-700">图例</span><button onClick={function(){setLegendOpen(false);}} className="text-gray-400 hover:text-gray-600"><X className="w-3 h-3"/></button></div><div className="space-y-1.5">{MARKER_CATEGORIES.map(function(c:any){return <div key={c.key} className="flex items-center gap-2"><span className="text-base">{c.icon}</span><span className="text-gray-600">{c.label}</span></div>;})}<div className="border-t pt-1.5 mt-1.5 space-y-1.5">{FAMILY_ATTR_OPTIONS.map(function(a:any){return <div key={a} className="flex items-center gap-2"><span className="w-4 h-4 rounded-full" style={{background:ATTR_COLORS[a]||"#999"}}></span><span className="text-gray-600">{a}</span></div>;})}<div className="flex items-center gap-2"><span className="text-base">🏠</span><span className="text-gray-600">驻村工作队</span></div></div></div></div>):(<button onClick={function(){setLegendOpen(true);}} className="absolute top-3 right-3 z-[1000] bg-white rounded-lg shadow px-2.5 py-1.5 text-xs text-gray-500 hover:text-gray-700">图例</button>)}
         <div className="absolute bottom-4 left-4 z-[1000] bg-white/90 backdrop-blur rounded-lg shadow px-3 py-2 text-xs text-gray-500">{selectMode?(polygonDone?"✅ 点击框选区域可添加信息":selectCorners.length<3?"🖱️ 点击添加点("+(selectCorners.length+1)+"/"+3+"+点)":"🖱️ 继续点击添加点"):"💡 点击地图添加信息"}</div>
-        <button onClick={function(){mapInstance.current?.setView(MAP_CENTER,teamPos.zoom);}} className="absolute bottom-4 right-4 z-[1000] bg-white rounded-full shadow-lg p-2.5 hover:bg-gray-100"><Navigation className="w-5 h-5 text-blue-600"/></button>
+        <button onClick={function(){mapInstance.current?.setView(MAP_CENTER,15);}} className="absolute bottom-4 right-4 z-[1000] bg-white rounded-full shadow-lg p-2.5 hover:bg-gray-100"><Navigation className="w-5 h-5 text-blue-600"/></button>
       </div>
 
       {/* Select results */}
