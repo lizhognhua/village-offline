@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth-utils";
 
-const CURRENT_VERSION = "1.4";
+const CURRENT_VERSION = "1.5";
 const UPDATE_URL = "https://zc.lizhonghua.vip:8002/api/version";
 
 export async function GET() {

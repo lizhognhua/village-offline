@@ -1,4 +1,4 @@
-import { requireAuth, requireAdmin } from "@/lib/auth-utils";
+import { requireAuth } from "@/lib/auth-utils";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sanitizeObject } from "@/lib/sanitize";

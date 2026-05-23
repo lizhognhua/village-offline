@@ -1,4 +1,4 @@
-import { requireAuth, requireAdmin } from "@/lib/auth-utils";
+import { requireAuth } from "@/lib/auth-utils";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { writeFile, mkdir } from "fs/promises";
@@ -24,7 +24,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 }
 
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const a = await requireAdmin();
+  const a = await requireAuth();
   if (a.error) return a.error;
   const { id } = await params;
 
@@ -99,7 +99,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 }
 
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const a = await requireAdmin();
+  const a = await requireAuth();
   if (a.error) return a.error;
   const { id } = await params;
   try {

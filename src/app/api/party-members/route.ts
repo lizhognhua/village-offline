@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireAuth, requireAdmin } from "@/lib/auth-utils";
+import { requireAuth } from "@/lib/auth-utils";
 import { sanitizeObject } from "@/lib/sanitize";
 import { auth } from "@/auth";
 
@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const a = await requireAdmin();
+  const a = await requireAuth();
   if (a.error) return a.error;
 
   try {
@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
 }
 
 export async function PUT(req: NextRequest) {
-  const a = await requireAdmin();
+  const a = await requireAuth();
   if (a.error) return a.error;
 
   try {

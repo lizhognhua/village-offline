@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireAdmin } from "@/lib/auth-utils";
+import { requireAuth } from "@/lib/auth-utils";
 import { sanitizeObject } from "@/lib/sanitize";
 
 export const dynamic = "force-dynamic";
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
-  const a = await requireAdmin();
+  const a = await requireAuth();
   if (a.error) return a.error;
   try {
     const { id } = await params;
@@ -32,7 +32,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 }
 
 export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
-  const a = await requireAdmin();
+  const a = await requireAuth();
   if (a.error) return a.error;
   try {
     const { id } = await params;
