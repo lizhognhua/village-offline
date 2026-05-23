@@ -45,7 +45,9 @@ export default function ArchivePage() {
 
   // Helpers
   const parseTags = function(tagsStr: string) {
-    try { var t = JSON.parse(tagsStr || "[]"); return Array.isArray(t) ? t : []; } catch { return []; }
+    if (!tagsStr) return [];
+    try { var t = JSON.parse(tagsStr); if (Array.isArray(t)) return t; } catch {}
+    return tagsStr.split(/[,，]/).map(function(s: string) { return s.trim(); }).filter(Boolean);
   };
 
   // Group files by category

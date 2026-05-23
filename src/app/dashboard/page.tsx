@@ -50,18 +50,13 @@ export default function DashboardPage() {
       fetch("/api/dashboard/stats").then(r => r.json()),
       fetch("/api/weather").then(r => r.json()).catch(() => ({ current: null })),
       fetch("/api/announcements").then(r => r.json()).catch(() => []),
-      fetch("/api/knowledge").then(r => r.json()).catch(() => []),
       fetch("/api/settings").then(r => r.json()).catch(() => ({})),
-    ]).then(([statsRes, weatherRes, annData, knowledgeData, settings]) => {
+    ]).then(([statsRes, weatherRes, annData, settings]) => {
       setData(statsRes);
       setWeather(weatherRes.current || null);
       setAnnouncements(Array.isArray(annData) ? annData.slice(0, 3) : []);
       if (settings.teamName) setTeamName(settings.teamName);
       if (settings.villageName) setVillageName(settings.villageName);
-      const items = Array.isArray(knowledgeData)
-        ? knowledgeData.filter(function(it: any) { return it.question && it.answer; })
-        : [];
-      setQaItems(items);
     }).catch(console.error).finally(() => setLoading(false));
   }, []);
 
@@ -102,7 +97,7 @@ export default function DashboardPage() {
     { label: "电子档案", href: "/archive", icon: FolderArchive, color: "bg-blue-600" },
     { label: "村情概况", href: "/village", icon: Map, color: "bg-emerald-600" },
     { label: "村庄地图", href: "/village/satellite-map", icon: MapPin, color: "bg-teal-600" },
-    { label: "预警信息", href: "/warnings/overview", icon: AlertTriangle, color: "bg-amber-600" },
+    { label: "天气预警", href: "/weather", icon: AlertTriangle, color: "bg-amber-600" },
     { label: "走访慰问", href: "/visits", icon: Footprints, color: "bg-primary-700" },
     { label: "工作日记", href: "/diary", icon: BookOpen, color: "bg-amber-500" },
     { label: "新增农户", href: "/village/families/new", icon: Home, color: "bg-rose-500" },
