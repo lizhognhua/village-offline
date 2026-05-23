@@ -150,7 +150,7 @@ export default function HomePage() {
                 {teamName}
               </h1>
               <p style={{ fontSize: "0.8rem", color: "#94a3b8", marginBottom: 32, lineHeight: 1.6 }}>
-                村情户情 · 走访记录 · 工作日志<br />
+                村情户情 · 走访记录 · 工作日记<br />
                 党建培训 · 产业管理 · 项目看板
               </p>
             </>

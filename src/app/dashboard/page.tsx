@@ -104,7 +104,7 @@ export default function DashboardPage() {
     { label: "村庄地图", href: "/village/satellite-map", icon: MapPin, color: "bg-teal-600" },
     { label: "预警信息", href: "/warnings/overview", icon: AlertTriangle, color: "bg-amber-600" },
     { label: "走访慰问", href: "/visits", icon: Footprints, color: "bg-primary-700" },
-    { label: "工作日志", href: "/diary", icon: BookOpen, color: "bg-amber-500" },
+    { label: "工作日记", href: "/diary", icon: BookOpen, color: "bg-amber-500" },
     { label: "新增农户", href: "/village/families/new", icon: Home, color: "bg-rose-500" },
     { label: "党建培训", href: "/party", icon: Flag, color: "bg-red-600" },
   ];

@@ -14,7 +14,7 @@ const PAGE_NAMES: Record<string, string> = {
   "/party": "党建培训",
   "/village": "村情概况",
   "/visits": "走访慰问",
-  "/diary": "工作日志",
+  "/diary": "工作日记",
   "/reports": "统计报表",
   "/industries": "产业管理",
   "/projects": "任务项目看板",

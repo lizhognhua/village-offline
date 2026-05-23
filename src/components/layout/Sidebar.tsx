@@ -10,7 +10,7 @@ const items = [
   { i: Map, l: "村情概况", h: "/village" },
   { i: MapPin, l: "村庄地图", h: "/village/satellite-map" },
   { i: Flag, l: "党建培训", h: "/party" },
-  { i: BookOpen, l: "工作日志", h: "/diary" },
+  { i: BookOpen, l: "工作日记", h: "/diary" },
   { i: Footprints, l: "走访慰问", h: "/visits" },
   { i: Wheat, l: "产业管理", h: "/industries" },
   { i: Kanban, l: "任务看板", h: "/projects" },

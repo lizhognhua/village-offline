@@ -40,7 +40,7 @@ export default function RichTextEditor({ content, onChange, placeholder = "è¯·è¾
     },
     editorProps: {
       attributes: {
-        class: "prose prose-sm max-w-none focus:outline-none min-h-[200px] px-4 py-3",
+        class: "prose prose-sm max-w-none focus:outline-none min-h-[200px] px-4 py-3 [&_ol]:list-decimal [&_ol]:pl-6 [&_ul]:list-disc [&_ul]:pl-6 [&_li]:my-0.5",
       },
     },
   });

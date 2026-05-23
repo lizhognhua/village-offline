@@ -76,7 +76,7 @@ export default function DiaryListPage() {
     <div className="max-w-7xl mx-auto space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">驻村工作日记</h1>
+          <h1 className="text-2xl font-bold text-gray-900">工作日记</h1>
           <p className="text-sm text-gray-500 mt-1">
             公开 {data?.totalPublic || 0} 篇 · 私密 {data?.totalPrivate || 0} 篇 · 总计 {data?.total || 0} 篇
           </p>
