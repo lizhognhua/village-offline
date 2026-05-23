@@ -43,6 +43,8 @@ export default function DashboardPage() {
   const [qaPage, setQaPage] = useState(0);
   const [loading, setLoading] = useState(true);
   const [updateInfo, setUpdateInfo] = useState<any>(null);
+  const [teamName, setTeamName] = useState("");
+  const [villageName, setVillageName] = useState("");
 
   useEffect(() => {
     Promise.all([
@@ -50,11 +52,13 @@ export default function DashboardPage() {
       fetch("/api/weather").then(r => r.json()).catch(() => ({ current: null })),
       fetch("/api/announcements").then(r => r.json()).catch(() => []),
       fetch("/api/knowledge").then(r => r.json()).catch(() => []),
-    ]).then(([statsRes, weatherRes, annData, knowledgeData]) => {
+      fetch("/api/settings").then(r => r.json()).catch(() => ({})),
+    ]).then(([statsRes, weatherRes, annData, knowledgeData, settings]) => {
       setData(statsRes);
       setWeather(weatherRes.current || null);
       setAnnouncements(Array.isArray(annData) ? annData.slice(0, 3) : []);
-      // Parse QA from knowledge data — expect [{id, category:"问答", question, answer}, ...]
+      if (settings.teamName) setTeamName(settings.teamName);
+      if (settings.villageName) setVillageName(settings.villageName);
       const items = Array.isArray(knowledgeData)
         ? knowledgeData.filter(function(it: any) { return it.question && it.answer; })
         : [];
@@ -112,6 +116,15 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
+      {/* Village / Team header */}
+      {villageName ? (
+        <div className="bg-white rounded-xl border shadow-sm px-5 py-3">
+          <h2 className="text-lg font-bold text-gray-800">
+            {teamName || "驻村工作队"}<span className="text-gray-400 mx-2">·</span>{villageName}
+          </h2>
+        </div>
+      ) : null}
+
       {/* Version update banner */}
       {updateInfo && <UpdateBanner info={updateInfo} onDismiss={() => setUpdateInfo(null)} />}
 

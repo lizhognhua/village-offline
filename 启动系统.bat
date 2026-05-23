@@ -84,6 +84,10 @@ echo * Close this window to stop the system
 echo.
 
 set HOSTNAME=0.0.0.0
+:: Set absolute DATABASE_URL for SQLite
+set "DB_PATH=%CD%\data\village.db"
+set "DB_PATH=%DB_PATH:\=/%"
+set "DATABASE_URL=file:%DB_PATH%"
 start http://localhost:3000
 %NODE% server.js
 

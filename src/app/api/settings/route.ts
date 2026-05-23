@@ -1,19 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAuth, requireAdmin } from "@/lib/auth-utils";
+import { auth } from "@/auth";
+import { requireAdmin } from "@/lib/auth-utils";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
-// Read all settings (must be logged in)
+// Read settings (public, API keys only visible to admin)
 export async function GET() {
-  const a = await requireAuth();
-  if (a.error) return a.error;
-
   try {
+    const session = await auth();
+    const isAdmin = session?.user?.role === "admin";
+
     const configs = await prisma.systemConfig.findMany();
     const settings: Record<string, string> = {};
     for (const c of configs) {
       settings[c.key] = c.value;
+    }
+    // Filter out API keys for non-admin
+    if (!isAdmin) {
+      delete settings.tiandituKey;
+      delete settings.amapKey;
+      delete settings.qweatherKey;
     }
     return NextResponse.json(settings);
   } catch (error: any) {
