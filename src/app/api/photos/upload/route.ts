@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth-utils";
 import { saveUploadWithThumb } from "@/lib/upload";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(req: NextRequest) {
   const a = await requireAuth();
   if (a.error) return a.error;

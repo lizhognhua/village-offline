@@ -6,6 +6,8 @@ import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 import { sanitizeObject, sanitizeString } from "@/lib/sanitize";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await auth();

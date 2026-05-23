@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { sanitizeObject } from "@/lib/sanitize";
 import { requireAuth } from "@/lib/auth-utils";
 
+export const dynamic = "force-dynamic";
+
 export async function PUT(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }

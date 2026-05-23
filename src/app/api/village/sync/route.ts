@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 import { sanitizeObject } from "@/lib/sanitize";
 
+export const dynamic = "force-dynamic";
+
 const FEISHU_APP_ID = process.env.FEISHU_APP_ID || "";
 const FEISHU_APP_SECRET = process.env.FEISHU_APP_SECRET || "";
 

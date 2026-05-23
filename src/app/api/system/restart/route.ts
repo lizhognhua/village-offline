@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth-utils";
 
+export const dynamic = "force-dynamic";
+
 export async function POST() {
   const a = await requireAdmin();
   if (a.error) return a.error;

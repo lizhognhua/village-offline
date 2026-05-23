@@ -4,6 +4,8 @@ import { requireAuth, requireAdmin } from "@/lib/auth-utils";
 import { sanitizeObject } from "@/lib/sanitize";
 import { auth } from "@/auth";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);

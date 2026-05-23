@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAuth, requireAdmin } from "@/lib/auth-utils";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = "force-dynamic";
+
 // Read all settings (must be logged in)
 export async function GET() {
   const a = await requireAuth();

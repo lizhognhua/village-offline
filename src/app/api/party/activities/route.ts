@@ -5,6 +5,8 @@ import { requireAuth } from "@/lib/auth-utils";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(req: NextRequest) {
   const session = await auth();
   // 未登录时返回空列表（不阻塞页面加载）

@@ -4,6 +4,8 @@ import { auth } from "@/auth";
 import { sanitizeObject } from "@/lib/sanitize";
 import { getDutyTags, getTaskTags } from "@/lib/accountability";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(req: NextRequest) {
   try {
     const session = await auth();

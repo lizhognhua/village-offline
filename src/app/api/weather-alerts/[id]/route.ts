@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth-utils";
 import { sanitizeObject } from "@/lib/sanitize";
 
+export const dynamic = "force-dynamic";
+
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const a = await requireAdmin();
   if (a.error) return a.error;

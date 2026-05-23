@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { sanitizeObject } from "@/lib/sanitize";
 import { auth } from "@/auth";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     const session = await auth();

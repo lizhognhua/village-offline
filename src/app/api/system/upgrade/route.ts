@@ -6,6 +6,8 @@ import { join } from "path";
 import { existsSync } from "fs";
 import AdmZip from "adm-zip";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(req: NextRequest) {
   const a = await requireAdmin();
   if (a.error) return a.error;

@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth-utils";
 
+export const dynamic = "force-dynamic";
+
 export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const a = await requireAuth();
   if (a.error) return a.error;

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth-utils";
 import { restoreBackup } from "@/lib/backup";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(req: NextRequest) {
   const a = await requireAdmin();
   if (a.error) return a.error;
