@@ -2,13 +2,13 @@
 
 <p align="center">
   <strong>专为驻村工作队打造的数字化帮扶管理平台</strong><br>
-  Windows 绿色免安装 · 双击即用 · 局域网多用户共用
+  Windows 绿色免安装 &middot; 双击即用 &middot; 局域网多用户共用
 </p>
 
 <p align="center">
-  <a href="../../releases/latest"><img src="https://img.shields.io/github/v/release/lizhognhua/village-offline?label=最新版本&color=22c55e"></a>
-  <img src="https://img.shields.io/badge/系统要求-Windows%207%2B-blue">
-  <img src="https://img.shields.io/badge/数据库-SQLite-local">
+  <a href="../../releases/latest"><img src="https://img.shields.io/github/v/release/lizhognhua/village-offline?label=最新版本&color=22c55e" alt="版本"></a>
+  <img src="https://img.shields.io/badge/系统-Windows%207%2B-blue" alt="系统">
+  <img src="https://img.shields.io/badge/数据库-SQLite%20(本地)-green" alt="数据库">
 </p>
 
 ---
@@ -23,38 +23,91 @@
 | 4 | 双击 `启动系统.bat`，浏览器自动打开 |
 | 5 | 登录 `admin` / `admin123` |
 
-## 功能
+## 功能模块
 
-| 模块 | 说明 |
-|------|------|
-| 智能工作台 | 驻村天数统计、快捷入口、一屏总览 |
-| 农户管理 | 12 标签属性、家庭成员、批量导入/导出 |
-| 走访慰问 | 入户记录、照片上传、HEIC 自动转 JPEG |
-| 党建培训 | 三会一课、主题党日、党员信息管理 |
-| 履职全景 | 四项职责十项任务进度追踪 |
-| 产业管理 | 帮扶项目全流程、进度看板 |
-| 档案管理 | 电子文档分类存储、在线预览 |
-| 百姓办事 | 标签系统、村民搜索、照片附件 |
-| AI 笔杆子 | 工作总结、汇报材料自动生成 |
-| 系统设置 | 备份恢复、数据导入、队员管理 |
+<table>
+<tr>
+<td width="50%"><strong>智能工作台</strong><br>驻村天数统计、快捷入口、一屏总览</td>
+<td width="50%"><strong>农户管理</strong><br>12 标签属性、家庭成员、批量导入导出</td>
+</tr>
+<tr>
+<td><img src="screenshots/01-dashboard.png" alt="智能工作台"></td>
+<td><img src="screenshots/02-families.png" alt="农户管理"></td>
+</tr>
+<tr>
+<td><strong>走访慰问</strong><br>入户记录、照片上传、HEIC 自动转 JPEG</td>
+<td><strong>党建培训</strong><br>三会一课、主题党日、党员信息管理</td>
+</tr>
+<tr>
+<td><img src="screenshots/03-visits.png" alt="走访慰问"></td>
+<td><img src="screenshots/04-party.png" alt="党建培训"></td>
+</tr>
+<tr>
+<td><strong>履职全景</strong><br>四项职责十项任务进度追踪</td>
+<td><strong>产业管理</strong><br>帮扶项目全流程管理</td>
+</tr>
+<tr>
+<td><img src="screenshots/06-performance.png" alt="履职全景"></td>
+<td><img src="screenshots/07-industry.png" alt="产业管理"></td>
+</tr>
+<tr>
+<td><strong>防返贫预警</strong><br>监测预警、风险研判、帮扶跟进</td>
+<td><strong>百姓办事</strong><br>标签系统、村民搜索、照片附件</td>
+</tr>
+<tr>
+<td><img src="screenshots/09-alerts.png" alt="防返贫预警"></td>
+<td><img src="screenshots/10-public-service.png" alt="百姓办事"></td>
+</tr>
+<tr>
+<td><strong>驻村日记</strong><br>工作日志、图文记录、私密模式</td>
+<td><strong>档案管理</strong><br>电子文档分类存储、在线预览</td>
+</tr>
+<tr>
+<td><img src="screenshots/11-diary.png" alt="驻村日记"></td>
+<td><img src="screenshots/12-archive.png" alt="档案管理"></td>
+</tr>
+<tr>
+<td><strong>项目看板</strong><br>任务进度可视化追踪</td>
+<td><strong>培训记录</strong><br>培训档案、学习记录管理</td>
+</tr>
+<tr>
+<td><img src="screenshots/08-projects.png" alt="项目看板"></td>
+<td><img src="screenshots/05-training.png" alt="培训记录"></td>
+</tr>
+<tr>
+<td><strong>地图标记</strong><br>村内地点标注、信息录入</td>
+<td><strong>AI 笔杆子</strong><br>工作总结、汇报材料自动生成</td>
+</tr>
+<tr>
+<td><img src="screenshots/16-map.png" alt="地图标记"></td>
+<td><img src="screenshots/14-ai-writer.png" alt="AI 笔杆子"></td>
+</tr>
+<tr>
+<td><strong>知识库</strong><br>政策文件、办事指南集中管理</td>
+<td><strong>相册管理</strong><br>图片上传、分类浏览</td>
+</tr>
+<tr>
+<td><img src="screenshots/13-knowledge.png" alt="知识库"></td>
+<td><img src="screenshots/15-album.png" alt="相册管理"></td>
+</tr>
+</table>
 
 ## 亮点
 
-- **零门槛** — 无需安装数据库或服务器，不需装 Node.js
-- **局域网共享** — 一台电脑启动，同网队员都能用
+- **零门槛** — 无需安装数据库或服务器，不含 Node.js 依赖
+- **局域网共享** — 一台电脑启动，同网队员都能访问
 - **自检诊断** — 双击 `系统自检.bat`，自动检测环境问题
-- **数据导入** — Excel 批量导入村民户、家庭成员、党员信息
+- **数据导入** — Excel 批量导入村民户、家庭成员、党员信息，自动判重
 - **身份证校验** — 18 位格式 + 校验码自动验证
 
 ## 常见问题
 
-**打不开页面？** 运行 `系统自检.bat`，查看端口是否被占用。
-
-**忘记密码？** 联系管理员重置。
-
-**如何备份数据？** 系统设置 → 一键备份 → 下载保存。或直接复制 `data/` 文件夹。
-
-**可以多台电脑同时用吗？** 可以。一台电脑作为主机启动服务，局域网内其他电脑通过 IP 地址访问。
+| 问题 | 解答 |
+|------|------|
+| 打不开页面？ | 运行 `系统自检.bat`，查看端口是否被占用 |
+| 忘记密码？ | 联系管理员重置 |
+| 如何备份？ | 系统设置 → 一键备份，或直接复制 `data/` 文件夹 |
+| 多人同时用？ | 一台电脑启动服务，局域网内其他电脑通过 IP 访问 |
 
 ## 技术栈
 
@@ -62,4 +115,4 @@ Next.js 14 · TypeScript · Prisma · SQLite · NextAuth.js · Tailwind CSS
 
 ---
 
-黑龙江省机关事务管理局 · 驻村干部开发
+黑龙江省机关事务管理局 &copy; 2026
