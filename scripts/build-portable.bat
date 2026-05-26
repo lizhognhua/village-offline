@@ -74,11 +74,15 @@ copy /y "%ROOT%\★使用说明-请先读我★.txt" "%DIST%\" >nul
 copy /y "%ROOT%\.env" "%DIST%\.env.example" >nul
 xcopy /e /i /y "%ROOT%\public" "%DIST%\public"
 
+:: Node.js portable runtime
+echo   Copying Node.js runtime...
+xcopy /e /i /y "%ROOT%\nodejs" "%DIST%\nodejs"
+
 :: 6. Create password-protected zip
 echo [6/6] Creating zip package...
 python -c "
 import zipfile, os
-zip_path = r'%ROOT%\dist\驻村帮扶管理系统-V1.3.zip'
+zip_path = r'%ROOT%\dist\驻村帮扶管理系统-V1.7.zip'
 src_dir = r'%DIST%'
 with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zf:
     zf.setpassword(b'2026')

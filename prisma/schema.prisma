@@ -441,6 +441,27 @@ model PartyActivity {
   updatedAt    DateTime @updatedAt
 }
 
+// ========== 百姓办事登记 ==========
+
+model PublicService {
+  id            String   @id @default(cuid())
+  teamId        String   @default("team-kaoshan")
+  name          String
+  phone         String   @default("")
+  requestType   String   @default("其他")
+  description   String
+  status        String   @default("待处理")
+  handlerNote   String   @default("")
+  handledById   String   @default("")
+  handledAt     DateTime?
+  staffIds      String   @default("")
+  staffOther    String   @default("")
+  photos        String   @default("")
+  tags          String   @default("")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
 // ========== 履职台账 ==========
 
 model AccountabilityRecord {

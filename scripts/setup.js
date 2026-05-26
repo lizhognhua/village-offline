@@ -1,6 +1,5 @@
 // First-run initialization
 const { PrismaClient } = require("@prisma/client");
-const { DatabaseSync } = require("node:sqlite");
 const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
@@ -46,10 +45,9 @@ async function main() {
   }
   fs.writeFileSync(ENV_PATH, envContent);
 
-  // Initialize empty SQLite database file
+  // Initialize empty SQLite database file (create empty file, Prisma handles the rest)
   console.log("Creating database...");
-  const initDb = new DatabaseSync(DB_PATH);
-  initDb.close();
+  fs.writeFileSync(DB_PATH, "");
 
   // Create tables from pre-generated SQL
   console.log("Creating database tables...");
@@ -68,9 +66,9 @@ async function main() {
   }
   await prisma.$disconnect();
 
-  // Run seed data
+  // Run seed data (use process.execPath to ensure portable Node.js works even without system Node)
   console.log("Writing initial data...");
-  execSync("node prisma/seed.js", { cwd: ROOT, stdio: "inherit" });
+  execSync(`"${process.execPath}" prisma/seed.js`, { cwd: ROOT, stdio: "inherit" });
 
   console.log("\nInit complete!");
   console.log("Account: admin");
