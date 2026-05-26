@@ -10,6 +10,9 @@ const DATA_DIR = path.join(ROOT, "data");
 const DB_PATH = path.join(DATA_DIR, "village.db");
 const ENV_PATH = path.join(ROOT, ".env");
 const SQL_PATH = path.join(__dirname, "init-db.sql");
+const VERSION_PATH = path.join(DATA_DIR, "version.txt");
+
+const EXPECTED_VERSION = "2.2";
 
 async function main() {
   console.log("Checking system status...");
@@ -20,13 +23,22 @@ async function main() {
   fs.mkdirSync(path.join(DATA_DIR, "photos"), { recursive: true });
   fs.mkdirSync(path.join(DATA_DIR, "files"), { recursive: true });
 
-  // Skip if already initialized
-  if (fs.existsSync(DB_PATH) && fs.statSync(DB_PATH).size > 0) {
+  // Check if database needs reinitialization
+  const dbExists = fs.existsSync(DB_PATH) && fs.statSync(DB_PATH).size > 0;
+  let currentVersion = "";
+  try { currentVersion = fs.readFileSync(VERSION_PATH, "utf8").trim(); } catch {}
+
+  if (dbExists && currentVersion === EXPECTED_VERSION) {
     console.log("Database exists, skipping init.");
     process.exit(0);
   }
 
-  console.log("First run, initializing...");
+  if (dbExists && currentVersion !== EXPECTED_VERSION) {
+    console.log(`Database version (${currentVersion || "unknown"}) outdated, upgrading to ${EXPECTED_VERSION}...`);
+    fs.unlinkSync(DB_PATH);
+  } else {
+    console.log("First run, initializing...");
+  }
 
   // Generate AUTH_SECRET
   const secret = crypto.randomBytes(32).toString("hex");
@@ -69,6 +81,9 @@ async function main() {
   // Run seed data (use process.execPath to ensure portable Node.js works even without system Node)
   console.log("Writing initial data...");
   execSync(`"${process.execPath}" prisma/seed.js`, { cwd: ROOT, stdio: "inherit" });
+
+  // Write version marker to enable future auto-upgrades
+  fs.writeFileSync(VERSION_PATH, EXPECTED_VERSION);
 
   console.log("\nInit complete!");
   console.log("Account: admin");

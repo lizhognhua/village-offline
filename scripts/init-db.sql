@@ -419,6 +419,26 @@ CREATE TABLE "PartyActivity" (
 );
 
 -- CreateTable
+CREATE TABLE "PublicService" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "teamId" TEXT NOT NULL DEFAULT 'team-kaoshan',
+    "name" TEXT NOT NULL,
+    "phone" TEXT NOT NULL DEFAULT '',
+    "requestType" TEXT NOT NULL DEFAULT '其他',
+    "description" TEXT NOT NULL,
+    "status" TEXT NOT NULL DEFAULT '待处理',
+    "handlerNote" TEXT NOT NULL DEFAULT '',
+    "handledById" TEXT NOT NULL DEFAULT '',
+    "handledAt" DATETIME,
+    "staffIds" TEXT NOT NULL DEFAULT '',
+    "staffOther" TEXT NOT NULL DEFAULT '',
+    "photos" TEXT NOT NULL DEFAULT '',
+    "tags" TEXT NOT NULL DEFAULT '',
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL
+);
+
+-- CreateTable
 CREATE TABLE "AccountabilityRecord" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "taskType" INTEGER NOT NULL,
