@@ -136,6 +136,54 @@
 | 如何备份？ | 系统设置 → 一键备份，或直接复制 `data/` 文件夹 |
 | 多人同时用？ | 一台电脑启动服务，局域网内其他电脑通过 IP 访问 |
 
+## 项目结构
+
+```
+village-offline/
+├── prisma/                    数据库
+│   ├── schema.prisma          表结构定义（Family、Visit、PartyMember 等 30+ 张表）
+│   └── seed.ts                开发用 seed 数据脚本
+├── public/                    静态资源
+│   ├── uploads/               用户上传的照片、附件（运行时生成）
+│   ├── images/                系统图标
+│   └── manifest.json          PWA 配置
+├── screenshots/               README 功能截图（仅 GitHub 展示用，非系统文件）
+├── scripts/                   系统脚本
+│   ├── setup.js               ★ 首次运行初始化 — 创建数据库、生成 AUTH_SECRET、写入 seed 数据
+│   ├── init-db.sql            预生成的建表 SQL（setup.js 调用）
+│   ├── build-portable.bat     离线版打包脚本 — 构建 → 复制 standalone → 生成 zip
+│   └── docker-entrypoint.sh   Docker 容器启动自检 — 验证 uploads 目录可写
+├── src/                       源代码（Next.js App Router）
+│   ├── app/                   页面路由（/login、/dashboard、/village、/visits …）
+│   │   ├── api/               ★ 后端 API（备份恢复、数据导入、村情统计、走访 CRUD …）
+│   │   ├── dashboard/         仪表盘 + 系统设置
+│   │   ├── village/           村情概况 + 农户管理
+│   │   ├── visits/            走访慰问
+│   │   ├── party/             党建专栏
+│   │   ├── diary/             驻村日记
+│   │   └── …                 其他功能模块
+│   ├── components/            React 组件（侧边栏、布局、导入、设置面板）
+│   ├── lib/                   核心工具库
+│   │   ├── auth-utils.ts      登录验证、权限校验（requireAuth / requireAdmin）
+│   │   ├── backup.ts          ★ 备份/恢复逻辑 — 打包 village.db + uploads 为 zip
+│   │   ├── import-templates.ts 数据导入 Excel 模板生成（含 12 标签白名单）
+│   │   ├── prisma.ts          Prisma 客户端实例
+│   │   └── upload.ts          文件上传工具
+│   └── middleware.ts          路由中间件（鉴权拦截）
+├── .env.example               环境变量模板（复制为 .env 后修改）
+├── .gitignore                 Git 忽略规则（node_modules、.next、data、uploads）
+├── CLAUDE.md                  ★ AI 开发助手的项目上下文文件（给 Claude Code 看的，非系统文件）
+├── next.config.mjs            Next.js 构建配置（standalone 输出模式）
+├── package.json               项目名称、版本、npm 依赖列表
+├── package-lock.json          依赖版本锁定（自动生成，勿手动修改）
+├── tailwind.config.ts         Tailwind CSS 主题色、字体配置
+├── tsconfig.json              TypeScript 编译选项
+├── ★使用说明-请先读我★.txt       用户使用说明（打包进 zip，解压后用户先看这个）
+├── 安装须知.txt                安装注意事项 + 常见问题解答（打包进 zip）
+├── 启动系统.bat                ★ Windows 启动脚本 — 双击运行系统（调用 nodejs/node.exe）
+└── 系统自检.bat                ★ 环境检测脚本 — 检查端口、磁盘空间、Node.js 可用性
+```
+
 ## 技术栈
 
 Next.js 14 · TypeScript · Prisma · SQLite · NextAuth.js · Tailwind CSS
