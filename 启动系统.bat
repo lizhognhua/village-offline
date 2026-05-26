@@ -1,8 +1,9 @@
 @echo off
 chcp 65001 >nul 2>&1
+set NODE_SKIP_PLATFORM_CHECK=1
 cd /d "%~dp0"
 set L=%~dp0startup.log
-echo Village System V1.8 - Startup Log > %L%
+echo Village System V1.9 - Startup Log > %L%
 echo ======================================== >> %L%
 echo Time: 2026/05/25 周一 10:39:19.89 >> %L%
 for /f "tokens=2 delims=[]" %%A in ('ver') do echo Windows: %%A >> %L%

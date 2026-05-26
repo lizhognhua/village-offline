@@ -38,6 +38,7 @@ export default function VillagePage() {
   var [page, setPage] = useState(1);
   var [total, setTotal] = useState(0);
   var [totalPages, setTotalPages] = useState(0);
+  var [villageName, setVillageName] = useState("");
   var [cat, setCat] = useState("全部");
   var [search, setSearch] = useState("");
   var limit = 25;
@@ -63,6 +64,7 @@ export default function VillagePage() {
   };
 
   useEffect(function() { loadFamilies(); }, [page, cat, selectedGroup]);
+  useEffect(function() { fetch("/api/team/profile").then(function(r) { return r.json(); }).then(function(d) { setVillageName(d?.team?.villageName || ""); }).catch(function() {}); }, []);
 
   var handleSearch = function() { setPage(1); loadFamilies(); };
 
@@ -70,7 +72,7 @@ export default function VillagePage() {
     <div className="space-y-5">
       {/* Title — centered */}
       <div className="text-center py-4">
-        <h1 className="text-2xl font-bold text-gray-900">靠山村概况</h1>
+        <h1 className="text-2xl font-bold text-gray-900">{villageName || "村情"}概况</h1>
         <a href="/" className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-primary-600 mt-2 transition-colors">
           <ChevronLeft className="w-4 h-4" /> 返回主页
         </a>

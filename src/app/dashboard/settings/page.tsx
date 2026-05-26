@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { Settings, Save, Users, MapPin, Building, Info, Plus, X, Pencil, Trash2, Check, Key, Navigation, RefreshCw, Database, Upload } from "lucide-react";
+import { Settings, Save, Users, MapPin, Building, Info, Plus, X, Pencil, Trash2, Check, Key, Navigation, RefreshCw, Database, Upload, Bot } from "lucide-react";
 
 const TABS = [
   { key: "basic", label: "基本信息", icon: Info },
@@ -13,6 +13,7 @@ const TABS = [
   { key: "gps", label: "GPS 定位", icon: Navigation },
   { key: "backup", label: "数据备份", icon: Database },
   { key: "upgrade", label: "系统升级", icon: Upload },
+  { key: "ai", label: "AI 设置", icon: Bot },
 ];
 
 export default function SettingsPage() {
@@ -52,6 +53,7 @@ export default function SettingsPage() {
       {tab === "gps" && <GpsSettings />}
       {tab === "backup" && <BackupSettings />}
       {tab === "upgrade" && <UpgradeSettings />}
+      {tab === "ai" && <AiSettings />}
     </div>
   );
 }
@@ -218,8 +220,7 @@ function GroupSettings() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(editId ? { id: editId, ...body } : body),
       });
-      if (r.ok) { load(); reset(); }
-      else { const d = await r.json().catch(() => ({})); setError(d.error || "保存失败"); }
+      if (r.ok) { load(); reset(); } else { const d = await r.json().catch(() => ({ error: "保存失败" })); alert(d.error || "保存失败"); }
     } catch { setError("网络错误"); }
   };
 
@@ -501,6 +502,66 @@ function ApiKeySettings() {
         </div>
       )}
     </div>
+  );
+}
+
+// ========== AI 设置 ==========
+
+function AiSettings() {
+  const [keys, setKeys] = useState<Record<string, string>>({});
+  const [saving, setSaving] = useState(false);
+  const [msg, setMsg] = useState("");
+
+  useEffect(() => {
+    fetch("/api/settings").then(r => r.json()).then(setKeys).catch(() => {});
+  }, []);
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault(); setSaving(true);
+    const fd = new FormData(e.target as HTMLFormElement);
+    const data: Record<string, string> = {};
+    for (const [k, v] of fd.entries()) data[k] = v as string;
+    const r = await fetch("/api/settings", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
+    if (r.ok) { setMsg("保存成功"); setTimeout(() => setMsg(""), 5000); }
+    else setMsg("保存失败");
+    setSaving(false);
+  };
+
+  return (
+    <form onSubmit={handleSave} className="bg-white rounded-xl border shadow-sm p-6 space-y-4">
+      <h2 className="text-lg font-semibold text-gray-800">AI 智能笔杆子 设置</h2>
+      <p className="text-xs text-gray-500">配置大模型 API Key，安全存储在本地数据库中。</p>
+      <div className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">模型服务商</label>
+          <select name="ai_provider" defaultValue={keys.ai_provider || ""}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+            <option value="">— 请选择 —</option>
+            <option value="deepseek">DeepSeek（推荐，便宜好用）</option>
+            <option value="qwen">通义千问（阿里云，有免费额度）</option>
+          </select>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">API Key</label>
+          <input name="ai_api_key" defaultValue={keys.ai_api_key || ""} type="password"
+            placeholder="sk-xxxxxxxxxxxxxxxxxxxxxxxx"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+          <p className="text-xs text-gray-400 mt-1">申请: platform.deepseek.com 或 dashscope.aliyun.com</p>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">模型名称（可选）</label>
+          <input name="ai_model" defaultValue={keys.ai_model || ""}
+            placeholder={keys.ai_provider === "qwen" ? "qwen-plus" : "deepseek-chat"}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+        </div>
+      </div>
+      <div className="flex items-center gap-3 pt-2">
+        <button type="submit" disabled={saving} className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 disabled:opacity-50">
+          <Save className="w-4 h-4" /> {saving ? "保存中..." : "保存"}
+        </button>
+        {msg && <span className="text-sm text-green-600">{msg}</span>}
+      </div>
+    </form>
   );
 }
 

@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, FolderArchive, Map, Footprints, Heart, BookOpen, Wheat, Kanban, ChevronLeft, ChevronRight, Flag, MapPin, ImageIcon, BarChart3, Settings } from "lucide-react";
+import { LayoutDashboard, FolderArchive, Map, Footprints, Heart, BookOpen, Wheat, Kanban, ChevronLeft, ChevronRight, Flag, MapPin, ImageIcon, BarChart3, Settings, PenLine } from "lucide-react";
 import { useSession } from "next-auth/react";
 
 const items = [
@@ -15,6 +15,7 @@ const items = [
   { i: Heart, l: "百姓办事", h: "/public-service" },
   { i: Wheat, l: "产业管理", h: "/industries" },
   { i: Kanban, l: "任务看板", h: "/projects" },
+  { i: PenLine, l: "AI 笔杆子", h: "/ai-writer" },
   { i: FolderArchive, l: "文件档案", h: "/archive" },
   { i: ImageIcon, l: "相册管理", h: "/dashboard/albums" },
   { i: BarChart3, l: "履职全景", h: "/accountability" },

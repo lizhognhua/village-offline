@@ -52,6 +52,7 @@ export async function PUT(req: NextRequest) {
       where: { id: body.id },
       data: {
         ...(body.name !== undefined && { name: body.name }),
+        ...(body.type !== undefined && { type: body.type }),
         ...(body.sortOrder !== undefined && { sortOrder: parseInt(body.sortOrder) || 0 }),
       },
     });
