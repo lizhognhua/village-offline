@@ -75,9 +75,9 @@ export default function PublicServicePage() {
     setUploading(true);
     try {
       const fd = new FormData(); fd.append("file", file);
-      const resp = await fetch("/api/archive/upload", { method: "POST", body: fd });
+      const resp = await fetch("/api/photos/upload", { method: "POST", body: fd });
       const data = await resp.json();
-      if (data.success && data.document) setter(`/api/paperless/download/${data.document.id}`);
+      if (data.success && data.url) setter(data.url);
     } catch {}
     setUploading(false);
     if (fileRef.current) fileRef.current.value = "";
@@ -319,7 +319,12 @@ export default function PublicServicePage() {
                     style={{ display: "flex", alignItems: "center", gap: 4, padding: "5px 10px", border: "1px solid #e2e8f0", borderRadius: 6, background: "#fff", cursor: "pointer", fontSize: "0.7rem", color: "#475569" }}>
                     <Upload style={{ width: 13, height: 13 }} /> {uploading ? "上传中..." : form.photos ? "已上传 ✓" : "上传照片"}
                   </button>
-                  {form.photos && <button type="button" onClick={() => setForm({ ...form, photos: "" })} style={{ padding: "2px 6px", border: "none", background: "#fef2f2", color: "#dc2626", borderRadius: 4, cursor: "pointer", fontSize: "0.6rem" }}>移除</button>}
+                  {form.photos && (
+                    <>
+                      <img src={form.photos} alt="预览" style={{ width: 48, height: 48, objectFit: "cover", borderRadius: 4, border: "1px solid #e2e8f0", cursor: "pointer" }} onClick={() => window.open(form.photos, "_blank")} />
+                      <button type="button" onClick={() => setForm({ ...form, photos: "" })} style={{ padding: "2px 6px", border: "none", background: "#fef2f2", color: "#dc2626", borderRadius: 4, cursor: "pointer", fontSize: "0.6rem" }}>移除</button>
+                    </>
+                  )}
                 </div>
 
                 <button type="submit" disabled={submitting} style={{ padding: "8px 20px", background: submitting ? "#94a3b8" : "#2563eb", color: "#fff", border: "none", borderRadius: 6, cursor: submitting ? "not-allowed" : "pointer", fontSize: "0.8rem", fontWeight: 600, display: "flex", alignItems: "center", gap: 6 }}>
@@ -356,7 +361,7 @@ export default function PublicServicePage() {
                     <div style={{ display: "flex", flexWrap: "wrap", gap: 2, marginBottom: 3 }}>{members.map(m => <button key={m.id} type="button" onClick={() => toggleStaff(editForm, setEditForm, m.id)} style={{ padding: "2px 6px", borderRadius: 3, border: `1px solid ${(editForm.staffIds || []).includes(m.id) ? "#2563eb" : "#e2e8f0"}`, background: (editForm.staffIds || []).includes(m.id) ? "#eff6ff" : "#fff", color: (editForm.staffIds || []).includes(m.id) ? "#2563eb" : "#64748b", fontSize: "0.62rem", cursor: "pointer" }}>{m.name}</button>)}</div>
                     <input value={editForm.staffOther || ""} onChange={e => setEditForm({ ...editForm, staffOther: e.target.value })} placeholder="其他" style={{ width: "100%", padding: "3px 6px", border: "1px solid #e2e8f0", borderRadius: 4, fontSize: "0.7rem", boxSizing: "border-box" }} /></div>
                   <div style={{ marginBottom: 8 }}><label style={{ fontSize: "0.62rem", color: "#94a3b8", display: "block" }}>办事内容</label><textarea value={editForm.description} onChange={e => setEditForm({ ...editForm, description: e.target.value })} rows={2} style={{ width: "100%", padding: "4px 6px", border: "1px solid #e2e8f0", borderRadius: 4, fontSize: "0.75rem", boxSizing: "border-box", resize: "vertical" }} /></div>
-                  <div style={{ marginBottom: 8, display: "flex", gap: 6 }}><input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={() => handleUpload(url => setEditPhotos(url))} /><button type="button" onClick={() => fileRef.current?.click()} disabled={uploading} style={{ padding: "3px 8px", border: "1px solid #e2e8f0", borderRadius: 4, background: "#fff", cursor: "pointer", fontSize: "0.62rem" }}><Upload style={{ width: 11, height: 11, display: "inline" }} /> {editPhotos ? "已上传" : "照片"}</button>{editPhotos && <button type="button" onClick={() => setEditPhotos("")} style={{ padding: "2px 5px", border: "none", background: "#fef2f2", color: "#dc2626", borderRadius: 4, cursor: "pointer", fontSize: "0.58rem" }}>移除</button>}</div>
+                  <div style={{ marginBottom: 8, display: "flex", alignItems: "center", gap: 6 }}><input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={() => handleUpload(url => setEditPhotos(url))} /><button type="button" onClick={() => fileRef.current?.click()} disabled={uploading} style={{ padding: "3px 8px", border: "1px solid #e2e8f0", borderRadius: 4, background: "#fff", cursor: "pointer", fontSize: "0.62rem" }}><Upload style={{ width: 11, height: 11, display: "inline" }} /> {editPhotos ? "已上传" : "照片"}</button>{editPhotos && <><img src={editPhotos} alt="预览" style={{ width: 36, height: 36, objectFit: "cover", borderRadius: 3, border: "1px solid #e2e8f0", cursor: "pointer" }} onClick={() => window.open(editPhotos, "_blank")} /><button type="button" onClick={() => setEditPhotos("")} style={{ padding: "2px 5px", border: "none", background: "#fef2f2", color: "#dc2626", borderRadius: 4, cursor: "pointer", fontSize: "0.58rem" }}>移除</button></>}</div>
                   <div style={{ display: "flex", gap: 6 }}><button onClick={() => handleSaveEdit(item.id)} disabled={submitting} style={{ padding: "4px 12px", background: "#2563eb", color: "#fff", border: "none", borderRadius: 4, cursor: "pointer", fontSize: "0.7rem", fontWeight: 600 }}>{submitting ? "保存中..." : "保存"}</button><button onClick={() => setEditingId(null)} style={{ padding: "4px 10px", border: "1px solid #e2e8f0", borderRadius: 4, background: "#fff", cursor: "pointer", fontSize: "0.7rem" }}>取消</button></div>
                 </div>
               );
@@ -379,7 +384,7 @@ export default function PublicServicePage() {
                 </div>
                 <div style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.description}</div>
                 <div style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontSize: "0.62rem", color: "#64748b" }}>{allStaff || "-"}</div>
-                <div>{item.photos ? <Camera style={{ width: 12, height: 12, color: "#94a3b8" }} /> : <span style={{ color: "#cbd5e1" }}>—</span>}</div>
+                <div>{item.photos ? <span style={{ cursor: "pointer" }} onClick={(e) => { e.stopPropagation(); window.open(item.photos, "_blank"); }} title="点击查看照片"><Camera style={{ width: 12, height: 12, color: "#2563eb" }} /></span> : <span style={{ color: "#cbd5e1" }}>—</span>}</div>
                 <div style={{ fontSize: "0.62rem", color: "#94a3b8" }}>{item.createdAt?.slice(0, 10)}</div>
                 <div><button onClick={(e) => { e.stopPropagation(); startEdit(item); }} style={{ padding: "2px 6px", border: "1px solid #e2e8f0", borderRadius: 3, background: "#fff", cursor: "pointer", fontSize: "0.58rem", color: "#64748b" }}><Edit3 style={{ width: 9, height: 9, display: "inline" }} /> 编辑</button></div>
               </div>

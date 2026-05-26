@@ -37,7 +37,7 @@ export async function GET() {
       prisma.teamMember.count({ where: { isActive: true } }),
       prisma.industry.count({ where: {} }),
       prisma.announcement.count({ where: { isActive: true, OR: [{ expiresAt: null }, { expiresAt: { gte: new Date() } }] } }),
-      prisma.publicService.count({ where: { teamId, status: "待处理" } }),
+      prisma.publicService.count({ where: { status: "待处理" } }),
       prisma.householdRecord.findMany({
         where: {},
         take: 6, orderBy: { createdAt: "desc" },
@@ -53,8 +53,8 @@ export async function GET() {
         select: { id: true, title: true, date: true, author: { select: { name: true } } },
       }),
       prisma.family.findMany({ where: {}, select: { population: true } }),
-      prisma.family.findMany({ where: { teamId, familyAttr: { contains: "脱贫户" } }, select: { population: true } }),
-      prisma.family.findMany({ where: { teamId, familyAttr: { contains: "监测户" } }, select: { population: true } }),
+      prisma.family.findMany({ where: { familyAttr: { contains: "脱贫户" } }, select: { population: true } }),
+      prisma.family.findMany({ where: { familyAttr: { contains: "监测户" } }, select: { population: true } }),
       prisma.project.count({ where: { status: "completed" } }),
       prisma.project.count({ where: { status: "active" } }),
     ]);
@@ -101,7 +101,8 @@ export async function GET() {
         id: d.id, date: d.date, title: d.title, authorName: d.author?.name || "未知",
       })),
     });
-  } catch {
+  } catch (err) {
+    console.error("dashboard/stats error:", err);
     return NextResponse.json({ error: "服务器内部错误" }, { status: 500 });
   }
 }

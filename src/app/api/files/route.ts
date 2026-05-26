@@ -73,7 +73,14 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    return NextResponse.json({ success: true, file: doc });
+    return NextResponse.json({
+      success: true,
+      docId: doc.id,
+      title: doc.title,
+      fileName: file.name,
+      downloadUrl: `/api/files/${doc.id}`,
+      file: doc
+    });
   } catch (error: any) {
     return NextResponse.json({ error: "服务器内部错误" }, { status: 500 });
   }

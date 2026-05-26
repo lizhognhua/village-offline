@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET(req: NextRequest) {
   try {
-    const [profile, totalFamilies, totalMembers, recentVisits, activeProjects, attrCounts] = await Promise.all([
+    const [profile, totalFamilies, totalMembers, recentVisits, activeProjects, attrCounts, populationSum] = await Promise.all([
       prisma.villageProfile.findFirst({ orderBy: { updatedAt: "desc" } }),
       prisma.family.count(),
       prisma.familyMember.count(),
@@ -13,6 +13,7 @@ export async function GET(req: NextRequest) {
         by: ["familyAttr"],
         _count: { id: true },
       }),
+      prisma.family.aggregate({ _sum: { population: true } }),
     ]);
 
     const attrMap: Record<string, number> = {};
@@ -23,7 +24,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       stats: {
         households: totalFamilies,
-        population: totalMembers,
+        population: populationSum._sum.population ?? 0,
         cultivatedLand: profile?.cultivatedLand ?? 0,
         totalFamilies,
         totalMembers,

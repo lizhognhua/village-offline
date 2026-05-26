@@ -24,11 +24,15 @@ export default function ArchiveUploadPage() {
       const r = await fetch("/api/files", { method: "POST", body: form });
       const d = await r.json();
       if (d.success) {
-        setUploadMsg("上传成功！");
+        setUploadMsg(`上传成功！文件：${d.fileName || d.title || "未知"}`);
         setUploadOk(true);
+        // Keep the form data but clear the file input
         setFiles([]);
-        (e.target as HTMLFormElement).reset();
-        setTimeout(function() { setUploadMsg(""); }, 5000);
+        const fileInput = (e.target as HTMLFormElement).querySelector('input[type="file"]') as HTMLInputElement;
+        if (fileInput) fileInput.value = "";
+        // Don't reset the whole form — keep title/category for next upload
+        // Auto-hide success msg after 8s
+        setTimeout(function() { setUploadMsg(""); }, 8000);
       } else {
         setUploadMsg("失败: " + (d.error || "未知错误"));
         setUploadOk(false);

@@ -9,19 +9,15 @@ export async function GET() {
   const a = await requireAuth();
   if (a.error) return a.error;
 
-  const teamId = a.session.user.teamId || "";
-  const role = a.session.user.role;
-  const teamFilter = role !== "superadmin" ? { teamId } : {};
-
   try {
     const [total, pending, processing, resolved, byType] = await Promise.all([
-      prisma.publicService.count({ where: teamFilter }),
-      prisma.publicService.count({ where: { ...teamFilter, status: "待处理" } }),
-      prisma.publicService.count({ where: { ...teamFilter, status: "处理中" } }),
-      prisma.publicService.count({ where: { ...teamFilter, status: "已解决" } }),
+      prisma.publicService.count({ where: {} }),
+      prisma.publicService.count({ where: { status: "待处理" } }),
+      prisma.publicService.count({ where: { status: "处理中" } }),
+      prisma.publicService.count({ where: { status: "已解决" } }),
       prisma.publicService.groupBy({
         by: ["requestType"],
-        where: teamFilter,
+        where: {},
         _count: true,
         orderBy: { _count: { requestType: "desc" } },
       }),

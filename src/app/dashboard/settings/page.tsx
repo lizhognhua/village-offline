@@ -62,11 +62,15 @@ export default function SettingsPage() {
 
 function BasicSettings() {
   const [settings, setSettings] = useState<Record<string, string>>({});
+  const [workStartDate, setWorkStartDate] = useState("");
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState("");
 
   useEffect(() => {
-    fetch("/api/settings").then(r => r.json()).then(setSettings).catch(() => {});
+    fetch("/api/settings").then(r => r.json()).then(d => {
+      setSettings(d);
+      if (d.workStartDate) setWorkStartDate(d.workStartDate);
+    }).catch(() => {});
   }, []);
 
   const handleSave = async (e: React.FormEvent) => {
@@ -116,7 +120,13 @@ function BasicSettings() {
         </div>
       </div>
       <div className="flex items-center gap-3 pt-2">
-        <button type="submit" disabled={saving} className="flex items-center gap-1.5 px-4 py-2 bg-primary-700 text-white rounded-lg text-sm hover:bg-primary-800 disabled:opacity-50">
+        <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">驻村开始日期</label>
+            <input type="date" name="workStartDate" defaultValue={workStartDate}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none" />
+          </div>
+          
+          <button type="submit" disabled={saving} className="flex items-center gap-1.5 px-4 py-2 bg-primary-700 text-white rounded-lg text-sm hover:bg-primary-800 disabled:opacity-50">
           <Save className="w-4 h-4" /> {saving ? "保存中..." : "保存"}
         </button>
         {msg && <span className="text-sm text-green-600">{msg}</span>}
@@ -182,7 +192,7 @@ function VillageProfileSettings() {
         ))}
       </div>
       <div className="flex items-center gap-3 pt-2">
-        <button type="submit" disabled={saving} className="flex items-center gap-1.5 px-4 py-2 bg-primary-700 text-white rounded-lg text-sm hover:bg-primary-800 disabled:opacity-50">
+          <button type="submit" disabled={saving} className="flex items-center gap-1.5 px-4 py-2 bg-primary-700 text-white rounded-lg text-sm hover:bg-primary-800 disabled:opacity-50">
           <Save className="w-4 h-4" /> {saving ? "保存中..." : "保存"}
         </button>
         {msg && <span className="text-sm text-green-600">{msg}</span>}
@@ -556,7 +566,7 @@ function AiSettings() {
         </div>
       </div>
       <div className="flex items-center gap-3 pt-2">
-        <button type="submit" disabled={saving} className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 disabled:opacity-50">
+          <button type="submit" disabled={saving} className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 disabled:opacity-50">
           <Save className="w-4 h-4" /> {saving ? "保存中..." : "保存"}
         </button>
         {msg && <span className="text-sm text-green-600">{msg}</span>}
@@ -633,7 +643,7 @@ function GpsSettings() {
         </div>
       </div>
       <div className="flex items-center gap-3 pt-2">
-        <button type="submit" disabled={saving} className="flex items-center gap-1.5 px-4 py-2 bg-primary-700 text-white rounded-lg text-sm hover:bg-primary-800 disabled:opacity-50">
+          <button type="submit" disabled={saving} className="flex items-center gap-1.5 px-4 py-2 bg-primary-700 text-white rounded-lg text-sm hover:bg-primary-800 disabled:opacity-50">
           <Save className="w-4 h-4" /> {saving ? "保存中..." : "保存"}
         </button>
         {msg && <span className="text-sm text-green-600">{msg}</span>}

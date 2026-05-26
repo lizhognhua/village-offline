@@ -10,7 +10,6 @@ export async function GET(req: NextRequest) {
   const a = await requireAuth();
   if (a.error) return a.error;
 
-  const teamId = a.session.user.teamId || "";
   const role = a.session.user.role;
   const { searchParams } = req.nextUrl;
   const status = searchParams.get("status") || "";
@@ -21,8 +20,6 @@ export async function GET(req: NextRequest) {
 
   try {
     const where: any = {};
-    // Sub-admins: only see own team
-    if (role !== "superadmin") where.teamId = teamId;
     if (status) where.status = status;
     if (requestType) where.requestType = requestType;
     if (tag) where.tags = { contains: tag };
@@ -47,22 +44,20 @@ export async function GET(req: NextRequest) {
 export async function POST(request: Request) {
   try {
     const body = sanitizeObject(await request.json());
-    const { name, phone, requestType, description, teamId, staffIds, staffOther, photos, tags, createdAt } = body;
+    const { name, phone, requestType, description, staffIds, staffOther, photos, tags, createdAt } = body;
 
     if (!name || !description) {
       return NextResponse.json({ error: "姓名和详细描述不能为空" }, { status: 400 });
     }
 
-    // Determine team - default to kaoshan if not specified
-    const targetTeam = teamId || "team-kaoshan";
-
+    // Offline single-team mode: always use default team
     const item = await prisma.publicService.create({
       data: {
         name: String(name),
         phone: String(phone || ""),
         requestType: String(requestType || "其他"),
         description: String(description),
-        teamId: targetTeam,
+        teamId: "team-kaoshan",
         staffIds: String(staffIds || ""),
         staffOther: String(staffOther || ""),
         photos: String(photos || ""),
@@ -91,12 +86,8 @@ export async function PUT(request: Request) {
     const existing = await prisma.publicService.findUnique({ where: { id } });
     if (!existing) return NextResponse.json({ error: "记录不存在" }, { status: 404 });
 
-    // Only superadmin or same-team admin can update
+    // Admin can update any record
     const role = a.session.user.role;
-    const userTeamId = a.session.user.teamId || "";
-    if (role !== "superadmin" && existing.teamId !== userTeamId) {
-      return NextResponse.json({ error: "无权操作" }, { status: 403 });
-    }
 
     const data: any = {};
     if (status) data.status = status;

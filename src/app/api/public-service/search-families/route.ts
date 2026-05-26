@@ -16,7 +16,6 @@ export async function GET(req: NextRequest) {
     // Search in family headName and familyMember name
     const families = await prisma.family.findMany({
       where: {
-        teamId: a.session.user.teamId || "team-kaoshan",
         headName: { contains: q },
       },
       select: { headName: true, phone: true },
@@ -26,7 +25,6 @@ export async function GET(req: NextRequest) {
     const members = await prisma.familyMember.findMany({
       where: {
         name: { contains: q },
-        family: { teamId: a.session.user.teamId || "team-kaoshan" },
       },
       select: { name: true, phone: true, family: { select: { headName: true } } },
       take: 5,
