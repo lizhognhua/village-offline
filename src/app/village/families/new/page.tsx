@@ -136,12 +136,21 @@ export default function NewFamilyPage() {
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">农户属性</label>
-            <select value={form.familyAttr} onChange={function(e) { setForm(function(f) { return {...f, familyAttr: e.target.value}; }); }}
-              className="w-full border rounded-lg px-3 py-2 text-sm">
-              <option value="">请选择</option>
-              <option value="一般农户">一般农户</option><option value="脱贫户">脱贫户</option>
-              <option value="监测户">监测户</option><option value="低保户">低保户</option><option value="五保户">五保户</option>
-            </select>
+            <div className="space-y-2">
+              <p className="text-xs text-gray-500 font-medium">户属性（可多选）</p>
+              <div className="flex flex-wrap gap-2">
+                {["一般农户","脱贫户","监测户","低保户","五保户","党员","村委会成员","高龄老人","赡养儿童","重疾重病","残疾","丧失劳动能力"].map(function(a) {
+                  var selected = (form.familyAttr || "").split(",").filter(Boolean);
+                  var isChecked = selected.includes(a);
+                  return <label key={a} className="flex items-center gap-1.5 text-sm cursor-pointer">
+                    <input type="checkbox" checked={isChecked} onChange={function() {
+                      var updated = isChecked ? selected.filter(function(x) { return x !== a; }) : selected.concat([a]);
+                      setForm(function(f) { return {...f, familyAttr: updated.join(",")}; });
+                    }} className="rounded" /> {a}
+                  </label>;
+                })}
+              </div>
+            </div>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">居住状况</label>

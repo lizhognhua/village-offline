@@ -40,6 +40,28 @@ export default function FamilyDetail() {
   var [newFileNames, setNewFileNames] = useState<string[]>([]);
   // 家庭成员详情弹窗
   var [selectedMember, setSelectedMember] = useState<any>(null);
+  var [showMemberForm, setShowMemberForm] = useState(false);
+  var [editMemberId, setEditMemberId] = useState<string | null>(null);
+  var [memberForm, setMemberForm] = useState({ name: "", relation: "", gender: "", idCard: "", phone: "", birthDate: "", education: "", occupation: "", healthStatus: "", healthNote: "" });
+  var [memberSaving, setMemberSaving] = useState(false);
+
+  // 家庭成员增删改
+  var openAddMember = function() { setEditMemberId(null); setMemberForm({ name: "", relation: "", gender: "", idCard: "", phone: "", birthDate: "", education: "", occupation: "", healthStatus: "", healthNote: "" }); setShowMemberForm(true); };
+  var openEditMember = function(m: any) { setEditMemberId(m.id); setMemberForm({ name: m.name || "", relation: m.relation || "", gender: m.gender || "", idCard: m.idCard || "", phone: m.phone || "", birthDate: m.birthDate ? new Date(m.birthDate).toISOString().slice(0,10) : "", education: m.education || "", occupation: m.occupation || "", healthStatus: m.healthStatus || "", healthNote: m.healthNote || "" }); setShowMemberForm(true); };
+  var saveMember = async function() {
+    if (!memberForm.name || !memberForm.relation) { alert("请填写姓名和与户主关系"); return; }
+    setMemberSaving(true);
+    var url = editMemberId ? "/api/village/families/" + f.id + "/members/" + editMemberId : "/api/village/families/" + f.id + "/members";
+    var r = await fetch(url, { method: editMemberId ? "PATCH" : "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(memberForm) });
+    if (r.ok) { setShowMemberForm(false); loadData(); }
+    else { var d = await r.json().catch(function() { return { error: "操作失败" }; }); alert(d.error || "操作失败"); }
+    setMemberSaving(false);
+  };
+  var deleteMember = async function(memberId: string) {
+    if (!confirm("确定删除该成员？")) return;
+    var r = await fetch("/api/village/families/" + f.id + "/members?memberId=" + memberId, { method: "DELETE" });
+    if (r.ok) loadData(); else alert("删除失败");
+  };
 
   var loadData = async function() {
     setLoading(true);
@@ -246,9 +268,9 @@ export default function FamilyDetail() {
               <h1 className="text-2xl font-bold text-gray-900">{f.headName}</h1>
             )}
             <div className="flex items-center gap-2 mt-1 flex-wrap">
-              {f.familyAttr && (
-                <span className={"text-xs px-2 py-0.5 rounded " + (attrColor[f.familyAttr] || "bg-gray-100 text-gray-500")}>{f.familyAttr}</span>
-              )}
+              {f.familyAttr && f.familyAttr.split(",").filter(Boolean).map(function(attr: string) {
+                return <span key={attr} className={"text-xs px-2 py-0.5 rounded " + (attrColor[attr] || "bg-gray-100 text-gray-500")}>{attr}</span>;
+              })}
               <span className="text-sm text-gray-400">{f.group?.name || ""}</span>
             </div>
           </div>
@@ -282,13 +304,18 @@ export default function FamilyDetail() {
             icon={<MapPin className="w-3.5 h-3.5" />} span={2} />
           {editMode && (
             <div className="col-span-full">
-              <label className="block text-sm font-medium text-gray-700 mb-1">属性</label>
-              <select value={editForm.familyAttr} onChange={function(e) { setEditForm(function(prev:any) { return {...prev, familyAttr: e.target.value}; }); }}
-                className="border rounded-lg px-3 py-2 text-sm w-full md:w-48">
-                <option value="">请选择</option>
-                <option value="一般农户">一般农户</option><option value="脱贫户">脱贫户</option>
-                <option value="监测户">监测户</option><option value="低保户">低保户</option><option value="五保户">五保户</option>
-              </select>
+              <label className="block text-sm font-medium text-gray-700 mb-1">属性/标签（可多选）</label>
+              <div className="flex flex-wrap gap-2">
+                {["一般农户","脱贫户","监测户","低保户","五保户","党员","村委会成员","高龄老人","赡养儿童","重疾重病","残疾","丧失劳动能力"].map(function(a) {
+                  var sel = (editForm.familyAttr || "").split(",").filter(Boolean);
+                  return <label key={a} className="flex items-center gap-1 text-sm cursor-pointer">
+                    <input type="checkbox" checked={sel.includes(a)} onChange={function() {
+                      var u = sel.includes(a) ? sel.filter(function(x){return x!==a;}) : sel.concat([a]);
+                      setEditForm(function(p:any){return{...p,familyAttr:u.join(",")};});
+                    }} className="rounded" />{a}
+                  </label>;
+                })}
+              </div>
             </div>
           )}
         </div>
@@ -469,8 +496,8 @@ export default function FamilyDetail() {
         )}
       </div>
 
-      {/* Members Card */}
-      {f.members && f.members.length > 0 && (
+      
+      {true && (
         <div className="bg-white rounded-xl border shadow-sm p-6">
           <h2 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
             <Users className="w-4 h-4 text-primary-600" /> 家庭成员 ({f.members.length}人)
@@ -479,7 +506,11 @@ export default function FamilyDetail() {
             {f.members.map(function(m: any) {
               return (
                 <div key={m.id} className="bg-gray-50 rounded-lg p-3 text-center cursor-pointer hover:bg-primary-50 hover:border-primary-300 border border-transparent transition-colors"
-                  onClick={function() { setSelectedMember(m); }}>
+                  >
+                  <div className="flex justify-end gap-1 mb-1">
+                    <button onClick={function(e) { e.stopPropagation(); openEditMember(m); }} className="p-1 rounded hover:bg-blue-100 text-gray-400 hover:text-blue-600" title="编辑"><Pencil className="w-3 h-3" /></button>
+                    <button onClick={function(e) { e.stopPropagation(); deleteMember(m.id); }} className="p-1 rounded hover:bg-red-100 text-gray-400 hover:text-red-600" title="删除"><Trash2 className="w-3 h-3" /></button>
+                  </div>
                   <div className="w-10 h-10 mx-auto rounded-full bg-primary-100 flex items-center justify-center mb-1.5">
                     <span className="text-primary-700 font-bold text-sm">{m.name.charAt(0)}</span>
                   </div>
@@ -498,6 +529,9 @@ export default function FamilyDetail() {
               );
             })}
           </div>
+          <button onClick={openAddMember} className="mt-4 w-full py-2 border-2 border-dashed border-gray-300 rounded-lg text-sm text-gray-500 hover:border-primary-400 hover:text-primary-600 transition-colors flex items-center justify-center gap-1">
+            <Plus className="w-4 h-4" /> 添加家庭成员
+          </button>
         </div>
       )}
 
@@ -539,6 +573,37 @@ export default function FamilyDetail() {
           <button onClick={handleSave} disabled={saving}
             className="flex items-center gap-2 px-6 py-2.5 bg-primary-600 text-white rounded-lg text-sm hover:bg-primary-700 disabled:opacity-50 shadow-lg">
             <Save className="w-4 h-4" /> {saving ? "保存中..." : "保存修改"}
+          </button>
+        </div>
+      )}
+
+      {/* 家庭成员表单弹窗 */}
+      {showMemberForm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={function() { setShowMemberForm(false); }}>
+          <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto" onClick={function(e) { e.stopPropagation(); }}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-gray-900">{editMemberId ? "编辑成员" : "添加成员"}</h3>
+              <button onClick={function() { setShowMemberForm(false); }} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div><label className="block text-xs text-gray-500 mb-0.5">姓名 *</label><input value={memberForm.name} onChange={function(e) { setMemberForm(function(p) { return {...p, name: e.target.value}; }); }} className="w-full border rounded px-2.5 py-1.5 text-sm" /></div>
+              <div><label className="block text-xs text-gray-500 mb-0.5">与户主关系 *</label><select value={memberForm.relation} onChange={function(e) { setMemberForm(function(p) { return {...p, relation: e.target.value}; }); }} className="w-full border rounded px-2 py-1.5 text-sm"><option value="">请选择</option><option value="配偶">配偶</option><option value="子女">子女</option><option value="父母">父母</option><option value="其他">其他</option></select></div>
+              <div><label className="block text-xs text-gray-500 mb-0.5">性别</label><select value={memberForm.gender} onChange={function(e) { setMemberForm(function(p) { return {...p, gender: e.target.value}; }); }} className="w-full border rounded px-2 py-1.5 text-sm"><option value="">请选择</option><option value="男">男</option><option value="女">女</option></select></div>
+              <div><label className="block text-xs text-gray-500 mb-0.5">身份证号</label><input value={memberForm.idCard} onChange={function(e) { setMemberForm(function(p) { return {...p, idCard: e.target.value}; }); }} className="w-full border rounded px-2.5 py-1.5 text-sm" /></div>
+              <div><label className="block text-xs text-gray-500 mb-0.5">电话</label><input value={memberForm.phone} onChange={function(e) { setMemberForm(function(p) { return {...p, phone: e.target.value}; }); }} className="w-full border rounded px-2.5 py-1.5 text-sm" /></div>
+              <div><label className="block text-xs text-gray-500 mb-0.5">出生日期</label><input type="date" value={memberForm.birthDate} onChange={function(e) { setMemberForm(function(p) { return {...p, birthDate: e.target.value}; }); }} className="w-full border rounded px-2 py-1.5 text-sm" /></div>
+              <div><label className="block text-xs text-gray-500 mb-0.5">学历</label><input value={memberForm.education} onChange={function(e) { setMemberForm(function(p) { return {...p, education: e.target.value}; }); }} className="w-full border rounded px-2.5 py-1.5 text-sm" /></div>
+              <div><label className="block text-xs text-gray-500 mb-0.5">职业</label><input value={memberForm.occupation} onChange={function(e) { setMemberForm(function(p) { return {...p, occupation: e.target.value}; }); }} className="w-full border rounded px-2.5 py-1.5 text-sm" /></div>
+              <div><label className="block text-xs text-gray-500 mb-0.5">健康状况</label><input value={memberForm.healthStatus} onChange={function(e) { setMemberForm(function(p) { return {...p, healthStatus: e.target.value}; }); }} className="w-full border rounded px-2.5 py-1.5 text-sm" placeholder="健康/慢性病/重病/残疾" /></div>
+              <div className="col-span-2"><label className="block text-xs text-gray-500 mb-0.5">健康备注</label><input value={memberForm.healthNote} onChange={function(e) { setMemberForm(function(p) { return {...p, healthNote: e.target.value}; }); }} className="w-full border rounded px-2.5 py-1.5 text-sm" /></div>
+            </div>
+            <div className="flex justify-end gap-3 mt-4">
+              <button onClick={function() { setShowMemberForm(false); }} className="px-4 py-2 border rounded-lg text-sm">取消</button>
+              <button onClick={saveMember} disabled={memberSaving} className="px-4 py-2 bg-primary-600 text-white rounded-lg text-sm disabled:opacity-50">{memberSaving ? "保存中..." : "保存"}</button>
+            </div>
+          </div>
+          <button onClick={openAddMember} className="mt-4 w-full py-2 border-2 border-dashed border-gray-300 rounded-lg text-sm text-gray-500 hover:border-primary-400 hover:text-primary-600 transition-colors flex items-center justify-center gap-1">
+            <Plus className="w-4 h-4" /> 添加家庭成员
           </button>
         </div>
       )}
@@ -600,6 +665,9 @@ export default function FamilyDetail() {
               )}
             </div>
           </div>
+          <button onClick={openAddMember} className="mt-4 w-full py-2 border-2 border-dashed border-gray-300 rounded-lg text-sm text-gray-500 hover:border-primary-400 hover:text-primary-600 transition-colors flex items-center justify-center gap-1">
+            <Plus className="w-4 h-4" /> 添加家庭成员
+          </button>
         </div>
       )}
     </div>

@@ -2,15 +2,18 @@ import { requireAuth } from "@/lib/auth-utils";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   const a = await requireAuth();
   if (a.error) return a.error;
+  const teamId = (a.session as any).user?.teamId || "";
   try {
     const activities: { type: string; content: string; time: string }[] = [];
 
     const [recentVisits, recentCondolences, recentDiaries, recentRecords] = await Promise.all([
       prisma.visit.findMany({
-        where: {},
+        where: teamId ? { teamId } : {},
         take: 5,
         orderBy: { createdAt: "desc" },
         include: {
@@ -19,19 +22,19 @@ export async function GET() {
         },
       }),
       prisma.condolence.findMany({
-        where: {},
+        where: teamId ? { teamId } : {},
         take: 5,
         orderBy: { createdAt: "desc" },
         include: { family: { select: { headName: true } } },
       }),
       prisma.workDiary.findMany({
-        where: { isPublic: true },
+        where: teamId ? { teamId, isPublic: true } : { isPublic: true },
         take: 5,
         orderBy: { createdAt: "desc" },
         include: { author: { select: { name: true } } },
       }),
       prisma.householdRecord.findMany({
-        where: {},
+        where: teamId ? { teamId } : {},
         take: 5,
         orderBy: { recordDate: "desc" },
         include: { family: { select: { headName: true } } },

@@ -3,7 +3,7 @@ chcp 65001 >nul 2>&1
 set NODE_SKIP_PLATFORM_CHECK=1
 cd /d "%~dp0"
 set L=%~dp0startup.log
-echo Village System V1.9 - Startup Log > %L%
+echo Village System V2.0 - Startup Log > %L%
 echo ======================================== >> %L%
 echo Time: 2026/05/25 周一 10:39:19.89 >> %L%
 for /f "tokens=2 delims=[]" %%A in ('ver') do echo Windows: %%A >> %L%
@@ -43,7 +43,7 @@ set "DATABASE_URL=file:%DB_PATH%"
 echo [INFO] DB URL: %DATABASE_URL% >> %L%
 echo.
 echo ==============================================
-echo   Village System V1.8
+echo   Village System V2.0
 echo   LAN : http://%LOCAL_IP%:3000
 echo   Local: http://localhost:3000
 echo   Log : startup.log
@@ -53,7 +53,7 @@ echo Starting... Close this window to stop.
 echo.
 echo [START] http://%LOCAL_IP%:3000 >> %L%
 echo Status: STARTUP SUCCESS >> %L%
-title Village V1.8 - http://%LOCAL_IP%:3000
+title Village V2.0 - http://%LOCAL_IP%:3000
 set HOSTNAME=0.0.0.0
 start http://localhost:3000
 %NODE% server.js
