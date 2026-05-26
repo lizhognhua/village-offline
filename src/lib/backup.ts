@@ -73,7 +73,7 @@ export async function createBackup(): Promise<Buffer> {
   // 添加数据库
   const dbPath = join(DATA_DIR, DB_FILE);
   if (existsSync(dbPath)) {
-    zip.addLocalFile(dbPath, "", "data");
+    zip.addLocalFile(dbPath, "data");
   }
 
   // 添加上传文件目录

@@ -12,7 +12,7 @@ const ENV_PATH = path.join(ROOT, ".env");
 const SQL_PATH = path.join(__dirname, "init-db.sql");
 const VERSION_PATH = path.join(DATA_DIR, "version.txt");
 
-const EXPECTED_VERSION = "2.2";
+const EXPECTED_VERSION = "2.4";
 
 async function main() {
   console.log("Checking system status...");
