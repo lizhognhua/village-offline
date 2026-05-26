@@ -3,23 +3,21 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET(req: NextRequest) {
   try {
-    const [profile, totalFamilies, totalMembers, recentVisits, activeProjects, attrCounts, populationSum] = await Promise.all([
+    const [profile, totalFamilies, totalMembers, recentVisits, activeProjects,
+      poorHouseholds, monitoredHouseholds, dibaoHouseholds, wubaoHouseholds, normalHouseholds, populationSum] = await Promise.all([
       prisma.villageProfile.findFirst({ orderBy: { updatedAt: "desc" } }),
       prisma.family.count(),
       prisma.familyMember.count(),
       prisma.visit.count({ where: { visitDate: { gte: new Date(new Date().getFullYear(), 0, 1) } } }),
       prisma.industry.count(),
-      prisma.family.groupBy({
-        by: ["familyAttr"],
-        _count: { id: true },
-      }),
+      // Use contains for multi-tag support (e.g. "脱贫户,残疾" counts as both)
+      prisma.family.count({ where: { familyAttr: { contains: "脱贫户" } } }),
+      prisma.family.count({ where: { familyAttr: { contains: "监测户" } } }),
+      prisma.family.count({ where: { familyAttr: { contains: "低保户" } } }),
+      prisma.family.count({ where: { familyAttr: { contains: "五保户" } } }),
+      prisma.family.count({ where: { OR: [{ familyAttr: { contains: "一般农户" } }, { familyAttr: null }] } }),
       prisma.family.aggregate({ _sum: { population: true } }),
     ]);
-
-    const attrMap: Record<string, number> = {};
-    for (const row of attrCounts) {
-      if (row.familyAttr) attrMap[row.familyAttr] = row._count.id;
-    }
 
     return NextResponse.json({
       stats: {
@@ -30,11 +28,11 @@ export async function GET(req: NextRequest) {
         totalMembers,
         recentVisits,
         activeProjects,
-        poorHouseholds: attrMap["脱贫户"] ?? 0,
-        monitoredHouseholds: attrMap["监测户"] ?? 0,
-        dibaoHouseholds: attrMap["低保户"] ?? 0,
-        wubaoHouseholds: attrMap["五保户"] ?? 0,
-        normalHouseholds: attrMap["一般农户"] ?? 0,
+        poorHouseholds,
+        monitoredHouseholds,
+        dibaoHouseholds,
+        wubaoHouseholds,
+        normalHouseholds,
         partyMembers: profile?.partyMembers ?? 0,
         villageIncome: profile?.villageIncome ?? 0,
         operatingIncome: profile?.operatingIncome ?? 0,

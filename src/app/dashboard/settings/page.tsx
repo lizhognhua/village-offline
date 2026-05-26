@@ -2,7 +2,8 @@
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { Settings, Save, Users, MapPin, Building, Info, Plus, X, Pencil, Trash2, Check, Key, Navigation, RefreshCw, Database, Upload, Bot } from "lucide-react";
+import { Settings, Save, Users, MapPin, Building, Info, Plus, X, Pencil, Trash2, Check, Key, Navigation, RefreshCw, Database, Upload, Bot, FileSpreadsheet } from "lucide-react";
+import { ImportSettings } from "@/components/ImportSettings";
 
 const TABS = [
   { key: "basic", label: "基本信息", icon: Info },
@@ -14,6 +15,7 @@ const TABS = [
   { key: "backup", label: "数据备份", icon: Database },
   { key: "upgrade", label: "系统升级", icon: Upload },
   { key: "ai", label: "AI 设置", icon: Bot },
+  { key: "import", label: "数据导入", icon: FileSpreadsheet },
 ];
 
 export default function SettingsPage() {
@@ -54,6 +56,7 @@ export default function SettingsPage() {
       {tab === "backup" && <BackupSettings />}
       {tab === "upgrade" && <UpgradeSettings />}
       {tab === "ai" && <AiSettings />}
+      {tab === "import" && <ImportSettings />}
     </div>
   );
 }

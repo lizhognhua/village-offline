@@ -2,7 +2,6 @@
 
 import { useState, useCallback } from "react";
 import { PenLine, Sparkles, FileText, Copy, Download, Loader2, Upload, Table2, ChevronDown } from "lucide-react";
-import Link from "next/link";
 
 const TASK_TYPES = [
   { key: "summary", label: "📝 撰写工作总结/汇报材料" },
@@ -313,13 +312,6 @@ export default function AiWriterPage() {
               )}
             </button>
           )}
-          <Link
-            href="/ai-writer/import"
-            className="w-full py-2.5 border border-gray-200 text-gray-600 rounded-lg text-sm hover:bg-gray-50 flex items-center justify-center gap-2 transition-colors"
-          >
-            <Upload className="w-4 h-4" />
-            批量导入村民数据
-          </Link>
         </div>
       </div>
 
