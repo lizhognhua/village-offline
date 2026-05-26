@@ -115,4 +115,4 @@ Next.js 14 · TypeScript · Prisma · SQLite · NextAuth.js · Tailwind CSS
 
 ---
 
-黑龙江省机关事务管理局 &copy; 2026
+黑龙江省机关事务管理局驻村工作队 @2026
