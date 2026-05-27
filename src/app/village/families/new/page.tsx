@@ -107,7 +107,7 @@ export default function NewFamilyPage() {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1"><User className="w-4 h-4 inline mr-1" />户主姓名 *</label>
             <input value={form.headName} onChange={function(e) { setForm(function(f) { return {...f, headName: e.target.value}; }); }}
-              className="w-full border rounded-lg px-3 py-2 text-sm" />
+              className="w-full border rounded-lg px-3 py-2 text-sm" maxLength={20} />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">性别</label>
@@ -121,16 +121,16 @@ export default function NewFamilyPage() {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1"><Phone className="w-4 h-4 inline mr-1" />电话</label>
             <input value={form.headPhone} onChange={function(e) { setForm(function(f) { return {...f, headPhone: e.target.value}; }); }}
-              className="w-full border rounded-lg px-3 py-2 text-sm" />
+              className="w-full border rounded-lg px-3 py-2 text-sm" type="tel" maxLength={11} inputMode="numeric" placeholder="11位手机号，选填" />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">身份证号</label>
             <input value={form.headIdCard} onChange={function(e) { setForm(function(f) { return {...f, headIdCard: e.target.value}; }); }}
-              className="w-full border rounded-lg px-3 py-2 text-sm" />
+              className="w-full border rounded-lg px-3 py-2 text-sm" maxLength={18} placeholder="18位，末位可为X，选填" />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1"><Users className="w-4 h-4 inline mr-1" />人口</label>
-            <input type="number" min="1" value={form.population}
+            <input type="number" min="0" step="1" value={form.population}
               onChange={function(e) { setForm(function(f) { return {...f, population: e.target.value}; }); }}
               className="w-full border rounded-lg px-3 py-2 text-sm" />
           </div>

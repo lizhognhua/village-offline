@@ -67,7 +67,7 @@ export function Sidebar() {
       {!col && (
         <div className="p-4 border-t border-primary-800 text-xs text-primary-300">
           <p>驻村帮扶管理系统</p>
-          <p className="mt-1">V2.4</p>
+          <p className="mt-1">V2.6</p>
           <p className="mt-0.5 text-primary-400">本系统由省机关局驻村工作队开发@2026</p>
         </div>
       )}

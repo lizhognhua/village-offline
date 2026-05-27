@@ -19,12 +19,15 @@ export async function GET() {
     }
 
     const publicServiceTotal = await prisma.publicService.count({ where: {} });
+    const industryTotal = await prisma.industry.count({ where: {} });
+    const diaryTotal = await prisma.workDiary.count({ where: {} });
+    const visitTotal = await prisma.householdRecord.count({ where: {} });
 
     const dutyStats = {
-      "建强组织": (taskCounts[1] || 0) + (taskCounts[5] || 0) + (taskCounts[10] || 0),
-      "兴村富民": (taskCounts[4] || 0) + (taskCounts[6] || 0) + (taskCounts[7] || 0) + (taskCounts[8] || 0),
+      "建强组织": (taskCounts[1] || 0) + (taskCounts[5] || 0) + (taskCounts[10] || 0) + diaryTotal,
+      "兴村富民": (taskCounts[4] || 0) + (taskCounts[6] || 0) + (taskCounts[7] || 0) + (taskCounts[8] || 0) + industryTotal,
       "加强治理": (taskCounts[9] || 0),
-      "为民服务": (taskCounts[2] || 0) + (taskCounts[3] || 0) + publicServiceTotal,
+      "为民服务": (taskCounts[2] || 0) + (taskCounts[3] || 0) + publicServiceTotal + visitTotal,
     };
 
     const timeline = await prisma.accountabilityRecord.findMany({

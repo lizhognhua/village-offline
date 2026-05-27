@@ -95,11 +95,13 @@ export default function PublicServicePage() {
     if (searchTimer.current) clearTimeout(searchTimer.current);
     if (value.length < 1) { setSearchResults([]); setShowSearch(false); return; }
     searchTimer.current = setTimeout(() => {
-      fetch(`/api/public-service/search-families?q=${encodeURIComponent(value)}`)
-        .then(r => r.json()).then(d => {
-          setSearchResults(d || []);
-          setShowSearch((d || []).length > 0);
-        }).catch(() => {});
+      fetch("/api/public-service/search-families?q=" + encodeURIComponent(value))
+        .then(function(r) { if (!r.ok) throw new Error("API error"); return r.json(); })
+        .then(function(d) {
+          var results = Array.isArray(d) ? d : [];
+          setSearchResults(results);
+          setShowSearch(results.length > 0);
+        }).catch(function() { setSearchResults([]); setShowSearch(false); });
     }, 200);
   };
 
@@ -234,7 +236,7 @@ export default function PublicServicePage() {
                     <input required value={form.name} onChange={e => handleNameSearch(e.target.value)}
                       onFocus={() => { if (searchResults.length > 0) setShowSearch(true); }}
                       onBlur={() => setTimeout(() => setShowSearch(false), 200)}
-                      placeholder="输入姓名搜索..."
+                      placeholder="输入姓名搜索..." autoComplete="off"
                       style={{ width: "100%", padding: "7px", border: "1px solid #e2e8f0", borderRadius: 6, fontSize: "0.8rem", boxSizing: "border-box" }} />
                     {showSearch && searchResults.length > 0 && (
                       <div style={{ position: "absolute", top: "100%", left: 0, right: 0, background: "#fff", border: "1px solid #e2e8f0", borderRadius: 6, boxShadow: "0 4px 12px rgba(0,0,0,0.1)", zIndex: 10, maxHeight: 180, overflow: "auto" }}>

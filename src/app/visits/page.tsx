@@ -1,7 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Footprints, Heart, Plus, User, Search, ChevronLeft, ChevronRight, X, Calendar } from "lucide-react";
+import { Footprints, Heart, Plus, User, Users, Search, ChevronLeft, ChevronRight, X, Calendar, FileText } from "lucide-react";
+import { sanitizeHtml } from "@/lib/sanitize";
 
 type RecordItem = {
   id: string; type: string; recordDate: string; content: string;
@@ -22,7 +23,7 @@ function fmtShortDate(d: string) {
 export default function VisitsPage() {
   const [records, setRecords] = useState<RecordItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<"all" | "visit" | "condolence">("all");
+  const [tab, setTab] = useState<"all" | "visit" | "condolence" | "reception">("all");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
@@ -42,6 +43,7 @@ export default function VisitsPage() {
   const filtered = records.filter(r => {
     if (tab === "visit" && r.type !== "visit") return false;
     if (tab === "condolence" && r.type !== "condolence") return false;
+    if (tab === "reception" && r.type !== "reception") return false;
     if (search) return (r.family?.headName || "").includes(search);
     return true;
   });
@@ -86,6 +88,7 @@ export default function VisitsPage() {
             { key: "all" as const, label: "全部", icon: null },
             { key: "visit" as const, label: "👣 走访", icon: null },
             { key: "condolence" as const, label: "❤️ 慰问", icon: null },
+            { key: "reception" as const, label: "👥 来访", icon: null },
           ]).map(t => (
             <button key={t.key} onClick={() => { setTab(t.key); setPage(1); }}
               className={`px-3 py-1.5 text-xs rounded-full border transition-colors ${
@@ -118,8 +121,10 @@ export default function VisitsPage() {
                 <div className="flex items-center gap-1.5 mb-1">
                   {r.type === "visit" ? (
                     <span className="text-[10px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded-full font-medium">走访</span>
-                  ) : (
+                  ) : r.type === "condolence" ? (
                     <span className="text-[10px] bg-rose-100 text-rose-700 px-1.5 py-0.5 rounded-full font-medium">慰问</span>
+                  ) : (
+                    <span className="text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full font-medium">来访</span>
                   )}
                   <span className="text-[11px] text-gray-400 ml-auto">{fmtShortDate(r.recordDate)}</span>
                 </div>
@@ -130,7 +135,7 @@ export default function VisitsPage() {
                 {r.family.familyAttr && <span className={"text-[10px] px-1.5 py-0.5 rounded " + (attrColor[r.family.familyAttr] || "bg-gray-100 text-gray-600")}>{r.family.familyAttr}</span>}
                 {tags.length > 0 && <div className="flex flex-wrap gap-1 mt-1.5">{tags.map((t: string, i: number) => (<span key={i} className="text-[10px] bg-emerald-50 text-emerald-700 px-1.5 py-0.5 rounded-full">{t}</span>))}</div>}
                 {photos.length > 0 && <div className="flex gap-1 mt-1.5">{photos.slice(0, 2).map((ph: string, i: number) => <img key={i} src={ph} className="w-10 h-10 object-cover rounded border" onClick={(e) => { e.stopPropagation(); setViewPhoto(ph); }} />)}{photos.length > 2 && <span className="text-[10px] text-gray-400 self-center">+{photos.length - 2}</span>}</div>}
-                <p className="text-xs text-gray-500 line-clamp-2 mt-1.5">{r.content}</p>
+                <p className="text-xs text-gray-500 line-clamp-2 mt-1.5" dangerouslySetInnerHTML={{ __html: sanitizeHtml(r.content || "") }} />
               </div>
             );
           })}
@@ -156,8 +161,10 @@ export default function VisitsPage() {
               <h3 className="text-lg font-semibold flex items-center gap-2">
                 {detail.type === "visit" ? (
                   <><Footprints className="w-5 h-5 text-emerald-600" /> 走访详情</>
-                ) : (
+                ) : detail.type === "condolence" ? (
                   <><Heart className="w-5 h-5 text-red-500" /> 慰问详情</>
+                ) : (
+                  <><Users className="w-5 h-5 text-blue-500" /> 来访详情</>
                 )}
               </h3>
               <button onClick={() => setDetail(null)} className="text-gray-400 hover:text-gray-600 text-xl">&times;</button>
@@ -169,7 +176,7 @@ export default function VisitsPage() {
                 <div><span className="text-gray-500">走访人：</span><span>{detail.staff || "未知"}</span></div>
               </div>
               {(() => { const t = parseTags(detail.statusTags); return t.length > 0 ? <div><span className="text-gray-500">状态：</span><div className="flex flex-wrap gap-1 mt-1">{t.map((x: string, i: number) => <span key={i} className="text-xs bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full">{x}</span>)}</div></div> : null; })()}
-              <div><span className="text-gray-500">内容：</span><div className="bg-gray-50 rounded-lg p-3 whitespace-pre-wrap text-gray-700 mt-1">{detail.content}</div></div>
+              <div><span className="text-gray-500">内容：</span><div className="bg-gray-50 rounded-lg p-3 text-gray-700 mt-1 prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: sanitizeHtml(detail.content || "") }} /></div>
               {parsePhotos(detail.photos).length > 0 && (
                 <div>
                   <span className="text-gray-500">照片/视频（{parsePhotos(detail.photos).length}）：</span>
@@ -183,9 +190,14 @@ export default function VisitsPage() {
                 </div>
               )}
             </div>
-            <div className="mt-4 pt-3 border-t flex justify-end gap-2">
-              <button onClick={() => router.push("/visits/edit/" + detail.id)} className="text-xs px-3 py-1.5 bg-primary-50 text-primary-700 rounded-lg hover:bg-primary-100">编辑</button>
-              <button onClick={() => setConfirmDelete(detail.id)} className="text-xs px-3 py-1.5 bg-rose-50 text-rose-700 rounded-lg hover:bg-rose-100">删除</button>
+            <div className="mt-4 pt-3 border-t flex justify-between gap-2">
+              <button onClick={() => router.push("/accountability/task/2")} className="text-xs px-3 py-1.5 bg-amber-50 text-amber-700 rounded-lg hover:bg-amber-100 flex items-center gap-1">
+                <FileText className="w-3 h-3" /> 履职台账
+              </button>
+              <div className="flex gap-2">
+                <button onClick={() => router.push("/visits/edit/" + detail.id)} className="text-xs px-3 py-1.5 bg-primary-50 text-primary-700 rounded-lg hover:bg-primary-100">编辑</button>
+                <button onClick={() => setConfirmDelete(detail.id)} className="text-xs px-3 py-1.5 bg-rose-50 text-rose-700 rounded-lg hover:bg-rose-100">删除</button>
+              </div>
             </div>
           </div>
         </div>

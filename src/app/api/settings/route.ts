@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { requireAdmin } from "@/lib/auth-utils";
 import { prisma } from "@/lib/prisma";
+import { rules, clean } from "@/lib/validators";
 
 export const dynamic = "force-dynamic";
 
@@ -35,8 +36,15 @@ export async function PUT(req: NextRequest) {
 
   try {
     const body = await req.json();
-    for (const [key, value] of Object.entries(body)) {
+    const vErr = rules.settings(body);
+    if (vErr) return NextResponse.json({ error: vErr }, { status: 400 });
+
+    for (let [key, value] of Object.entries(body)) {
       if (typeof value !== "string") continue;
+      // 清理
+      if (key === "villageSecretary" || key === "teamName") value = clean.name(value) || "";
+      if (key === "villageName" || key === "township" || key === "shortName") value = clean.placeName(value) || "";
+      if (key === "secretaryPhone" || key === "contactPhone") value = clean.phone(value) || "";
       await prisma.systemConfig.upsert({
         where: { key },
         update: { value },

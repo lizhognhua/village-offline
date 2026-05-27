@@ -6,13 +6,15 @@ type Industry = {
   id: string; name: string; description: string | null; status: string;
   scale: string | null; startDate: string | null; icon: string | null;
   benefit: string | null; detail: string | null;
-  images: string | null; videos: string | null; links: string | null;
+  photos: string | null; videos: string | null; links: string | null;
 };
+
+const ICONS = ["🌾","🌽","🐄","🐓","🐟","🍎","🥬","🌸","🏭","🔧","🏪","💻","☀️","🏠","🚜","🌱"];
 
 const emptyForm = {
   name: "", description: "", status: "进行中", scale: "",
   startDate: "", benefit: "", detail: "",
-  icon: "🌾", images: "", videos: "", links: ""
+  icon: "🌾", photos: "[]", videos: "", links: ""
 };
 
 export default function IndustriesPage() {
@@ -42,7 +44,7 @@ export default function IndustriesPage() {
       name: ind.name, description: ind.description || "", status: ind.status,
       scale: ind.scale || "", startDate: ind.startDate?.split("T")[0] || "",
       benefit: ind.benefit || "", detail: ind.detail || "",
-      icon: ind.icon || "🌾", images: ind.images || "", videos: ind.videos || "", links: ind.links || ""
+      icon: ind.icon || "🌾", photos: ind.photos || "", videos: ind.videos || "", links: ind.links || ""
     });
     setShowForm(true);
   };
@@ -60,7 +62,7 @@ export default function IndustriesPage() {
       const body: any = {
         name: form.name.trim(), status: form.status, icon: form.icon,
         description: form.description, scale: form.scale, startDate: form.startDate || null,
-        benefit: form.benefit, detail: form.detail, images: form.images, videos: form.videos, links: form.links
+        benefit: form.benefit, detail: form.detail, photos: form.photos, videos: form.videos, links: form.links
       };
       const url = editing ? `/api/industries/${editing.id}` : "/api/industries";
       const method = editing ? "PATCH" : "POST";
@@ -84,12 +86,13 @@ export default function IndustriesPage() {
     try {
       const fd = new FormData();
       fd.append("file", file);
-      fd.append("album_id", "9"); // 驻村-工作活动
       const r = await fetch("/api/photos/upload", { method: "POST", body: fd });
       const d = await r.json();
-      if (d.url) {
-        const current = form.images ? form.images + "\n" + d.url : d.url;
-        setForm(f => ({...f, images: current}));
+      if (d.success || d.url) {
+        var imgUrl = d.url || ("/api/uploads/" + file.name);
+        var current = (function() { try { var arr = JSON.parse(form.photos || "[]"); return Array.isArray(arr) ? arr : []; } catch { return []; } })();
+        current.push(imgUrl);
+        setForm(function(f) { return {...f, photos: JSON.stringify(current)}; });
       } else {
         alert("上传失败: " + (d.error || "未知"));
       }
@@ -124,10 +127,10 @@ export default function IndustriesPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {data.map(ind => {
-            const imgs = (() => { try { return JSON.parse(ind.images||"[]"); } catch { return []; } })();
+            const imgs = (() => { try { return JSON.parse(ind.photos||"[]"); } catch { return []; } })();
             return (
               <div key={ind.id} className="bg-white rounded-xl border shadow-sm overflow-hidden hover:shadow-md transition-shadow">
-                {imgs[0] && <img src={imgs[0]} className="w-full h-40 object-cover" alt={ind.name} />}
+                {imgs[0] && <img src={imgs[0]} className="w-full h-24 object-contain bg-gray-50" alt={ind.name} />}
                 <div className="p-5">
                   <div className="flex items-center gap-2 mb-2">
                     <span className="text-2xl">{ind.icon || "🌾"}</span>
@@ -140,7 +143,7 @@ export default function IndustriesPage() {
                   {ind.description && <p className="text-sm text-gray-600 line-clamp-2 mb-3">{ind.description}</p>}
                   <div className="flex items-center justify-between">
                     <div className="flex gap-2 text-xs text-gray-400">
-                      {ind.images && <span><ImageIcon className="w-3 h-3 inline mr-0.5" />图片</span>}
+                      {ind.photos && <span><ImageIcon className="w-3 h-3 inline mr-0.5" />图片</span>}
                       {ind.links && <span><Link className="w-3 h-3 inline mr-0.5" />链接</span>}
                     </div>
                     <button onClick={() => openEdit(ind)} className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-700 font-medium">
@@ -171,7 +174,13 @@ export default function IndustriesPage() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">图标</label>
-                  <input type="text" value={form.icon} onChange={e => setForm(f => ({...f, icon: e.target.value}))} className="w-full border rounded-lg px-3 py-2 text-sm" />
+                  <div className="flex flex-wrap gap-1 mb-1">
+                    {ICONS.map(function(ico) { return (
+                      <button key={ico} type="button" onClick={function() { setForm(function(f) { return {...f, icon: ico}; }); }}
+                        className={"w-8 h-8 text-lg rounded border " + (form.icon === ico ? "border-green-500 bg-green-50" : "border-gray-200 hover:border-gray-400")}>{ico}</button>
+                    );})}
+                  </div>
+                  <input type="text" value={form.icon} onChange={function(e) { setForm(function(f) { return {...f, icon: e.target.value}; }); }} className="w-full border rounded-lg px-3 py-2 text-sm mt-1" placeholder="或手动输入emoji" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">状态</label>
@@ -187,7 +196,7 @@ export default function IndustriesPage() {
                 <input type="text" value={form.scale} onChange={e => setForm(f => ({...f, scale: e.target.value}))} className="w-full border rounded-lg px-3 py-2 text-sm" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">开始日期</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">日期</label>
                 <input type="date" value={form.startDate} onChange={e => setForm(f => ({...f, startDate: e.target.value}))} className="w-full border rounded-lg px-3 py-2 text-sm" />
               </div>
               <div>
@@ -209,13 +218,21 @@ export default function IndustriesPage() {
                 {uploading && <p className="text-xs text-blue-600 mt-1">上传中...</p>}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1"><ImageIcon className="w-4 h-4 inline mr-1" />图片URL（每行一个）</label>
-                <textarea value={form.images} onChange={e => setForm(f => ({...f, images: e.target.value}))} rows={3} className="w-full border rounded-lg px-3 py-2 text-sm font-mono text-xs" />
-                {form.images && (
+                <label className="block text-sm font-medium text-gray-700 mb-1"><ImageIcon className="w-4 h-4 inline mr-1" />图片</label>
+                <div className="flex gap-2 mb-2">
+                  <label className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 border rounded-lg cursor-pointer hover:bg-gray-100 text-sm">
+                    <Upload className="w-4 h-4" /> {uploading ? "上传中..." : "上传照片"}
+                    <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" disabled={uploading} />
+                  </label>
+                </div>
+                {form.photos && (() => { try { var imgs = JSON.parse(form.photos); return Array.isArray(imgs) && imgs.length > 0; } catch { return false; } })() && (
                   <div className="flex gap-2 mt-2 flex-wrap">
-                    {form.images.split("\n").filter(Boolean).map((url, i) => (
-                      <img key={i} src={url} className="w-16 h-16 object-cover rounded border" />
-                    ))}
+                    {(function() { try { return JSON.parse(form.photos); } catch { return []; } })().map(function(url: string, i: number) { return (
+                      <div key={i} className="relative group">
+                        <img src={url} className="w-16 h-16 object-cover rounded border" alt="" />
+                        <button onClick={function() { var arr = (function() { try { return JSON.parse(form.photos); } catch { return []; } })(); arr.splice(i,1); setForm(function(f) { return {...f, photos: JSON.stringify(arr)}; }); }} className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white rounded-full text-[10px] opacity-0 group-hover:opacity-100 flex items-center justify-center"><X className="w-3 h-3" /></button>
+                      </div>
+                    );})}
                   </div>
                 )}
               </div>

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { rules } from "@/lib/validators";
 import { requireAuth } from "@/lib/auth-utils";
 
 export const dynamic = "force-dynamic";
@@ -18,6 +19,7 @@ export async function PATCH(
       return NextResponse.json({ error: "无权操作" }, { status: 403 });
     }
     const body = await req.json();
+    const vErr = rules.familyMember(body); if (vErr) return NextResponse.json({ error: vErr }, { status: 400 });
     const data: any = {};
     if (body.name !== undefined) data.name = body.name;
     if (body.gender !== undefined) data.gender = body.gender;

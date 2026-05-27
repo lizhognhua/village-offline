@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Footprints, Heart, ArrowLeft, Trash2, User, Calendar, MapPin, X } from "lucide-react";
+import { Footprints, Heart, ArrowLeft, Trash2, User, Calendar, MapPin, X, Pencil } from "lucide-react";
 import { sanitizeHtml } from "@/lib/sanitize";
 
 function fmtDate(d: string) {
@@ -112,10 +112,16 @@ export default function VisitDetailPage() {
             );
           })()}
         </div>
-        <button onClick={function() { setConfirmDelete(true); }}
-          className="flex items-center gap-1 px-3 py-1.5 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors">
-          <Trash2 className="w-4 h-4" /> 删除
-        </button>
+        <div className="flex items-center gap-2">
+          <button onClick={function() { router.push("/visits/edit/" + params.id); }}
+            className="flex items-center gap-1 px-3 py-1.5 text-sm text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+            <Pencil className="w-4 h-4" /> 编辑
+          </button>
+          <button onClick={function() { setConfirmDelete(true); }}
+            className="flex items-center gap-1 px-3 py-1.5 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+            <Trash2 className="w-4 h-4" /> 删除
+          </button>
+        </div>
       </div>
 
       <div className="bg-white rounded-xl border shadow-sm p-6 space-y-4">

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sanitizeObject } from "@/lib/sanitize";
+import { rules, clean } from "@/lib/validators";
 import { requireAdmin } from "@/lib/auth-utils";
 
 export const dynamic = "force-dynamic";
@@ -34,6 +35,16 @@ export async function PUT(req: NextRequest) {
   try {
     let body = await req.json()
     body = sanitizeObject(body);
+
+    // 条件校验
+    const vErr = rules.villageProfile(body);
+    if (vErr) return NextResponse.json({ error: vErr }, { status: 400 });
+
+    // 清理
+    if (body.secretaryPhone) body.secretaryPhone = clean.phone(body.secretaryPhone);
+    if (body.fillPersonPhone) body.fillPersonPhone = clean.phone(body.fillPersonPhone);
+    if (body.villageSecretary) body.villageSecretary = clean.name(body.villageSecretary);
+    if (body.fillPerson) body.fillPerson = clean.name(body.fillPerson);
     
     const existing = await prisma.villageProfile.findFirst({
       where: {},

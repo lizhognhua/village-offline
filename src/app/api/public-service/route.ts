@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { rules } from "@/lib/validators";
 import { requireAuth } from "@/lib/auth-utils";
 import { sanitizeObject } from "@/lib/sanitize";
 
@@ -49,6 +50,8 @@ export async function POST(request: Request) {
     if (!name || !description) {
       return NextResponse.json({ error: "姓名和详细描述不能为空" }, { status: 400 });
     }
+    const vErr = rules.publicService(body);
+    if (vErr) return NextResponse.json({ error: vErr }, { status: 400 });
 
     // Offline single-team mode: always use default team
     const item = await prisma.publicService.create({

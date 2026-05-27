@@ -1,9 +1,10 @@
 "use client";
+export const dynamic = "force-dynamic";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { BookOpen, Plus, Lock, Globe, Calendar, User, ChevronRight, Image as ImageIcon } from "lucide-react";
+import { BookOpen, Plus, Lock, Globe, Calendar, User, ChevronRight, RefreshCw, Image as ImageIcon, Search, LayoutGrid, List } from "lucide-react";
 import { useSession } from "next-auth/react";
 
 type DiaryItem = {
@@ -54,12 +55,16 @@ export default function DiaryListPage() {
   const [data, setData] = useState<DiaryListData | null>(null);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
+  const [search, setSearch] = useState("");
+  const [viewMode, setViewMode] = useState<"card" | "list">("card");
   const limit = 24;
 
   const fetchDiaries = async function(p: number) {
     setLoading(true);
     try {
-      var res = await fetch("/api/diary?page=" + p + "&limit=" + limit);
+      var url = "/api/diary?page=" + p + "&limit=" + limit;
+      if (search) url += "&search=" + encodeURIComponent(search);
+      var res = await fetch(url);
       var json = await res.json();
       setData(json);
     } catch (e) {
@@ -72,12 +77,31 @@ export default function DiaryListPage() {
   useEffect(function() { fetchDiaries(page); }, [page]);
 
   const totalPages = data ? Math.ceil(data.total / limit) : 0;
+  const [syncing, setSyncing] = useState(false);
+
+  const syncSiyuan = async function() {
+    setSyncing(true);
+    try {
+      var res = await fetch("/api/diary/sync-siyuan", { method: "POST" });
+      var d = await res.json();
+      if (d.success) {
+        alert("思源同步完成：" + d.summary);
+        fetchDiaries(page);
+      } else {
+        alert("同步失败：" + (d.error || "未知错误"));
+      }
+    } catch (e) {
+      alert("同步请求失败");
+    } finally {
+      setSyncing(false);
+    }
+  };
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">工作日记</h1>
+          <h1 className="text-2xl font-bold text-gray-900">驻村工作日记</h1>
           <p className="text-sm text-gray-500 mt-1">
             公开 {data?.totalPublic || 0} 篇 · 私密 {data?.totalPrivate || 0} 篇 · 总计 {data?.total || 0} 篇
           </p>
@@ -86,7 +110,30 @@ export default function DiaryListPage() {
           <Link href="/diary/new" className="flex items-center gap-2 bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors">
             <Plus className="w-4 h-4" /> 写日记
           </Link>
+          <button onClick={syncSiyuan} disabled={syncing} className="flex items-center gap-2 border border-primary-300 text-primary-700 px-4 py-2 rounded-lg hover:bg-primary-50 transition-colors disabled:opacity-50">
+            <RefreshCw className={"w-4 h-4" + (syncing ? " animate-spin" : "")} /> {syncing ? "同步中..." : "思源同步"}
+          </button>
         </>)}
+      </div>
+
+      {/* 搜索 + 视图切换 */}
+      <div className="flex items-center gap-3 flex-wrap">
+        <div className="relative flex-1 max-w-sm">
+          <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+          <input type="text" value={search} onChange={function(e) { setSearch(e.target.value); setPage(1); }}
+            onKeyDown={function(e) { if (e.key === "Enter") fetchDiaries(1); }}
+            placeholder="搜索日记标题或内容..." className="w-full pl-9 pr-3 py-2 text-sm border rounded-lg outline-none focus:ring-2 focus:ring-primary-500" />
+        </div>
+        <div className="flex items-center border rounded-lg overflow-hidden">
+          <button onClick={function() { setViewMode("card"); }}
+            className={"p-2 " + (viewMode === "card" ? "bg-primary-600 text-white" : "bg-white text-gray-500 hover:bg-gray-100")}>
+            <LayoutGrid className="w-4 h-4" />
+          </button>
+          <button onClick={function() { setViewMode("list"); }}
+            className={"p-2 " + (viewMode === "list" ? "bg-primary-600 text-white" : "bg-white text-gray-500 hover:bg-gray-100")}>
+            <List className="w-4 h-4" />
+          </button>
+        </div>
       </div>
 
       {loading ? (
@@ -101,7 +148,8 @@ export default function DiaryListPage() {
         </div>
       ) : (
         <>
-          {/* Card Grid — 6 per row on large screens */}
+          {/* Card Grid */}
+          {viewMode === "card" && (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
             {data?.diaries.map(function(diary) {
               var photos = parsePhotos(diary.images || diary.photos || "");
@@ -127,6 +175,9 @@ export default function DiaryListPage() {
                       ) : (
                         <span className="text-[10px] bg-amber-500 text-white px-1.5 py-0.5 rounded">私密</span>
                       )}
+                      {diary.source === "siyuan" && (
+                        <span className="text-[10px] bg-blue-500 text-white px-1.5 py-0.5 rounded">思源</span>
+                      )}
                     </div>
                     {photos.length > 1 && (
                       <span className="absolute bottom-2 right-2 text-[10px] bg-black/50 text-white px-1.5 py-0.5 rounded">
@@ -139,6 +190,9 @@ export default function DiaryListPage() {
                     <h3 className="text-sm font-semibold text-gray-900 line-clamp-2 group-hover:text-primary-700 transition-colors leading-snug">
                       {diary.title}
                     </h3>
+                    <p className="text-[11px] text-gray-400 mt-1 line-clamp-1 flex-1">
+                      {stripHtml(diary.content)}
+                    </p>
                     <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-50">
                       <span className="text-[10px] text-gray-400 flex items-center gap-1">
                         <Calendar className="w-3 h-3" />
@@ -154,6 +208,35 @@ export default function DiaryListPage() {
               );
             })}
           </div>
+          )}
+
+          {/* List View */}
+          {viewMode === "list" && (
+          <div className="bg-white rounded-xl border shadow-sm overflow-hidden">
+            <table className="w-full">
+              <thead className="bg-gray-50 border-b">
+                <tr>
+                  <th className="text-left px-4 py-2 text-xs font-medium text-gray-500">标题</th>
+                  <th className="text-left px-4 py-2 text-xs font-medium text-gray-500 hidden sm:table-cell">作者</th>
+                  <th className="text-left px-4 py-2 text-xs font-medium text-gray-500 hidden md:table-cell">日期</th>
+                  <th className="text-center px-4 py-2 text-xs font-medium text-gray-500 w-16">可见</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data?.diaries.map(function(diary) {
+                  return (
+                    <tr key={diary.id} className="border-b last:border-b-0 hover:bg-gray-50 cursor-pointer" onClick={function() { router.push("/diary/" + diary.id); }}>
+                      <td className="px-4 py-2.5 text-sm font-medium text-gray-800 truncate max-w-[300px]">{diary.title}</td>
+                      <td className="px-4 py-2.5 text-xs text-gray-500 hidden sm:table-cell">{diary.author.name}</td>
+                      <td className="px-4 py-2.5 text-xs text-gray-500 hidden md:table-cell whitespace-nowrap">{new Date(diary.date).toLocaleDateString("zh-CN")}</td>
+                      <td className="px-4 py-2.5 text-center">{diary.isPublic ? <Globe className="w-3.5 h-3.5 text-green-500 inline" /> : <Lock className="w-3.5 h-3.5 text-gray-400 inline" />}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+          )}
 
           {/* Pagination */}
           {totalPages > 1 && (

@@ -24,7 +24,7 @@ export default function ArchivePage() {
       setStats({
         families: statsData?.stats?.totalFamilies || 0,
         projects: statsData?.stats?.activeProjects || 0,
-        diaries: 0,
+        diaries: statsData?.stats?.diaries || 0,
       });
       setFiles(filesData.files || []);
       setTotal(filesData.total || 0);

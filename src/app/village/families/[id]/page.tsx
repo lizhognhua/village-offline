@@ -78,6 +78,7 @@ export default function FamilyDetail() {
         address: family.address || "",
         population: family.population || 1,
         familyAttr: family.familyAttr || "",
+        notes: family.notes || "",
       });
       if (family?.headName) {
         try {
@@ -109,6 +110,7 @@ export default function FamilyDetail() {
       fd.append("address", editForm.address);
       fd.append("population", String(editForm.population || 1));
       fd.append("familyAttr", editForm.familyAttr || "");
+      if (editForm.notes) fd.append("notes", editForm.notes);
       fd.append("existingPhotos", JSON.stringify(photos));
       fd.append("existingFiles", JSON.stringify((function() { try { return JSON.parse(data?.files || "[]"); } catch(e) { return []; } })()));
       newPhotos.forEach(function(f) { fd.append("photos", f); });
@@ -328,6 +330,23 @@ export default function FamilyDetail() {
             editValue={editForm.address}
             onChange={function(v: string) { setEditForm(function(prev:any) { return {...prev, address: v}; }); }}
             icon={<MapPin className="w-3.5 h-3.5" />} span={2} />
+          <InfoField label="备注" value={f.notes || ""} edit={editMode}
+            editValue={editForm.notes || ""}
+            onChange={function(v: string) { setEditForm(function(prev:any) { return {...prev, notes: v}; }); }}
+            type="textarea" span={2} />
+          {/* 人口与家庭成员不一致警告 */}
+          {(() => {
+            var expectedPop = 1 + (f.members ? f.members.length : 0);
+            if (f.population !== expectedPop) {
+              return (
+                <div className="col-span-full bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-800">
+                  ⚠️ 登记人口为 <b>{f.population}人</b>，但家庭成员（含户主）共 <b>{expectedPop}人</b>，数量不一致。
+                  {editMode ? " 请在「人口」字段中修正，或在「家庭成员」标签中添加成员。" : " 请点击「编辑信息」进行修正。"}
+                </div>
+              );
+            }
+            return null;
+          })()}
           {editMode && (
             <div className="col-span-full">
               <label className="block text-sm font-medium text-gray-700 mb-1">属性/标签（可多选）</label>
@@ -588,7 +607,7 @@ export default function FamilyDetail() {
                   var kindLabel = item._kind === "visit" ? "走访" : item._kind === "condolence" ? "慰问" : item._kind === "reception" ? "来访" : "记录";
                   var kindColor = item._kind === "visit" ? "bg-emerald-100 text-emerald-700" : item._kind === "condolence" ? "bg-rose-100 text-rose-700" : "bg-blue-100 text-blue-700";
                   return (
-                    <div key={i} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg border-l-4 border-emerald-400 hover:bg-gray-100 transition-colors">
+                    <Link href={"/visits/" + (item._kind === "visit" ? item.id : item._kind === "condolence" ? item.id : item.id)} key={i} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg border-l-4 border-emerald-400 hover:bg-gray-100 transition-colors cursor-pointer">
                       <div className={"text-xs px-2 py-0.5 rounded whitespace-nowrap " + kindColor}>{kindLabel}</div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm text-gray-700 line-clamp-2">{item._summary || "无内容"}</p>
@@ -598,7 +617,7 @@ export default function FamilyDetail() {
                           {item.staff ? " · " + (typeof item.staff === "string" ? item.staff : "") : ""}
                         </p>
                       </div>
-                    </div>
+                    </Link>
                   );
                 })}
               </div>
@@ -827,15 +846,23 @@ function InfoField({ label, value, edit, editValue, onChange, icon, type, option
             <option value="">请选择</option>
             {(options || []).map(function(o) { return <option key={o} value={o}>{o}</option>; })}
           </select>
+        ) : type === "textarea" ? (
+          <textarea value={editValue} rows={3}
+            onChange={function(e) { onChange(e.target.value); }}
+            className="w-full border rounded-lg px-2 py-1.5 text-sm outline-none focus:ring-1 focus:ring-primary-400" />
         ) : (
           <input type={type || "text"} value={editValue}
             onChange={function(e) { onChange(e.target.value); }}
             className="w-full border rounded-lg px-2 py-1.5 text-sm outline-none focus:ring-1 focus:ring-primary-400" />
         )
       ) : (
-        <p className="text-sm text-gray-800 flex items-center gap-1">
-          {icon}{value || <span className="text-gray-300">—</span>}
-        </p>
+        type === "textarea" ? (
+          <div className="text-sm text-gray-700 mt-1 whitespace-pre-wrap" dangerouslySetInnerHTML={{ __html: String(value || "") }} />
+        ) : (
+          <p className="text-sm text-gray-800 flex items-center gap-1">
+            {icon}{value || <span className="text-gray-300">—</span>}
+          </p>
+        )
       )}
     </div>
   );

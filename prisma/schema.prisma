@@ -117,7 +117,7 @@ model Family {
   spousePhone     String?
   spouseIdCard    String?
   address         String?
-  income          String?
+  income          Float?
   registeredAddr  String?
   actualAddr      String?
   population      Int            @default(0)

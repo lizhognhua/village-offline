@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { Settings, Save, Users, MapPin, Building, Info, Plus, X, Pencil, Trash2, Check, Key, Navigation, RefreshCw, Database, Upload, Bot, FileSpreadsheet, Lock } from "lucide-react";
+import { Settings, Save, Users, MapPin, Building, Info, Plus, X, Pencil, Trash2, Check, Key, Navigation, RefreshCw, Database, Upload, Bot, FileSpreadsheet, Lock, User } from "lucide-react";
 import { ImportSettings } from "@/components/ImportSettings";
 
 const TABS = [
@@ -79,10 +79,22 @@ function BasicSettings() {
   }, []);
 
   const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault(); setSaving(true);
+    e.preventDefault(); setSaving(true); setMsg("");
     const fd = new FormData(e.target as HTMLFormElement);
     const data: Record<string, string> = {};
-    for (const [k, v] of fd.entries()) data[k] = v as string;
+    for (const [k, v] of fd.entries()) data[k] = (v as string).trim();
+
+    // 条件校验：填了就须符合格式
+    if (data.secretaryPhone && !/^1[3-9]\d{9}$/.test(data.secretaryPhone)) {
+      setMsg("村书记电话应为11位手机号"); setSaving(false); return;
+    }
+    if (data.contactPhone && !/^1[3-9]\d{9}$/.test(data.contactPhone)) {
+      setMsg("联系电话应为11位手机号"); setSaving(false); return;
+    }
+    // 清理姓名
+    if (data.villageSecretary) data.villageSecretary = data.villageSecretary.replace(/[，,]+/g, "");
+    if (data.teamName) data.teamName = data.teamName.replace(/[，,]+/g, "");
+
     const r = await fetch("/api/settings", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
     if (r.ok) { setMsg("保存成功"); setTimeout(() => setMsg(""), 3000); }
     else setMsg("保存失败");
@@ -105,7 +117,7 @@ function BasicSettings() {
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">联系电话</label>
-          <input name="contactPhone" defaultValue={settings.contactPhone || ""} placeholder="工作队联系电话"
+          <input name="contactPhone" defaultValue={settings.contactPhone || ""} placeholder="11位手机号" type="tel" maxLength={11}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none" />
         </div>
         <div>
@@ -120,7 +132,7 @@ function BasicSettings() {
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">村书记电话</label>
-          <input name="secretaryPhone" defaultValue={settings.secretaryPhone || ""} placeholder="村书记电话"
+          <input name="secretaryPhone" defaultValue={settings.secretaryPhone || ""} placeholder="11位手机号" type="tel" maxLength={11}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none" />
         </div>
       </div>
@@ -201,17 +213,31 @@ function ChangePassword() {
 
 function VillageProfileSettings() {
   const [profile, setProfile] = useState<any>({});
+  const [stats, setStats] = useState<any>({});
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState("");
 
   useEffect(() => {
-    fetch("/api/village/stats").then(r => r.json()).then(d => setProfile(d.stats || {})).catch(() => {});
+    // 可编辑字段：从 VillageProfile 读取
+    fetch("/api/village/profile").then(r => r.json()).then(d => {
+      if (d?.profile) setProfile(d.profile);
+    }).catch(() => {});
+    // 自动统计字段：从 Family 表实时计算
+    fetch("/api/village/stats").then(r => r.json()).then(d => setStats(d.stats || {})).catch(() => {});
   }, []);
 
   const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault(); setSaving(true);
+    e.preventDefault(); setSaving(true); setMsg("");
     const fd = new FormData(e.target as HTMLFormElement);
     const data: any = {};
+    // 校验整数字段
+    const intFields = editFields.filter(f => f.step === "1");
+    for (const f of intFields) {
+      const v = fd.get(f.key) as string;
+      if (v && v.includes(".")) {
+        setMsg("「" + f.label + "」请录入整数"); setSaving(false); return;
+      }
+    }
     for (const [k, v] of fd.entries()) {
       const num = Number(v);
       data[k] = isNaN(num) || v === "" ? (v || null) : num;
@@ -222,46 +248,77 @@ function VillageProfileSettings() {
     setSaving(false);
   };
 
-  const fields = [
-    { key: "administrativeArea", label: "行政面积(公顷)", type: "number" },
-    { key: "cultivatedLand", label: "耕地面积(亩)", type: "number" },
-    { key: "registeredHouseholds", label: "户籍户数", type: "number" },
-    { key: "registeredPopulation", label: "户籍人口", type: "number" },
-    { key: "residentHouseholds", label: "常住户数", type: "number" },
-    { key: "residentPopulation", label: "常驻人口", type: "number" },
-    { key: "partyMembers", label: "党员人数", type: "number" },
-    { key: "laborForce", label: "劳动力人数", type: "number" },
-    { key: "villageIncome", label: "村集体收入(万元)", type: "number" },
-    { key: "operatingIncome", label: "经营性收入(万元)", type: "number" },
-    { key: "wubaoHouseholds", label: "五保户数", type: "number" },
-    { key: "severeIllness", label: "重病人数", type: "number" },
-    { key: "elderlyCount", label: "高龄老人数", type: "number" },
-    { key: "poorHouseholds", label: "脱贫户数", type: "number" },
-    { key: "monitoredHouseholds", label: "监测户数", type: "number" },
-    { key: "dibaoHouseholds", label: "低保户数", type: "number" },
-    { key: "relocatedHouseholds", label: "异地搬迁户户数", type: "number" },
-    { key: "relocatedPopulation", label: "异地搬迁户人数", type: "number" },
+  // 仅可手动录入的字段
+  const editFields = [
+    { key: "administrativeArea", label: "行政面积(公顷)", type: "number", step: "any" },
+    { key: "cultivatedLand", label: "耕地面积(亩)", type: "number", step: "any" },
+    { key: "laborForce", label: "劳动力人数", type: "number", step: "1" },
+    { key: "residentHouseholds", label: "常住户数", type: "number", step: "1" },
+    { key: "residentPopulation", label: "常住人口", type: "number", step: "1" },
+    { key: "villageIncome", label: "村集体收入(万元)", type: "number", step: "any" },
+    { key: "operatingIncome", label: "经营性收入(万元)", type: "number", step: "any" },
+    { key: "relocatedHouseholds", label: "异地搬迁户户数", type: "number", step: "1" },
+    { key: "relocatedPopulation", label: "异地搬迁户人数", type: "number", step: "1" },
+  ];
+
+  // 自动统计字段（来自农户数据，只读）
+  const fmtVal = (v: any) => {
+    if (v === null || v === undefined || v === "") return "-";
+    const n = Number(v);
+    if (isNaN(n)) return "-";
+    return n < 0 ? "0" : n.toLocaleString();
+  };
+  const autoFields = [
+    { label: "户籍户数", value: fmtVal(stats.households ?? stats.totalFamilies) },
+    { label: "户籍人口", value: fmtVal(stats.population) },
+    { label: "脱贫户数", value: fmtVal(stats.poorHouseholds), color: "text-emerald-600" },
+    { label: "监测户数", value: fmtVal(stats.monitoredHouseholds), color: "text-orange-600" },
+    { label: "低保户数", value: fmtVal(stats.dibaoHouseholds), color: "text-blue-600" },
+    { label: "五保户数", value: fmtVal(stats.wubaoHouseholds), color: "text-purple-600" },
+    { label: "党员人数", value: fmtVal(stats.partyMembers) },
+    { label: "重病人数", value: fmtVal(profile.severeIllness) },
+    { label: "高龄老人数", value: fmtVal(profile.elderlyCount) },
   ];
 
   return (
-    <form onSubmit={handleSave} className="bg-white rounded-xl border shadow-sm p-6 space-y-4">
-      <h2 className="text-lg font-semibold text-gray-800">村情概况</h2>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        {fields.map(f => (
-          <div key={f.key}>
-            <label className="block text-xs font-medium text-gray-600 mb-1">{f.label}</label>
-            <input name={f.key} type={f.type} defaultValue={profile[f.key] ?? ""}
-              className="w-full px-2.5 py-1.5 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-primary-500 outline-none" />
-          </div>
-        ))}
+    <div className="space-y-4">
+      {/* 自动统计（只读） */}
+      <div className="bg-blue-50 rounded-xl border border-blue-200 p-5">
+        <h2 className="text-sm font-semibold text-blue-800 mb-3">自动统计（来自农户数据，无需手动填写）</h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {autoFields.map(f => (
+            <div key={f.label} className="bg-white rounded-lg p-3 border border-blue-100">
+              <div className="text-xs text-gray-500 mb-0.5">{f.label}</div>
+              <div className={"text-xl font-bold " + (f.color || "text-gray-800")}>{f.value}</div>
+            </div>
+          ))}
+        </div>
       </div>
-      <div className="flex items-center gap-3 pt-2">
+
+      {/* 手动录入 */}
+      <form onSubmit={handleSave} className="bg-white rounded-xl border shadow-sm p-6 space-y-4">
+        <h2 className="text-lg font-semibold text-gray-800">手动录入</h2>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+          {editFields.map(f => (
+            <div key={f.key}>
+              <label className="block text-xs font-medium text-gray-600 mb-1">{f.label}</label>
+              <input name={f.key}
+                type={f.step === "1" ? "text" : "number"}
+                inputMode={f.step === "1" ? "numeric" : undefined}
+                step={f.step === "1" ? undefined : "any"}
+                min="0" defaultValue={profile[f.key] ?? ""}
+                className="w-full px-2.5 py-1.5 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-primary-500 outline-none" />
+            </div>
+          ))}
+        </div>
+        <div className="flex items-center gap-3 pt-2">
           <button type="submit" disabled={saving} className="flex items-center gap-1.5 px-4 py-2 bg-primary-700 text-white rounded-lg text-sm hover:bg-primary-800 disabled:opacity-50">
-          <Save className="w-4 h-4" /> {saving ? "保存中..." : "保存"}
-        </button>
-        {msg && <span className="text-sm text-green-600">{msg}</span>}
-      </div>
-    </form>
+            <Save className="w-4 h-4" /> {saving ? "保存中..." : "保存"}
+          </button>
+          {msg && <span className="text-sm text-green-600">{msg}</span>}
+        </div>
+      </form>
+    </div>
   );
 }
 
@@ -372,6 +429,7 @@ function GroupSettings() {
 // ========== 队员管理 ==========
 
 function MemberSettings() {
+  const { data: session, update } = useSession();
   const [members, setMembers] = useState<any[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
@@ -381,6 +439,40 @@ function MemberSettings() {
   const [sortOrder, setSortOrder] = useState(0);
   const [uploading, setUploading] = useState(false);
   const [avatar, setAvatar] = useState("");
+  // 编辑当前账号
+  const [editingSelf, setEditingSelf] = useState(false);
+  const [selfName, setSelfName] = useState((session?.user as any)?.name || "");
+  const [selfSaving, setSelfSaving] = useState(false);
+  const [selfMsg, setSelfMsg] = useState("");
+  // 本地缓存的显示名，保存后立即更新
+  const [displayedName, setDisplayedName] = useState((session?.user as any)?.name || "");
+
+  const currentUser = session?.user;
+  const currentUserId = (currentUser as any)?.id;
+  const currentUserName = (currentUser as any)?.name || "";
+  const currentUserPhone = (currentUser as any)?.phone || "";
+
+  const saveSelf = async () => {
+    if (!selfName.trim()) { setSelfMsg("姓名不能为空"); return; }
+    setSelfSaving(true); setSelfMsg("");
+    try {
+      const r = await fetch("/api/user/me", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: selfName.trim() }),
+      });
+      if (r.ok) {
+        await update(); // 刷新会话
+        setDisplayedName(selfName.trim()); // 立即更新本地显示
+        setSelfMsg("保存成功"); setEditingSelf(false);
+        setTimeout(() => setSelfMsg(""), 3000);
+      } else {
+        const d = await r.json().catch(() => ({ error: "保存失败" }));
+        setSelfMsg(d.error || "保存失败");
+      }
+    } catch { setSelfMsg("网络错误"); }
+    setSelfSaving(false);
+  };
 
   const load = () => {
     fetch("/api/team-members").then(r => r.json()).then(d => setMembers(d.members || [])).catch(() => {});
@@ -420,6 +512,49 @@ function MemberSettings() {
 
   return (
     <div className="bg-white rounded-xl border shadow-sm p-6 space-y-4">
+      {/* 当前登录账号 */}
+      <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-sm font-semibold text-blue-800 flex items-center gap-1.5">
+            <User className="w-4 h-4" /> 当前登录账号
+          </h3>
+          {!editingSelf && (
+            <button onClick={() => { setSelfName(displayedName); setEditingSelf(true); }}
+              className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1">
+              <Pencil className="w-3 h-3" /> 编辑
+            </button>
+          )}
+        </div>
+        {editingSelf ? (
+          <div className="space-y-2">
+            <div>
+              <label className="block text-xs text-gray-600 mb-0.5">姓名</label>
+              <input value={selfName} onChange={e => setSelfName(e.target.value)}
+                className="w-full max-w-xs px-2.5 py-1.5 border border-gray-300 rounded-md text-sm outline-none" />
+            </div>
+            <div className="text-xs text-gray-500">手机号（不可修改）：{currentUserPhone}</div>
+            <div className="flex gap-2">
+              <button onClick={saveSelf} disabled={selfSaving}
+                className="px-3 py-1 bg-green-600 text-white rounded-md text-xs">{selfSaving ? "保存中..." : "保存"}</button>
+              <button onClick={() => setEditingSelf(false)}
+                className="px-3 py-1 bg-gray-300 text-gray-700 rounded-md text-xs">取消</button>
+              {selfMsg && <span className={"text-xs " + (selfMsg.includes("成功") ? "text-green-600" : "text-red-500")}>{selfMsg}</span>}
+            </div>
+          </div>
+        ) : (
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-blue-200 flex items-center justify-center">
+              <User className="w-5 h-5 text-blue-700" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-800">{displayedName}</p>
+              <p className="text-xs text-gray-500">{currentUserPhone}</p>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* 队员列表 */}
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold text-gray-800">队员管理</h2>
         <button onClick={() => setShowForm(true)}

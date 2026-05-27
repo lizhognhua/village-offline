@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { rules } from "@/lib/validators";
 import { requireAuth } from "@/lib/auth-utils";
 
 export const dynamic = "force-dynamic";

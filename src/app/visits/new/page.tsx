@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Save, User, Calendar, FileText, Image as ImageIcon, X, Footprints, Heart, BookOpen, Search, Plus } from "lucide-react";
+import { ArrowLeft, Save, User, Users, Calendar, FileText, Image as ImageIcon, X, Footprints, Heart, BookOpen, Search, Plus } from "lucide-react";
 import RichTextEditor from "@/components/RichTextEditor";
 
 const STATUS_OPTIONS = ["在家", "外出务工", "出门", "健康", "生病", "其他"];
@@ -12,7 +12,7 @@ export default function NewVisitPage() {
   var [families, setFamilies] = useState<any[]>([]);
   var [staffOptions, setStaffOptions] = useState<string[]>(GENERIC_STAFF);
   var [saving, setSaving] = useState(false);
-  var [recType, setRecType] = useState<"visit" | "condolence">("visit");
+  var [recType, setRecType] = useState<"visit" | "condolence" | "reception">("visit");
   var [files, setFiles] = useState<File[]>([]);
 
   // Fetch team members for dynamic staff list
@@ -26,6 +26,7 @@ export default function NewVisitPage() {
       .catch(() => {});
   }, []);
   var [previews, setPreviews] = useState<string[]>([]);
+  var [syncSiyuan, setSyncSiyuan] = useState(true);
   var [searchText, setSearchText] = useState("");
   var [dropdownOpen, setDropdownOpen] = useState(false);
   var [showNewFamily, setShowNewFamily] = useState(false);
@@ -137,6 +138,7 @@ export default function NewVisitPage() {
       fd.append("type", recType);
       fd.append("statusTags", JSON.stringify(form.statusTags));
       fd.append("staff", form.staff.join(","));
+      fd.append("syncSiyuan", String(syncSiyuan));
       files.forEach(function(f) { fd.append("photos", f); });
       var r = await fetch("/api/records", { method: "POST", body: fd });
       if (r.ok) { router.push("/visits"); }
@@ -169,6 +171,10 @@ export default function NewVisitPage() {
           <button type="button" onClick={function() { setRecType("condolence"); }}
             className={"flex items-center gap-1.5 px-4 py-2 text-sm rounded-lg border transition-colors " + (recType === "condolence" ? "bg-rose-50 text-rose-700 border-rose-300 font-medium" : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50")}>
             <Heart className="w-4 h-4" /> 慰问
+          </button>
+          <button type="button" onClick={function() { setRecType("reception"); }}
+            className={"flex items-center gap-1.5 px-4 py-2 text-sm rounded-lg border transition-colors " + (recType === "reception" ? "bg-blue-50 text-blue-700 border-blue-300 font-medium" : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50")}>
+            <Users className="w-4 h-4" /> 来访
           </button>
         </div>
       </div>
@@ -225,15 +231,17 @@ export default function NewVisitPage() {
               <input type="text" placeholder="电话" value={newFamily.phone}
                 onChange={function(e) { setNewFamily(function(f) { return {...f, phone: e.target.value}; }); }}
                 className="px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-1 focus:ring-primary-500" />
-              <select value={newFamily.familyAttr}
-                onChange={function(e) { setNewFamily(function(f) { return {...f, familyAttr: e.target.value}; }); }}
-                className="px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-1 focus:ring-primary-500">
-                <option value="一般农户">一般农户</option>
-                <option value="脱贫户">脱贫户</option>
-                <option value="监测户">监测户</option>
-                <option value="低保户">低保户</option>
-                <option value="五保户">五保户</option>
-              </select>
+              <div className="flex flex-wrap gap-1.5">
+                {["一般农户","脱贫户","监测户","低保户","五保户"].map(function(a) {
+                  var sel = (newFamily.familyAttr || "").split(",").filter(Boolean);
+                  return <label key={a} className="flex items-center gap-0.5 text-xs cursor-pointer">
+                    <input type="checkbox" checked={sel.includes(a)} onChange={function() {
+                      var u = sel.includes(a) ? sel.filter(function(x){return x!==a;}) : sel.concat([a]);
+                      setNewFamily(function(f) { return {...f, familyAttr: u.join(",")}; });
+                    }} className="rounded" />{a}
+                  </label>;
+                })}
+              </div>
             </div>
             <div className="flex gap-2">
               <button type="button" onClick={createFamily} disabled={!newFamily.headName.trim()}
@@ -245,7 +253,7 @@ export default function NewVisitPage() {
         )}
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1"><Calendar className="w-4 h-4 inline mr-1" />{recType === "visit" ? "走访" : "慰问"}日期</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1"><Calendar className="w-4 h-4 inline mr-1" />{recType === "visit" ? "走访" : recType === "condolence" ? "慰问" : "来访"}日期</label>
           <input type="date" value={form.visitDate} onChange={function(e) { setForm(function(f) { return {...f, visitDate: e.target.value}; }); }}
             className="w-full md:w-48 border rounded-lg px-3 py-2 text-sm" />
         </div>
@@ -304,10 +312,15 @@ export default function NewVisitPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1"><FileText className="w-4 h-4 inline mr-1" />{recType === "visit" ? "走访" : "慰问"}内容</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1"><FileText className="w-4 h-4 inline mr-1" />{recType === "visit" ? "走访" : recType === "condolence" ? "慰问" : "来访"}内容</label>
           <RichTextEditor content={form.content}
             onChange={function(html) { setForm(function(f) { return {...f, content: html}; }); }}
             placeholder={recType === "visit" ? "记录走访情况..." : "记录慰问情况..."} />
+        </div>
+
+        <div className="flex items-center gap-2 text-sm">
+          <input type="checkbox" id="syncSiyuan" checked={syncSiyuan} onChange={function(e) { setSyncSiyuan(e.target.checked); }} />
+          <label htmlFor="syncSiyuan" className="flex items-center gap-1 text-gray-600 cursor-pointer"><BookOpen className="w-4 h-4" /> 同步到思源笔记</label>
         </div>
 
         <div className="flex gap-2 justify-end pt-2">

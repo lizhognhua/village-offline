@@ -7,6 +7,7 @@ interface PartyMember {
   id: string; name: string; gender: string; idCard: string;
   ethnicity: string; education: string; joinDate: string;
   phone: string; avatar: string; note: string;
+  _virtual?: boolean;
 }
 
 export default function PartyMembersPage() {
@@ -99,17 +100,18 @@ export default function PartyMembersPage() {
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
         {members.map(m => (
-          <div key={m.id} className="bg-white rounded-lg border p-4 shadow-sm flex gap-3 items-start">
+          <div key={m.id} className={"bg-white rounded-lg border p-4 shadow-sm flex gap-3 items-start " + (m._virtual ? "border-dashed border-amber-300 bg-amber-50" : "")}>
             {m.avatar ? <img src={m.avatar} className="w-12 h-12 rounded-full object-cover flex-shrink-0" /> : <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center text-red-600 font-bold flex-shrink-0">{m.name[0]}</div>}
             <div className="flex-1 min-w-0">
-              <p className="font-medium text-sm">{m.name}{m.gender ? ` · ${m.gender}` : ""}</p>
+              <p className="font-medium text-sm">{m.name}{m.gender ? " · " + m.gender : ""}</p>
               {m.idCard && <p className="text-xs text-gray-400">身份证 {m.idCard}</p>}
               {m.phone && <p className="text-xs text-gray-400">📞 {m.phone}</p>}
-              <p className="text-xs text-gray-400">{m.joinDate || ""} 入党</p>
+              {m.joinDate && <p className="text-xs text-gray-400">{m.joinDate} 入党</p>}
+              {m._virtual && <p className="text-xs text-amber-600 mt-1">⚠️ {m.note}</p>}
             </div>
             <div className="flex gap-1 flex-shrink-0">
-              <button onClick={() => openEdit(m)} className="p-1 hover:bg-gray-100 rounded"><Pencil size={13} /></button>
-              <button onClick={() => handleDelete(m.id)} className="p-1 hover:bg-red-50 rounded text-red-500"><Trash2 size={13} /></button>
+              {!m._virtual && <button onClick={() => openEdit(m)} className="p-1 hover:bg-gray-100 rounded"><Pencil size={13} /></button>}
+              {!m._virtual && <button onClick={() => handleDelete(m.id)} className="p-1 hover:bg-red-50 rounded text-red-500"><Trash2 size={13} /></button>}
             </div>
           </div>
         ))}

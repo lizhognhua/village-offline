@@ -46,6 +46,11 @@ export default function EditVisitPage() {
           setFamilies(famData.families || famData);
         }
         if (data) {
+          // 解析已有照片
+          try {
+            const parsed = JSON.parse(data.photos || '[]');
+            setExistingPhotos(Array.isArray(parsed) ? parsed : []);
+          } catch { setExistingPhotos([]); }
           // 解析 staff
           let staffArr: string[] = [];
           if (data.staff) {

@@ -85,13 +85,15 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       statusTags: typeof body.statusTags === "string" ? body.statusTags : JSON.stringify(body.statusTags || []),
       items: typeof body.items === "string" ? body.items : JSON.stringify(body.items || []),
       staff: body.staff || null,
+      dutyTags: body.dutyTags || JSON.stringify(["为民服务"]),
+      taskTags: body.taskTags || JSON.stringify(["#2 落实入户走访制度"]),
     };
     if (body.visitDate || body.recordDate) {
       updateData.recordDate = new Date(body.visitDate || body.recordDate);
     }
     // 保护照片：仅当有新照片上传或显式传入 photos 时才更新
     if (photoPaths.length > 0 || body.photos !== undefined) {
-      updateData.photos = JSON.stringify(photoPaths.length ? photoPaths : body.photos);
+      updateData.photos = photoPaths.length ? JSON.stringify(photoPaths) : body.photos;
     }
 
     const record = await prisma.householdRecord.update({

@@ -1,10 +1,10 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Plus } from "lucide-react";
+import { ArrowLeft, Plus, Footprints, ExternalLink } from "lucide-react";
 import RecordCard from "@/components/accountability/RecordCard";
 import RecordModal from "@/components/accountability/RecordModal";
-import { TEN_TASKS } from "@/lib/accountability";
+import { TEN_TASKS, FOUR_DUTIES } from "@/lib/accountability";
 
 export default function TaskDetailPage() {
   const params = useParams();
@@ -20,6 +20,12 @@ export default function TaskDetailPage() {
   const [showModal, setShowModal] = useState(false);
   const [editRecord, setEditRecord] = useState<any>(null);
 
+  // Related visit records
+  const [relatedVisits, setRelatedVisits] = useState<any[]>([]);
+  const [visitsLoading, setVisitsLoading] = useState(false);
+
+  const duty = FOUR_DUTIES.find(d => task?.duty && d.key === task.duty);
+
   const loadRecords = () => {
     setLoading(true);
     fetch(`/api/accountability/records?taskType=${taskType}&page=${page}&limit=24`)
@@ -30,6 +36,18 @@ export default function TaskDetailPage() {
   };
 
   useEffect(() => { loadRecords(); }, [taskType, page]);
+
+  // Load related visit records for 为民服务 tasks
+  useEffect(() => {
+    if (task?.duty === "为民服务") {
+      setVisitsLoading(true);
+      fetch("/api/records?limit=20")
+        .then(r => r.json())
+        .then(d => { setRelatedVisits(d.records || []); })
+        .catch(() => {})
+        .finally(() => setVisitsLoading(false));
+    }
+  }, [taskType]);
 
   const handleDelete = async (id: string) => {
     if (!confirm("确定删除该记录？")) return;
@@ -96,6 +114,63 @@ export default function TaskDetailPage() {
               </div>
             )}
           </>
+        )}
+
+        {/* 关联走访记录 */}
+        {task?.duty === "为民服务" && (
+          <div style={{ marginTop: 32 }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+              <h3 style={{ color: "#e8d5c4", fontSize: "1rem", fontWeight: 700, margin: 0, display: "flex", alignItems: "center", gap: 8 }}>
+                <Footprints size={18} style={{ color: "#d97706" }} /> 关联走访记录
+              </h3>
+              <button onClick={() => router.push("/visits")}
+                style={{ background: "rgba(217,119,6,0.12)", border: "1px solid rgba(217,119,6,0.25)", borderRadius: 16, padding: "5px 14px", color: "#d97706", fontSize: "0.75rem", cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}>
+                查看全部 <ExternalLink size={12} />
+              </button>
+            </div>
+            {visitsLoading ? (
+              <div style={{ textAlign: "center", padding: 24, color: "#5a4a5a", fontSize: "0.78rem" }}>加载中...</div>
+            ) : relatedVisits.length === 0 ? (
+              <div style={{ textAlign: "center", padding: 24, color: "#5a4a5a", fontSize: "0.78rem", background: "rgba(255,255,255,0.03)", borderRadius: 10, border: "1px solid rgba(255,255,255,0.06)" }}>
+                暂无关联走访记录
+              </div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                {relatedVisits.slice(0, 10).map((v: any) => (
+                  <div key={v.id}
+                    onClick={() => router.push("/visits")}
+                    style={{
+                      display: "flex", alignItems: "center", gap: 10, padding: "10px 14px",
+                      background: "rgba(255,255,255,0.03)", borderRadius: 8,
+                      border: "1px solid rgba(255,255,255,0.06)", cursor: "pointer",
+                    }}>
+                    <span style={{
+                      fontSize: "0.65rem", padding: "2px 8px", borderRadius: 10, fontWeight: 600,
+                      background: v.type === "visit" ? "rgba(16,185,129,0.15)" : v.type === "condolence" ? "rgba(244,63,94,0.15)" : "rgba(59,130,246,0.15)",
+                      color: v.type === "visit" ? "#10b981" : v.type === "condolence" ? "#f43f5e" : "#3b82f6",
+                    }}>
+                      {v.type === "visit" ? "走访" : v.type === "condolence" ? "慰问" : "来访"}
+                    </span>
+                    <span style={{ color: "#e0d0c0", fontSize: "0.82rem", flex: 1 }}>
+                      {v.family?.headName || "未知农户"}
+                    </span>
+                    <span style={{ color: "#5a4a5a", fontSize: "0.68rem" }}>
+                      {new Date(v.recordDate).toLocaleDateString("zh-CN")}
+                    </span>
+                    <span style={{ color: "#847b8a", fontSize: "0.7rem", maxWidth: 160, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {v.content?.replace(/<[^>]*>/g, "") || ""}
+                    </span>
+                  </div>
+                ))}
+                {relatedVisits.length > 10 && (
+                  <button onClick={() => router.push("/visits")}
+                    style={{ textAlign: "center", padding: 8, color: "#d97706", fontSize: "0.72rem", background: "none", border: "none", cursor: "pointer" }}>
+                    还有 {relatedVisits.length - 10} 条，查看全部 →
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
         )}
 
         {showModal && (

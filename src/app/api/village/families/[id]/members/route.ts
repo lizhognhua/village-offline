@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth-utils";
+import { rules } from "@/lib/validators";
 
 export const dynamic = "force-dynamic";
 
@@ -19,6 +20,8 @@ export async function POST(
     if (!body.name || !body.relation) {
       return NextResponse.json({ error: "姓名和与户主关系为必填" }, { status: 400 });
     }
+    const vErr = rules.familyMember(body);
+    if (vErr) return NextResponse.json({ error: vErr }, { status: 400 });
 
     const data: any = { name: body.name, relation: body.relation, familyId };
     if (body.gender) data.gender = body.gender;

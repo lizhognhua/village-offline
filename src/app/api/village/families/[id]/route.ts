@@ -5,6 +5,7 @@ import { auth } from "@/auth";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 import { sanitizeObject, sanitizeString } from "@/lib/sanitize";
+import { rules, clean } from "@/lib/validators";
 
 export const dynamic = "force-dynamic";
 
@@ -49,6 +50,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       body.address = sanitizeString(fd.get("address"))
       body.population = fd.get("population") ? parseInt(fd.get("population") as string) : undefined;
       body.familyAttr = sanitizeString(fd.get("familyAttr"))
+      body.notes = sanitizeString(fd.get("notes") || null)
       body.existingPhotos = sanitizeString(fd.get("existingPhotos"))
       body.existingFiles = sanitizeString(fd.get("existingFiles"))
 
@@ -99,6 +101,16 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     } else {
       body = sanitizeObject(await req.json());
     }
+
+    // 条件校验
+    const vErr = rules.family(body);
+    if (vErr) return NextResponse.json({ error: vErr }, { status: 400 });
+
+    // 清理
+    if (body.headName !== undefined) body.headName = clean.name(body.headName);
+    if (body.spouseName !== undefined) body.spouseName = clean.name(body.spouseName);
+    if (body.headPhone !== undefined) body.headPhone = clean.phone(body.headPhone);
+    if (body.spousePhone !== undefined) body.spousePhone = clean.phone(body.spousePhone);
 
     // Build update data — only set fields that are provided
     var updateData: any = {};

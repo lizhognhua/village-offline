@@ -13,15 +13,17 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     const industry = await prisma.industry.findUnique({ where: { id } });
     if (!industry) return NextResponse.json({ error: "未找到" }, { status: 404 });
     return NextResponse.json(industry);
-  } catch (error: any) { return NextResponse.json({ error: "服务器内部错误" }, { status: 500 }); }
+  } catch (error: any) { console.error("Industry PATCH error:", error?.message || error, JSON.stringify(error)); return NextResponse.json({ error: "服务器内部错误" }, { status: 500 }); }
 }
 
 function mapBody(body: any) {
   const data: any = { ...body };
   // Map frontend field names to DB columns
   if (body.images !== undefined) { data.photos = body.images; delete data.images; }
-  if (body.videos !== undefined) { /* videos stored as-is */ }
-  if (body.links !== undefined) { /* links stored as-is */ }
+  if (body.photos !== undefined) { data.photos = body.photos; }
+  // Remove fields not in Prisma schema
+  delete data.videos;
+  delete data.links;
   if (body.startDate !== undefined) { data.startDate = body.startDate ? new Date(body.startDate) : null; }
   return data;
 }
@@ -40,7 +42,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     const data = mapBody(body);
     const industry = await prisma.industry.update({ where: { id }, data });
     return NextResponse.json(industry);
-  } catch (error: any) { return NextResponse.json({ error: "服务器内部错误" }, { status: 500 }); }
+  } catch (error: any) { console.error("Industry PATCH error:", error?.message || error, JSON.stringify(error)); return NextResponse.json({ error: "服务器内部错误" }, { status: 500 }); }
 }
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -57,6 +59,6 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     const data = mapBody(body);
     const industry = await prisma.industry.update({ where: { id }, data });
     return NextResponse.json(industry);
-  } catch (error: any) { return NextResponse.json({ error: "服务器内部错误" }, { status: 500 }); }
+  } catch (error: any) { console.error("Industry PATCH error:", error?.message || error, JSON.stringify(error)); return NextResponse.json({ error: "服务器内部错误" }, { status: 500 }); }
 }
 

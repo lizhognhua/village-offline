@@ -4,6 +4,7 @@ import { auth } from "@/auth";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 import { sanitizeObject, sanitizeString } from "@/lib/sanitize";
+import { rules, clean } from "@/lib/validators";
 
 export const dynamic = "force-dynamic";
 
@@ -19,7 +20,7 @@ export async function GET(req: NextRequest) {
 
     const where: any = {};
     if (search) { where.headName = { contains: search, mode: "insensitive" }; }
-    if (attr === "一般农户") { where.OR = [{ familyAttr: "一般农户" }, { familyAttr: null }]; } else if (attr) { where.familyAttr = attr; }
+    if (attr) { where.familyAttr = { contains: attr }; }
     if (groupId) { where.groupId = groupId; }
     if (hasCoords === "true") { where.latitude = { not: null }; where.longitude = { not: null }; }
 
@@ -67,7 +68,7 @@ export async function POST(req: NextRequest) {
       body.spousePhone = sanitizeString(fd.get("spousePhone") || null)
       body.spouseIdCard = sanitizeString(fd.get("spouseIdCard") || null)
       body.address = sanitizeString(fd.get("address") || null)
-      body.income = sanitizeString(fd.get("income") || null)
+      body.income = fd.get("income") ? parseFloat(fd.get("income") as string) : null
       body.notes = sanitizeString(fd.get("notes") || null)
       body.latitude = fd.get("latitude") ? parseFloat(fd.get("latitude") as string) : null
       body.longitude = fd.get("longitude") ? parseFloat(fd.get("longitude") as string) : null
@@ -133,6 +134,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "缺少姓名" }, { status: 400 });
     }
 
+    // 条件校验
+    const vErr = rules.family(body);
+    if (vErr) return NextResponse.json({ error: vErr }, { status: 400 });
+
+    // 清理姓名和电话
+    body.headName = clean.name(body.headName);
+    body.spouseName = clean.name(body.spouseName);
+    body.headPhone = clean.phone(body.headPhone);
+    body.spousePhone = clean.phone(body.spousePhone);
+
     const family = await prisma.family.create({
       data: {
         headName: body.headName,
@@ -152,7 +163,7 @@ export async function POST(req: NextRequest) {
         spousePhone: body.spousePhone || null,
         spouseIdCard: body.spouseIdCard || null,
         address: body.address || null,
-        income: body.income || null,
+        income: (body.income !== null && body.income !== undefined && !isNaN(body.income)) ? body.income : null,
         photos: photoPaths.length > 0 ? JSON.stringify(photoPaths) : "[]",
         files: body.files || "[]",
         notes: body.notes || null,
