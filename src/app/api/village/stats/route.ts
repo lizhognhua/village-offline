@@ -42,6 +42,8 @@ export async function GET(req: NextRequest) {
         operatingIncome: profile?.operatingIncome ?? 0,
         relocatedHouseholds: profile?.relocatedHouseholds ?? 0,
         relocatedPopulation: profile?.relocatedPopulation ?? 0,
+        severeIllness: profile?.severeIllness ?? 0,
+        elderlyCount: profile?.elderlyCount ?? 0,
       },
     });
   } catch (error) {

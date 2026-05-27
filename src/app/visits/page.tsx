@@ -173,9 +173,11 @@ export default function VisitsPage() {
               <div className="grid grid-cols-3 gap-4">
                 <div><span className="text-gray-500">农户：</span><span className="font-medium">{detail.family.headName}</span></div>
                 <div><span className="text-gray-500">日期：</span><span>{fmtDate(detail.recordDate)}</span></div>
-                <div><span className="text-gray-500">走访人：</span><span>{detail.staff || "未知"}</span></div>
+                <div><span className="text-gray-500">状态：</span>
+                  {(() => { const t = parseTags(detail.statusTags); return t.length > 0 ? <span className="flex flex-wrap gap-1">{t.map((x: string, i: number) => <span key={i} className="text-xs bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full">{x}</span>)}</span> : <span className="text-gray-400">—</span>; })()}
+                </div>
               </div>
-              {(() => { const t = parseTags(detail.statusTags); return t.length > 0 ? <div><span className="text-gray-500">状态：</span><div className="flex flex-wrap gap-1 mt-1">{t.map((x: string, i: number) => <span key={i} className="text-xs bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full">{x}</span>)}</div></div> : null; })()}
+              <div><span className="text-gray-500">走访人：</span><span>{detail.staff || "未知"}</span></div>
               <div><span className="text-gray-500">内容：</span><div className="bg-gray-50 rounded-lg p-3 text-gray-700 mt-1 prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: sanitizeHtml(detail.content || "") }} /></div>
               {parsePhotos(detail.photos).length > 0 && (
                 <div>

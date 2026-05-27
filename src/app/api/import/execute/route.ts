@@ -58,8 +58,13 @@ export async function POST(req: NextRequest) {
       }, { status: 400 });
     }
 
-    // Skip header row, filter empty rows
-    const rows = rawData.slice(1).filter((row: any[]) => row.some((cell: any) => String(cell).trim() !== ""));
+    // Skip header row, tip row, and empty rows
+    const rows = rawData.slice(1).filter((row: any[]) => {
+      const firstCell = String(row[0] ?? "").trim();
+      // Skip rows with placeholder text
+      if (firstCell.includes("请在下方填写") || firstCell.startsWith("示例行")) return false;
+      return row.some((cell: any) => String(cell).trim() !== "");
+    });
 
     // Pre-load reference data
     const groups = type === "family"

@@ -115,10 +115,9 @@ export function generateTemplate(type: string, groups?: { name: string }[]): Buf
 
   const wb = XLSX.utils.book_new();
 
-  // Sheet 1: 数据表
+  // Sheet 1: 数据表（仅表头+提示，示例请参考"填写说明"页）
   const headers = tmpl.fields.map(f => f.label);
-  const exampleRow = tmpl.fields.map(f => f.example || "");
-  const dataSheet = XLSX.utils.aoa_to_sheet([headers, ["示例行，请在此行下方填写实际数据"], exampleRow]);
+  const dataSheet = XLSX.utils.aoa_to_sheet([headers, ["⬇ 请在下方填写实际数据（此行自动跳过，无需删除）"]]);
 
   // Set column widths
   dataSheet["!cols"] = tmpl.fields.map(() => ({ wch: 18 }));

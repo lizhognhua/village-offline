@@ -7,12 +7,20 @@ import {
   Phone, Home, Footprints, Heart, Wheat
 } from "lucide-react";
 
-var CATS = ["全部","一般农户","脱贫户","监测户","低保户","五保户"];
+var CATS = ["全部","一般农户","脱贫户","监测户","低保户","五保户","党员","村委会成员","高龄老人","残疾","重疾重病","赡养儿童","丧失劳动能力"];
 var attrColor: Record<string,string> = {
   "脱贫户":"bg-green-100 text-green-700",
   "监测户":"bg-orange-100 text-orange-700",
   "低保户":"bg-blue-100 text-blue-700",
-  "五保户":"bg-purple-100 text-purple-700"
+  "五保户":"bg-purple-100 text-purple-700",
+  "一般农户":"bg-gray-100 text-gray-600",
+  "党员":"bg-red-100 text-red-700",
+  "村委会成员":"bg-indigo-100 text-indigo-700",
+  "高龄老人":"bg-amber-100 text-amber-700",
+  "残疾":"bg-pink-100 text-pink-700",
+  "重疾重病":"bg-rose-100 text-rose-700",
+  "赡养儿童":"bg-cyan-100 text-cyan-700",
+  "丧失劳动能力":"bg-slate-100 text-slate-700"
 };
 
 interface VillageGroup {
@@ -28,6 +36,7 @@ interface VillageStats {
   relocatedHouseholds: number; relocatedPopulation: number;
   villageIncome: number;
   activeProjects: number;
+  severeIllness: number; elderlyCount: number;
 }
 
 export default function VillagePage() {
@@ -81,26 +90,25 @@ export default function VillagePage() {
   return (
     <div className="space-y-5">
       {/* Title — centered */}
-      <div className="text-center py-4">
+      <div className="text-center py-2">
         <h1 className="text-2xl font-bold text-gray-900">{villageName || "村情"}概况</h1>
-        <a href="/" className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-primary-600 mt-2 transition-colors">
-          <ChevronLeft className="w-4 h-4" /> 返回主页
-        </a>
       </div>
 
-      {/* Stats Cards */}
+      {/* Stats Cards — 4列×3行 */}
       {stats && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4">
           <StatCard icon={<Home className="w-5 h-5" />} label="户籍户数" value={stats.households} color="text-indigo-600" bg="bg-indigo-50" />
           <StatCard icon={<Users className="w-5 h-5" />} label="户籍人口" value={stats.population} color="text-blue-600" bg="bg-blue-50" />
-          <StatCard icon={<UserCheck className="w-5 h-5" />} label="脱贫户" value={stats.poorHouseholds} color="text-emerald-600" bg="bg-emerald-50" onClick={function() { scrollToCat("脱贫户"); }} clickable />
-          <StatCard icon={<UserCheck className="w-5 h-5" />} label="监测户" value={stats.monitoredHouseholds} color="text-orange-600" bg="bg-orange-50" onClick={function() { scrollToCat("监测户"); }} clickable />
           <StatCard icon={<LandPlot className="w-5 h-5" />} label="耕地(亩)" value={stats.cultivatedLand} color="text-green-600" bg="bg-green-50" />
           <StatCard icon={<DollarSign className="w-5 h-5" />} label="集体收入" value={stats.villageIncome} color="text-rose-600" bg="bg-rose-50" suffix="万" />
-          <StatCard icon={<Heart className="w-5 h-5" />} label="低保户" value={stats.dibaoHouseholds} color="text-blue-600" bg="bg-blue-50" onClick={function() { scrollToCat("低保户"); }} clickable />
+          <StatCard icon={<UserCheck className="w-5 h-5" />} label="脱贫户" value={stats.poorHouseholds} color="text-emerald-600" bg="bg-emerald-50" onClick={function() { scrollToCat("脱贫户"); }} clickable />
+          <StatCard icon={<UserCheck className="w-5 h-5" />} label="监测户" value={stats.monitoredHouseholds} color="text-orange-600" bg="bg-orange-50" onClick={function() { scrollToCat("监测户"); }} clickable />
           <StatCard icon={<Home className="w-5 h-5" />} label="异地搬迁户" value={stats.relocatedHouseholds} color="text-teal-600" bg="bg-teal-50" suffix={"户/" + (stats.relocatedPopulation || 0) + "人"} />
-          <StatCard icon={<Footprints className="w-5 h-5" />} label="本年走访" value={stats.recentVisits} color="text-amber-600" bg="bg-amber-50" />
           <StatCard icon={<Wheat className="w-5 h-5" />} label="产业项目" value={stats.activeProjects} color="text-purple-600" bg="bg-purple-50" />
+          <StatCard icon={<Heart className="w-5 h-5" />} label="低保户" value={stats.dibaoHouseholds} color="text-blue-600" bg="bg-blue-50" onClick={function() { scrollToCat("低保户"); }} clickable />
+          <StatCard icon={<Heart className="w-5 h-5" />} label="重病人数" value={stats.severeIllness} color="text-red-600" bg="bg-red-50" suffix="人" />
+          <StatCard icon={<Users className="w-5 h-5" />} label="高龄老人数" value={stats.elderlyCount} color="text-amber-600" bg="bg-amber-50" suffix="人" />
+          <StatCard icon={<Footprints className="w-5 h-5" />} label="本年走访" value={stats.recentVisits} color="text-indigo-600" bg="bg-indigo-50" suffix="次" />
         </div>
       )}
 
@@ -177,9 +185,16 @@ export default function VillagePage() {
                   </div>
                   <div className="space-y-1 text-xs text-gray-500">
                     {f.familyAttr && (
-                      <span className={"inline-block px-1.5 py-0.5 rounded text-[10px] " + (attrColor[f.familyAttr] || "bg-gray-100 text-gray-500")}>
-                        {f.familyAttr}
-                      </span>
+                      <div className="flex flex-wrap gap-1">
+                        {f.familyAttr.split(",").map(function(tag: string) {
+                          var t = tag.trim();
+                          return (
+                            <span key={t} className={"inline-block px-1.5 py-0.5 rounded text-[10px] " + (attrColor[t] || "bg-gray-100 text-gray-500")}>
+                              {t}
+                            </span>
+                          );
+                        })}
+                      </div>
                     )}
                     {f.headPhone && <p className="flex items-center gap-1"><Phone className="w-3 h-3" />{f.headPhone}</p>}
                     {f.address && <p className="flex items-center gap-1 truncate"><MapPin className="w-3 h-3 flex-shrink-0" />{f.address}</p>}
@@ -211,14 +226,14 @@ function StatCard({ icon, label, value, color, bg, suffix, onClick, clickable }:
 }) {
   return (
     <div
-      className={"bg-white rounded-xl border shadow-sm p-4 hover:shadow-md transition-all text-center" + (clickable ? " cursor-pointer hover:border-primary-300" : "")}
+      className={"bg-white rounded-lg border shadow-sm p-3 hover:shadow-md transition-all text-center" + (clickable ? " cursor-pointer hover:border-primary-300" : "")}
       onClick={onClick}
     >
-      <div className={"p-2.5 rounded-lg inline-block " + bg}>
+      <div className={"p-1.5 rounded-lg inline-block " + bg}>
         <span className={color}>{icon}</span>
       </div>
-      <p className="mt-2 text-xl font-bold text-gray-900">{value != null ? value.toLocaleString() : "--"}{suffix || ""}</p>
-      <p className="text-xs text-gray-500 mt-0.5">{label}</p>
+      <p className="mt-1.5 text-base font-bold text-gray-900">{value != null ? value.toLocaleString() : "--"}{suffix || ""}</p>
+      <p className="text-[11px] text-gray-500">{label}</p>
     </div>
   );
 }

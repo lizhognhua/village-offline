@@ -5,7 +5,7 @@ import { ArrowLeft, Footprints, Heart, User, Calendar, FileText, Save, Users, X,
 import RichTextEditor from '@/components/RichTextEditor';
 
 const STATUS_TAGS = ['在家', '外出务工', '出门', '健康', '生病', '其他'];
-const STAFF_OPTIONS = ['局领导','县领导','乡领导','肖慧军','李中华','马威','村委会','屯组长','医疗行业','民政'];
+const GENERIC_STAFF = ['局领导','县领导','乡领导','村委会','屯组长','医疗行业','民政'];
 
 export default function EditVisitPage() {
   const router = useRouter();
@@ -22,9 +22,21 @@ export default function EditVisitPage() {
     staff: [] as string[],
   });
   const [customStaffInput, setCustomStaffInput] = useState('');
+  const [staffOptions, setStaffOptions] = useState<string[]>(GENERIC_STAFF);
   const [existingPhotos, setExistingPhotos] = useState<string[]>([]);
   const [newPhotoFiles, setNewPhotoFiles] = useState<File[]>([]);
   const [newPhotoPreviews, setNewPhotoPreviews] = useState<string[]>([]);
+
+  useEffect(() => {
+    // Fetch team members for dynamic staff list
+    fetch("/api/team-members")
+      .then(r => r.json())
+      .then(d => {
+        var names = (d.members || []).map((m: any) => m.name).filter(Boolean);
+        setStaffOptions([...GENERIC_STAFF, ...names]);
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     async function loadData() {
@@ -266,14 +278,14 @@ export default function EditVisitPage() {
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700 mb-2">走访/慰问人员</label>
           <div className="flex flex-wrap gap-2">
-            {STAFF_OPTIONS.map(s=>(
+            {staffOptions.map(s=>(
               <button key={s} type="button" onClick={()=>toggleStaff(s)}
                 className={"px-3 py-1.5 text-sm rounded-full border transition-colors "+(form.staff.includes(s)?'bg-emerald-700 text-white border-emerald-700':'bg-white text-gray-600 border-gray-300 hover:border-emerald-400')}>{s}</button>
             ))}
           </div>
-          {form.staff.filter(s=>!STAFF_OPTIONS.includes(s)).length>0&&<div className="flex flex-wrap gap-1 mt-2">
-            {form.staff.filter(s=>!STAFF_OPTIONS.includes(s)).map(s=>
-              <span key={s} className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs">{s}<button onClick={()=>toggleStaff(s)} className="hover:text-red-500"><X className="w-3 h-3"/></button></span>)}
+          {form.staff.filter(function(s) { return !GENERIC_STAFF.includes(s); }).length > 0 && <div className="flex flex-wrap gap-1 mt-2">
+            {form.staff.filter(function(s) { return !GENERIC_STAFF.includes(s); }).map(function(s) { return (
+              <span key={s} className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs">{s}<button onClick={()=>toggleStaff(s)} className="hover:text-red-500"><X className="w-3 h-3"/></button></span>); })}
           </div>}
           <div className="mt-2 flex gap-2">
             <input type="text" value={customStaffInput} placeholder="其他人员..."

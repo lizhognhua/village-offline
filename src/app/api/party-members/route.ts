@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { rules } from "@/lib/validators";
+import { rules, clean } from "@/lib/validators";
 import { requireAuth } from "@/lib/auth-utils";
 import { sanitizeObject } from "@/lib/sanitize";
 import { auth } from "@/auth";
@@ -44,7 +44,7 @@ export async function GET(req: NextRequest) {
         avatar: null,
         note: "（来自农户标记）",
         isActive: true,
-        _virtual: true, // 标记为虚拟记录
+        _virtual: true,
       }));
 
     const members = [...partyMembers, ...virtualMembers];
@@ -62,6 +62,15 @@ export async function POST(req: NextRequest) {
     let body = await req.json()
     body = sanitizeObject(body);
     if (!body.name) return NextResponse.json({ error: "缺少姓名" }, { status: 400 });
+
+    // 数据校验
+    const vErr = rules.partyMember(body);
+    if (vErr) return NextResponse.json({ error: vErr }, { status: 400 });
+
+    // 清洗
+    if (body.name) body.name = clean.name(body.name);
+    if (body.phone) body.phone = clean.phone(body.phone);
+
     const member = await prisma.partyMember.create({ data: body });
     return NextResponse.json(member, { status: 201 });
   } catch (error: any) {
@@ -78,6 +87,13 @@ export async function PUT(req: NextRequest) {
     body = sanitizeObject(body);
     const { id, ...data } = body;
     if (!id) return NextResponse.json({ error: "缺少ID" }, { status: 400 });
+
+    const vErr = rules.partyMember(data);
+    if (vErr) return NextResponse.json({ error: vErr }, { status: 400 });
+
+    if (data.name) data.name = clean.name(data.name);
+    if (data.phone) data.phone = clean.phone(data.phone);
+
     const member = await prisma.partyMember.update({ where: { id }, data });
     return NextResponse.json(member);
   } catch (error: any) {
