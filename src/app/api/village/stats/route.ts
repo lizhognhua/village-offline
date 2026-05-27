@@ -21,21 +21,24 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({
       stats: {
-        households: totalFamilies,
-        population: populationSum._sum.population ?? 0,
+        // Order: VillageProfile (manual) > Family table (computed) > 0
+        households: profile?.registeredHouseholds ?? totalFamilies,
+        population: profile?.registeredPopulation ?? (populationSum._sum.population ?? 0),
         cultivatedLand: profile?.cultivatedLand ?? 0,
         totalFamilies,
         totalMembers,
         recentVisits,
         activeProjects,
-        poorHouseholds,
-        monitoredHouseholds,
-        dibaoHouseholds,
-        wubaoHouseholds,
+        poorHouseholds: profile?.poorHouseholds ?? poorHouseholds,
+        monitoredHouseholds: profile?.monitoredHouseholds ?? monitoredHouseholds,
+        dibaoHouseholds: profile?.dibaoHouseholds ?? dibaoHouseholds,
+        wubaoHouseholds: profile?.wubaoHouseholds ?? wubaoHouseholds,
         normalHouseholds,
         partyMembers: profile?.partyMembers ?? 0,
         villageIncome: profile?.villageIncome ?? 0,
         operatingIncome: profile?.operatingIncome ?? 0,
+        relocatedHouseholds: profile?.relocatedHouseholds ?? 0,
+        relocatedPopulation: profile?.relocatedPopulation ?? 0,
       },
     });
   } catch (error) {

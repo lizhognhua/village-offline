@@ -1,0 +1,91 @@
+{
+  "summary": {
+    "total": 16,
+    "pass": 13,
+    "warn": 3,
+    "fail": 0
+  },
+  "results": [
+    {
+      "module": "登录",
+      "status": "PASS",
+      "detail": "登录成功，仪表盘渲染正常"
+    },
+    {
+      "module": "村情概况",
+      "status": "WARN",
+      "detail": "未找到关键词 \"屯\""
+    },
+    {
+      "module": "农户管理",
+      "status": "WARN",
+      "detail": "未找到关键词 \"户主\""
+    },
+    {
+      "module": "走访慰问",
+      "status": "PASS",
+      "detail": "页面正常渲染 (6511 字符)"
+    },
+    {
+      "module": "党建专栏",
+      "status": "PASS",
+      "detail": "页面正常渲染 (6510 字符)"
+    },
+    {
+      "module": "产业管理",
+      "status": "PASS",
+      "detail": "页面正常渲染 (6513 字符)"
+    },
+    {
+      "module": "履职全景",
+      "status": "PASS",
+      "detail": "页面正常渲染 (6516 字符)"
+    },
+    {
+      "module": "驻村日记",
+      "status": "PASS",
+      "detail": "页面正常渲染 (6510 字符)"
+    },
+    {
+      "module": "档案管理",
+      "status": "PASS",
+      "detail": "页面正常渲染 (6512 字符)"
+    },
+    {
+      "module": "百姓办事",
+      "status": "PASS",
+      "detail": "页面正常渲染 (6519 字符)"
+    },
+    {
+      "module": "防返贫预警",
+      "status": "PASS",
+      "detail": "页面正常渲染 (6511 字符)"
+    },
+    {
+      "module": "系统设置",
+      "status": "WARN",
+      "detail": "未找到关键词 \"admin\""
+    },
+    {
+      "module": "地图标记",
+      "status": "PASS",
+      "detail": "页面正常渲染 (6508 字符)"
+    },
+    {
+      "module": "AI笔杆子",
+      "status": "PASS",
+      "detail": "页面正常渲染 (5479 字符)"
+    },
+    {
+      "module": "培训记录",
+      "status": "PASS",
+      "detail": "页面正常渲染 (6521 字符)"
+    },
+    {
+      "module": "数据导入",
+      "status": "PASS",
+      "detail": "导入界面测试"
+    }
+  ],
+  "timestamp": "2026-05-26T11:25:31.632Z"
+}

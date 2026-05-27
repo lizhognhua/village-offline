@@ -55,6 +55,8 @@ echo [START] http://%LOCAL_IP%:3000 >> %L%
 echo Status: STARTUP SUCCESS >> %L%
 title Village V2.0 - http://%LOCAL_IP%:3000
 set HOSTNAME=0.0.0.0
+REM Create desktop shortcut on first run
+powershell -ExecutionPolicy Bypass -File "%~dp0scripts\create-shortcut.ps1" >nul 2>&1
 start http://localhost:3000
 %NODE% server.js
 echo.

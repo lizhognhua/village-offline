@@ -42,6 +42,17 @@ export default function DashboardPage() {
 
   const userName = session?.user?.name || "驻村干部";
 
+  // Fetch real-time user name from DB (JWT may have stale name after admin edit)
+  const [displayName, setDisplayName] = useState(userName);
+  useEffect(() => {
+    setDisplayName(userName);
+    if (session?.user?.id) {
+      fetch("/api/user/me").then(r => r.json()).then(d => {
+        if (d?.user?.name) setDisplayName(d.user.name);
+      }).catch(() => {});
+    }
+  }, [session]);
+
   useEffect(() => {
     Promise.all([
       fetch("/api/dashboard/stats").then(r => r.json()),
@@ -107,7 +118,7 @@ export default function DashboardPage() {
         <div className="flex-[2] bg-gradient-to-br from-blue-900 to-blue-600 rounded-xl p-6 text-white relative overflow-hidden">
           <div className="absolute right-0 bottom-0 w-40 h-40 bg-white/5 rounded-full translate-x-10 translate-y-10" />
           <h2 className="text-lg font-semibold mb-1.5 relative z-10 leading-relaxed">
-            尊敬的<span className="text-yellow-300">{userName}</span>同志，<br />
+            尊敬的<span className="text-yellow-300">{displayName}</span>同志，<br />
             {workDays > 0 ? (
               <>今天是您加入驻村帮扶大家庭的第 <span className="text-yellow-300">{workDays}</span> 天</>
             ) : (

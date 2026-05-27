@@ -81,6 +81,8 @@ model VillageProfile {
   poorHouseholds       Int?
   monitoredHouseholds  Int?
   dibaoHouseholds      Int?
+  relocatedHouseholds  Int?
+  relocatedPopulation  Int?
   villageSecretary     String?
   secretaryPhone       String?
   fillPerson           String   @default("肖慧军")

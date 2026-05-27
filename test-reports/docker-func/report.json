@@ -1,0 +1,130 @@
+{
+  "summary": {
+    "pass": 22,
+    "fail": 2,
+    "total": 24
+  },
+  "results": [
+    {
+      "module": "登录认证",
+      "ok": true,
+      "detail": "成功进入仪表盘"
+    },
+    {
+      "module": "仪表盘-统计卡片",
+      "ok": true,
+      "detail": "统计数据正常显示"
+    },
+    {
+      "module": "仪表盘-快捷入口",
+      "ok": true,
+      "detail": "38 个可交互元素"
+    },
+    {
+      "module": "仪表盘-导航菜单",
+      "ok": true,
+      "detail": "17 个导航项"
+    },
+    {
+      "module": "村情概况-页面",
+      "ok": true,
+      "detail": "村情数据正常展示"
+    },
+    {
+      "module": "农户管理-列表",
+      "ok": false,
+      "detail": "农户列表正常加载"
+    },
+    {
+      "module": "农户管理-数据行",
+      "ok": false,
+      "detail": "0 行数据"
+    },
+    {
+      "module": "农户管理-详情",
+      "ok": true,
+      "detail": "无详情链接（可能表格结构不同）"
+    },
+    {
+      "module": "走访慰问-页面",
+      "ok": true,
+      "detail": "正常渲染 (5546 字符)"
+    },
+    {
+      "module": "党建专栏-页面",
+      "ok": true,
+      "detail": "正常渲染 (5270 字符)"
+    },
+    {
+      "module": "党建-党员列表",
+      "ok": true,
+      "detail": "党员列表正常"
+    },
+    {
+      "module": "产业管理-页面",
+      "ok": true,
+      "detail": "正常渲染 (5202 字符)"
+    },
+    {
+      "module": "项目看板-页面",
+      "ok": true,
+      "detail": "正常渲染 (5250 字符)"
+    },
+    {
+      "module": "驻村日记-页面",
+      "ok": true,
+      "detail": "正常渲染 (7002 字符)"
+    },
+    {
+      "module": "驻村日记-新建入口",
+      "ok": true,
+      "detail": "新建按钮存在"
+    },
+    {
+      "module": "预警总览-页面",
+      "ok": true,
+      "detail": "正常渲染 (6529 字符)"
+    },
+    {
+      "module": "系统设置-标签页",
+      "ok": true,
+      "detail": "3/7 个标签可见"
+    },
+    {
+      "module": "地图标记-页面",
+      "ok": true,
+      "detail": "正常渲染 (30943 字符)"
+    },
+    {
+      "module": "AI笔杆子-页面",
+      "ok": true,
+      "detail": "AI写作界面正常"
+    },
+    {
+      "module": "数据导入-页面",
+      "ok": true,
+      "detail": "导入界面正常"
+    },
+    {
+      "module": "百姓办事-页面",
+      "ok": true,
+      "detail": "正常渲染 (5367 字符)"
+    },
+    {
+      "module": "知识库-页面",
+      "ok": true,
+      "detail": "正常渲染 (5430 字符)"
+    },
+    {
+      "module": "档案管理-页面",
+      "ok": true,
+      "detail": "正常渲染 (6986 字符)"
+    },
+    {
+      "module": "培训记录-页面",
+      "ok": true,
+      "detail": "正常渲染 (5546 字符)"
+    }
+  ],
+  "timestamp": "2026-05-26T12:07:14.940Z"
+}

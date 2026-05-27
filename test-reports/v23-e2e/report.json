@@ -1,0 +1,106 @@
+{
+  "summary": {
+    "total": 19,
+    "pass": 18,
+    "warn": 0,
+    "fail": 1
+  },
+  "results": [
+    {
+      "module": "登录认证",
+      "status": "PASS",
+      "detail": "admin 登录成功 → 仪表盘"
+    },
+    {
+      "module": "智能工作台",
+      "status": "FAIL",
+      "detail": "page.goto: net::ERR_FAILED at http://localhost:3000/dashboard\nCall log:\n\u001b[2m  - "
+    },
+    {
+      "module": "村情概况",
+      "status": "PASS",
+      "detail": "页面正常渲染"
+    },
+    {
+      "module": "农户管理",
+      "status": "PASS",
+      "detail": "页面正常渲染"
+    },
+    {
+      "module": "走访慰问",
+      "status": "PASS",
+      "detail": "页面正常渲染"
+    },
+    {
+      "module": "党建专栏",
+      "status": "PASS",
+      "detail": "页面正常渲染"
+    },
+    {
+      "module": "产业管理",
+      "status": "PASS",
+      "detail": "页面正常渲染"
+    },
+    {
+      "module": "履职全景",
+      "status": "PASS",
+      "detail": "页面正常渲染"
+    },
+    {
+      "module": "驻村日记",
+      "status": "PASS",
+      "detail": "页面正常渲染"
+    },
+    {
+      "module": "档案管理",
+      "status": "PASS",
+      "detail": "页面正常渲染"
+    },
+    {
+      "module": "百姓办事",
+      "status": "PASS",
+      "detail": "页面正常渲染"
+    },
+    {
+      "module": "防返贫预警",
+      "status": "PASS",
+      "detail": "页面正常渲染"
+    },
+    {
+      "module": "系统设置",
+      "status": "PASS",
+      "detail": "页面正常渲染"
+    },
+    {
+      "module": "地图标记",
+      "status": "PASS",
+      "detail": "页面正常渲染"
+    },
+    {
+      "module": "AI笔杆子",
+      "status": "PASS",
+      "detail": "页面正常渲染"
+    },
+    {
+      "module": "培训记录",
+      "status": "PASS",
+      "detail": "页面正常渲染"
+    },
+    {
+      "module": "知识库",
+      "status": "PASS",
+      "detail": "页面正常渲染"
+    },
+    {
+      "module": "相册管理",
+      "status": "PASS",
+      "detail": "页面正常渲染"
+    },
+    {
+      "module": "数据导入",
+      "status": "PASS",
+      "detail": "导入界面正常"
+    }
+  ],
+  "timestamp": "2026-05-26T11:22:16.263Z"
+}

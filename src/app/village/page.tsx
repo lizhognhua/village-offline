@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import {
   Users, Search, ChevronLeft, ChevronRight, Plus,
@@ -25,6 +25,7 @@ interface VillageStats {
   totalFamilies: number; recentVisits: number;
   poorHouseholds: number; monitoredHouseholds: number;
   dibaoHouseholds: number; wubaoHouseholds: number;
+  relocatedHouseholds: number; relocatedPopulation: number;
   villageIncome: number;
   activeProjects: number;
 }
@@ -42,6 +43,15 @@ export default function VillagePage() {
   var [cat, setCat] = useState("全部");
   var [search, setSearch] = useState("");
   var limit = 25;
+  var catRef = useRef<HTMLDivElement>(null);
+
+  var scrollToCat = function(c: string) {
+    setCat(c);
+    setPage(1);
+    setTimeout(function() {
+      catRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 100);
+  };
 
   useEffect(function() {
     fetch("/api/village/groups").then(function(r) { return r.json(); }).then(setGroups).catch(console.error);
@@ -83,10 +93,12 @@ export default function VillagePage() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
           <StatCard icon={<Home className="w-5 h-5" />} label="户籍户数" value={stats.households} color="text-indigo-600" bg="bg-indigo-50" />
           <StatCard icon={<Users className="w-5 h-5" />} label="户籍人口" value={stats.population} color="text-blue-600" bg="bg-blue-50" />
-          <StatCard icon={<UserCheck className="w-5 h-5" />} label="脱贫户" value={stats.poorHouseholds} color="text-emerald-600" bg="bg-emerald-50" />
-          <StatCard icon={<UserCheck className="w-5 h-5" />} label="监测户" value={stats.monitoredHouseholds} color="text-orange-600" bg="bg-orange-50" />
+          <StatCard icon={<UserCheck className="w-5 h-5" />} label="脱贫户" value={stats.poorHouseholds} color="text-emerald-600" bg="bg-emerald-50" onClick={function() { scrollToCat("脱贫户"); }} clickable />
+          <StatCard icon={<UserCheck className="w-5 h-5" />} label="监测户" value={stats.monitoredHouseholds} color="text-orange-600" bg="bg-orange-50" onClick={function() { scrollToCat("监测户"); }} clickable />
           <StatCard icon={<LandPlot className="w-5 h-5" />} label="耕地(亩)" value={stats.cultivatedLand} color="text-green-600" bg="bg-green-50" />
           <StatCard icon={<DollarSign className="w-5 h-5" />} label="集体收入" value={stats.villageIncome} color="text-rose-600" bg="bg-rose-50" suffix="万" />
+          <StatCard icon={<Heart className="w-5 h-5" />} label="低保户" value={stats.dibaoHouseholds} color="text-blue-600" bg="bg-blue-50" onClick={function() { scrollToCat("低保户"); }} clickable />
+          <StatCard icon={<Home className="w-5 h-5" />} label="异地搬迁户" value={stats.relocatedHouseholds} color="text-teal-600" bg="bg-teal-50" suffix={"户/" + (stats.relocatedPopulation || 0) + "人"} />
           <StatCard icon={<Footprints className="w-5 h-5" />} label="本年走访" value={stats.recentVisits} color="text-amber-600" bg="bg-amber-50" />
           <StatCard icon={<Wheat className="w-5 h-5" />} label="产业项目" value={stats.activeProjects} color="text-purple-600" bg="bg-purple-50" />
         </div>
@@ -118,7 +130,7 @@ export default function VillagePage() {
       </div>
 
       {/* Category filter */}
-      <div className="flex gap-1.5 flex-wrap">
+      <div ref={catRef} className="flex gap-1.5 flex-wrap">
         {CATS.map(function(c) {
           return (
             <button key={c} onClick={function() { setCat(c); setPage(1); }}
@@ -193,11 +205,15 @@ export default function VillagePage() {
   );
 }
 
-function StatCard({ icon, label, value, color, bg, suffix }: {
+function StatCard({ icon, label, value, color, bg, suffix, onClick, clickable }: {
   icon: React.ReactNode; label: string; value: number; color: string; bg: string; suffix?: string;
+  onClick?: () => void; clickable?: boolean;
 }) {
   return (
-    <div className="bg-white rounded-xl border shadow-sm p-4 hover:shadow-md transition-all text-center">
+    <div
+      className={"bg-white rounded-xl border shadow-sm p-4 hover:shadow-md transition-all text-center" + (clickable ? " cursor-pointer hover:border-primary-300" : "")}
+      onClick={onClick}
+    >
       <div className={"p-2.5 rounded-lg inline-block " + bg}>
         <span className={color}>{icon}</span>
       </div>

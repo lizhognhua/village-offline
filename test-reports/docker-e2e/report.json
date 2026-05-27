@@ -1,0 +1,131 @@
+{
+  "summary": {
+    "total": 24,
+    "pass": 17,
+    "warn": 0,
+    "fail": 7
+  },
+  "results": [
+    {
+      "module": "下载页面",
+      "status": "PASS",
+      "detail": "正常渲染 (7143 字符)"
+    },
+    {
+      "module": "登录认证",
+      "status": "PASS",
+      "detail": "登录成功 → 仪表盘"
+    },
+    {
+      "module": "村情概况",
+      "status": "FAIL",
+      "detail": "会话丢失，重定向到登录页"
+    },
+    {
+      "module": "农户管理",
+      "status": "FAIL",
+      "detail": "HTTP 404"
+    },
+    {
+      "module": "走访慰问",
+      "status": "FAIL",
+      "detail": "会话丢失，重定向到登录页"
+    },
+    {
+      "module": "党建专栏",
+      "status": "PASS",
+      "detail": "正常渲染 (5233 字符)"
+    },
+    {
+      "module": "产业管理",
+      "status": "PASS",
+      "detail": "正常渲染 (5152 字符)"
+    },
+    {
+      "module": "项目看板",
+      "status": "PASS",
+      "detail": "正常渲染 (5205 字符)"
+    },
+    {
+      "module": "驻村日记",
+      "status": "PASS",
+      "detail": "正常渲染 (6788 字符)"
+    },
+    {
+      "module": "档案管理",
+      "status": "FAIL",
+      "detail": "会话丢失，重定向到登录页"
+    },
+    {
+      "module": "百姓办事",
+      "status": "PASS",
+      "detail": "正常渲染 (5312 字符)"
+    },
+    {
+      "module": "预警总览",
+      "status": "PASS",
+      "detail": "正常渲染 (6481 字符)"
+    },
+    {
+      "module": "系统设置",
+      "status": "PASS",
+      "detail": "正常渲染 (6542 字符)"
+    },
+    {
+      "module": "地图标记",
+      "status": "PASS",
+      "detail": "正常渲染 (27233 字符)"
+    },
+    {
+      "module": "AI笔杆子",
+      "status": "PASS",
+      "detail": "正常渲染 (5243 字符)"
+    },
+    {
+      "module": "培训记录",
+      "status": "FAIL",
+      "detail": "会话丢失，重定向到登录页"
+    },
+    {
+      "module": "知识库",
+      "status": "PASS",
+      "detail": "正常渲染 (5377 字符)"
+    },
+    {
+      "module": "履职全景",
+      "status": "PASS",
+      "detail": "正常渲染 (5472 字符)"
+    },
+    {
+      "module": "相册管理",
+      "status": "FAIL",
+      "detail": "会话丢失，重定向到登录页"
+    },
+    {
+      "module": "数据导入",
+      "status": "PASS",
+      "detail": "正常渲染 (5022 字符)"
+    },
+    {
+      "module": "天气信息",
+      "status": "PASS",
+      "detail": "正常渲染 (5085 字符)"
+    },
+    {
+      "module": "问责管理",
+      "status": "PASS",
+      "detail": "正常渲染 (5228 字符)"
+    },
+    {
+      "module": "慰问记录",
+      "status": "FAIL",
+      "detail": "page.goto: net::ERR_FAILED at https://zc.lizhonghua.vip:8002/condolences\nCall log:\n\u001b[2m  - navigating to \"https://zc.liz"
+    },
+    {
+      "module": "公告管理",
+      "status": "PASS",
+      "detail": "正常渲染 (5061 字符)"
+    }
+  ],
+  "timestamp": "2026-05-26T11:56:41.324Z"
+}

@@ -2,11 +2,12 @@
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { Settings, Save, Users, MapPin, Building, Info, Plus, X, Pencil, Trash2, Check, Key, Navigation, RefreshCw, Database, Upload, Bot, FileSpreadsheet } from "lucide-react";
+import { Settings, Save, Users, MapPin, Building, Info, Plus, X, Pencil, Trash2, Check, Key, Navigation, RefreshCw, Database, Upload, Bot, FileSpreadsheet, Lock } from "lucide-react";
 import { ImportSettings } from "@/components/ImportSettings";
 
 const TABS = [
   { key: "basic", label: "基本信息", icon: Info },
+  { key: "password", label: "修改密码", icon: Lock },
   { key: "village", label: "村情概况", icon: Building },
   { key: "groups", label: "屯组管理", icon: MapPin },
   { key: "members", label: "队员管理", icon: Users },
@@ -48,6 +49,7 @@ export default function SettingsPage() {
       </div>
 
       {tab === "basic" && <BasicSettings />}
+      {tab === "password" && <ChangePassword />}
       {tab === "village" && <VillageProfileSettings />}
       {tab === "groups" && <GroupSettings />}
       {tab === "members" && <MemberSettings />}
@@ -138,6 +140,63 @@ function BasicSettings() {
   );
 }
 
+// ========== 修改密码 ==========
+
+function ChangePassword() {
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [msg, setMsg] = useState("");
+
+  const handleChange = async (e: React.FormEvent) => {
+    e.preventDefault(); setMsg("");
+    if (newPassword.length < 6) { setMsg("新密码至少6位"); return; }
+    if (newPassword !== confirmPassword) { setMsg("两次输入的新密码不一致"); return; }
+    setSaving(true);
+    try {
+      const r = await fetch("/api/user/change-password", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ currentPassword, newPassword }),
+      });
+      const d = await r.json();
+      if (r.ok) { setMsg("密码修改成功"); setCurrentPassword(""); setNewPassword(""); setConfirmPassword(""); }
+      else setMsg(d.error || "修改失败");
+    } catch { setMsg("网络错误"); }
+    setSaving(false);
+  };
+
+  return (
+    <form onSubmit={handleChange} className="bg-white rounded-xl border shadow-sm p-6 space-y-4">
+      <h2 className="text-lg font-semibold text-gray-800">修改密码</h2>
+      <div className="max-w-sm space-y-3">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">当前密码</label>
+          <input type="password" value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} required
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none" />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">新密码</label>
+          <input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} required minLength={6}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none" />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">确认新密码</label>
+          <input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} required minLength={6}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none" />
+        </div>
+      </div>
+      <div className="flex items-center gap-3 pt-2">
+        <button type="submit" disabled={saving} className="flex items-center gap-1.5 px-4 py-2 bg-primary-700 text-white rounded-lg text-sm hover:bg-primary-800 disabled:opacity-50">
+          <Save className="w-4 h-4" /> {saving ? "修改中..." : "修改密码"}
+        </button>
+        {msg && <span className={"text-sm " + (msg.includes("成功") ? "text-green-600" : "text-red-500")}>{msg}</span>}
+      </div>
+    </form>
+  );
+}
+
 // ========== 村情概况 ==========
 
 function VillageProfileSettings() {
@@ -180,6 +239,8 @@ function VillageProfileSettings() {
     { key: "poorHouseholds", label: "脱贫户数", type: "number" },
     { key: "monitoredHouseholds", label: "监测户数", type: "number" },
     { key: "dibaoHouseholds", label: "低保户数", type: "number" },
+    { key: "relocatedHouseholds", label: "异地搬迁户户数", type: "number" },
+    { key: "relocatedPopulation", label: "异地搬迁户人数", type: "number" },
   ];
 
   return (
@@ -216,7 +277,7 @@ function GroupSettings() {
   const [error, setError] = useState("");
 
   const load = () => {
-    fetch("/api/village/groups").then(r => r.json()).then(d => setGroups(d.groups || d || [])).catch(() => {});
+    fetch("/api/village/groups?_t=" + Date.now()).then(r => r.json()).then(d => setGroups(d.groups || d || [])).catch(() => {});
   };
   useEffect(() => { load(); }, []);
 

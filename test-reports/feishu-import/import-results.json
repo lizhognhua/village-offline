@@ -1,0 +1,199 @@
+{
+  "summary": {
+    "imported": 38,
+    "errors": 0,
+    "skipped": 0
+  },
+  "results": [
+    {
+      "name": "崔德有",
+      "status": "imported",
+      "familyId": "cmpn9r74f0001tkavo4nn0i90"
+    },
+    {
+      "name": "马春生",
+      "status": "imported",
+      "familyId": "cmpn9r77p0003tkavr8kzl239"
+    },
+    {
+      "name": "赵佰军",
+      "status": "imported",
+      "familyId": "cmpn9r79x0005tkav3froy52o"
+    },
+    {
+      "name": "丁宪文",
+      "status": "imported",
+      "familyId": "cmpn9r7c60007tkavi5wfj7dk"
+    },
+    {
+      "name": "赵树友",
+      "status": "imported",
+      "familyId": "cmpn9r7es0009tkavd7tyi6fr"
+    },
+    {
+      "name": "邵春录",
+      "status": "imported",
+      "familyId": "cmpn9r7gy000btkavqlabnnjw"
+    },
+    {
+      "name": "刘凤金",
+      "status": "imported",
+      "familyId": "cmpn9r7j1000dtkavvwlns9k7"
+    },
+    {
+      "name": "吴振清",
+      "status": "imported",
+      "familyId": "cmpn9r7l1000ftkavx2mtmg44"
+    },
+    {
+      "name": "郭宝臣",
+      "status": "imported",
+      "familyId": "cmpn9r7mz000htkavi7ucxthx"
+    },
+    {
+      "name": "孙有江",
+      "status": "imported",
+      "familyId": "cmpn9r7pj000jtkavgaqis2tx"
+    },
+    {
+      "name": "邢霞",
+      "status": "imported",
+      "familyId": "cmpn9r7sl000ltkavf2kp1h3e"
+    },
+    {
+      "name": "禹国鑫",
+      "status": "imported",
+      "familyId": "cmpn9r7y2000ntkavukjd4yr2"
+    },
+    {
+      "name": "王喜有",
+      "status": "imported",
+      "familyId": "cmpn9r849000ptkavp06q7c0n"
+    },
+    {
+      "name": "张树忠",
+      "status": "imported",
+      "familyId": "cmpn9r8fj000rtkav6a8aaqcg"
+    },
+    {
+      "name": "吕海成",
+      "status": "imported",
+      "familyId": "cmpn9r8qs000ttkavyx9ma437"
+    },
+    {
+      "name": "张千",
+      "status": "imported",
+      "familyId": "cmpn9r90q000vtkavkihia7wl"
+    },
+    {
+      "name": "陈凤义",
+      "status": "imported",
+      "familyId": "cmpn9r9aa000xtkavzdy13o1x"
+    },
+    {
+      "name": "李永久",
+      "status": "imported",
+      "familyId": "cmpn9r9fu000ztkavutm7ybxm"
+    },
+    {
+      "name": "吴贵校",
+      "status": "imported",
+      "familyId": "cmpn9r9mg0011tkavmwcsib69"
+    },
+    {
+      "name": "崔海全",
+      "status": "imported",
+      "familyId": "cmpn9r9r40013tkav3dh2j3u8"
+    },
+    {
+      "name": "吴广金",
+      "status": "imported",
+      "familyId": "cmpn9ra2e0015tkavar4xxjqq"
+    },
+    {
+      "name": "邵春军",
+      "status": "imported",
+      "familyId": "cmpn9ra4f0017tkavpq4truf8"
+    },
+    {
+      "name": "倪显廷",
+      "status": "imported",
+      "familyId": "cmpn9ra6a0019tkavpu1blsp1"
+    },
+    {
+      "name": "李玉芝",
+      "status": "imported",
+      "familyId": "cmpn9ra8t001btkavzo9e037a"
+    },
+    {
+      "name": "黄纯",
+      "status": "imported",
+      "familyId": "cmpn9rab3001dtkava7mgamxw"
+    },
+    {
+      "name": "赵树林",
+      "status": "imported",
+      "familyId": "cmpn9rada001ftkav4sbovk6b"
+    },
+    {
+      "name": "胡景龙",
+      "status": "imported",
+      "familyId": "cmpn9rahp001htkavkgpmm0d5"
+    },
+    {
+      "name": "孙福全",
+      "status": "imported",
+      "familyId": "cmpn9ralk001jtkavr08ynm2p"
+    },
+    {
+      "name": "赵树文",
+      "status": "imported",
+      "familyId": "cmpn9rapn001ltkavx2ydhk9e"
+    },
+    {
+      "name": "田德红",
+      "status": "imported",
+      "familyId": "cmpn9ratk001ntkav6argihly"
+    },
+    {
+      "name": "李树仁",
+      "status": "imported",
+      "familyId": "cmpn9raxw001ptkav3ics6lhu"
+    },
+    {
+      "name": "胡恩云",
+      "status": "imported",
+      "familyId": "cmpn9rb0a001rtkavw6ov75g4"
+    },
+    {
+      "name": "吕志柏",
+      "status": "imported",
+      "familyId": "cmpn9rb36001ttkavrsnb0tln"
+    },
+    {
+      "name": "禹学国",
+      "status": "imported",
+      "familyId": "cmpn9rb5i001vtkavrwvn9421"
+    },
+    {
+      "name": "刘成",
+      "status": "imported",
+      "familyId": "cmpn9rb7x001xtkavr7ep82lu"
+    },
+    {
+      "name": "刘凤伍",
+      "status": "imported",
+      "familyId": "cmpn9rbae001ztkavur53d9rw"
+    },
+    {
+      "name": "姚树仁",
+      "status": "imported",
+      "familyId": "cmpn9rbcf0021tkava966897m"
+    },
+    {
+      "name": "刘忠富",
+      "status": "imported",
+      "familyId": "cmpn9rbf70023tkav7rn8s0ic"
+    }
+  ]
+}

@@ -10,6 +10,8 @@ export async function GET() {
       orderBy: { sortOrder: "asc" },
       include: { _count: { select: { families: true } } },
     });
-    return NextResponse.json(groups);
+    return NextResponse.json(groups, {
+      headers: { "Cache-Control": "no-cache, no-store, must-revalidate" },
+    });
   } catch (error: any) { return NextResponse.json({ error: "服务器内部错误" }, { status: 500 }); }
 }
