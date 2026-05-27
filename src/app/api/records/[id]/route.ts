@@ -78,18 +78,25 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       }
     }
 
+    const updateData: any = {
+      type: body.type,
+      familyId: body.familyId,
+      content: body.content,
+      statusTags: typeof body.statusTags === "string" ? body.statusTags : JSON.stringify(body.statusTags || []),
+      items: typeof body.items === "string" ? body.items : JSON.stringify(body.items || []),
+      staff: body.staff || null,
+    };
+    if (body.visitDate || body.recordDate) {
+      updateData.recordDate = new Date(body.visitDate || body.recordDate);
+    }
+    // 保护照片：仅当有新照片上传或显式传入 photos 时才更新
+    if (photoPaths.length > 0 || body.photos !== undefined) {
+      updateData.photos = JSON.stringify(photoPaths.length ? photoPaths : body.photos);
+    }
+
     const record = await prisma.householdRecord.update({
       where: { id },
-      data: {
-        type: body.type,
-        familyId: body.familyId,
-        recordDate: (body.visitDate || body.recordDate) ? new Date(body.visitDate || body.recordDate) : undefined,
-        content: body.content,
-        photos: JSON.stringify(photoPaths.length ? photoPaths : (body.photos || "[]")),
-        statusTags: typeof body.statusTags === "string" ? body.statusTags : JSON.stringify(body.statusTags || []),
-        items: typeof body.items === "string" ? body.items : JSON.stringify(body.items || []),
-        staff: body.staff || null,
-      },
+      data: updateData,
     });
 
     return NextResponse.json(record);

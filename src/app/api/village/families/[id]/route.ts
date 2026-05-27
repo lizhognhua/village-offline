@@ -17,6 +17,11 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       include: {
         members: { orderBy: [{ relation: "asc" }, { name: "asc" }] },
         group: { select: { name: true } },
+        visits: { take: 20, orderBy: { visitDate: "desc" }, include: { visitor: { select: { name: true } } } },
+        condolences: { take: 20, orderBy: { condolenceDate: "desc" } },
+        records: { take: 20, orderBy: { recordDate: "desc" } },
+        policies: { take: 20, orderBy: { createdAt: "desc" } },
+        alerts: { take: 20, orderBy: { createdAt: "desc" } },
       },
     });
     if (!family) return NextResponse.json({ error: "未找到" }, { status: 404 });

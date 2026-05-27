@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { ArrowLeft, Footprints, Heart, User, Calendar, FileText, Save } from 'lucide-react';
+import { ArrowLeft, Footprints, Heart, User, Calendar, FileText, Save, Users, X, Image, Plus } from 'lucide-react';
 import RichTextEditor from '@/components/RichTextEditor';
 
 const STATUS_TAGS = ['在家', '外出务工', '出门', '健康', '生病', '其他'];
@@ -13,7 +13,7 @@ export default function EditVisitPage() {
   const [families, setFamilies] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [recType, setRecType] = useState<'visit' | 'condolence'>('visit');
+  const [recType, setRecType] = useState<'visit' | 'condolence' | 'reception'>('visit');
   const [form, setForm] = useState({
     familyId: '',
     visitDate: '',
@@ -22,6 +22,9 @@ export default function EditVisitPage() {
     staff: [] as string[],
   });
   const [customStaffInput, setCustomStaffInput] = useState('');
+  const [existingPhotos, setExistingPhotos] = useState<string[]>([]);
+  const [newPhotoFiles, setNewPhotoFiles] = useState<File[]>([]);
+  const [newPhotoPreviews, setNewPhotoPreviews] = useState<string[]>([]);
 
   useEffect(() => {
     async function loadData() {
@@ -88,6 +91,17 @@ export default function EditVisitPage() {
   const toggleStaff=(s:string)=>setForm(f=>({...f,staff:f.staff.includes(s)?f.staff.filter(x=>x!==s):[...f.staff,s]}));
   const addCustomStaff=()=>{const n=customStaffInput.trim();if(n&&!form.staff.includes(n)){setForm(f=>({...f,staff:[...f.staff,n]}));setCustomStaffInput('')}};
 
+  const handleAddPhotos = (e: any) => {
+    const files = e.target.files;
+    if (!files) return;
+    for (let i = 0; i < files.length; i++) {
+      setNewPhotoFiles(p => [...p, files[i]]);
+      setNewPhotoPreviews(p => [...p, URL.createObjectURL(files[i])]);
+    }
+  };
+  const removeNewPhoto = (i: number) => { setNewPhotoFiles(p => p.filter((_,j) => j!==i)); setNewPhotoPreviews(p => p.filter((_,j) => j!==i)); };
+  const removeExistingPhoto = (i: number) => { setExistingPhotos(p => p.filter((_,j) => j!==i)); };
+
   const handleSave = async () => {
     if (!form.familyId || !form.content.trim()) {
       alert('请选择农户并填写内容');
@@ -95,18 +109,40 @@ export default function EditVisitPage() {
     }
     setSaving(true);
     try {
-      const res = await fetch('/api/records/' + params.id, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          familyId: form.familyId,
-          visitDate: form.visitDate,
-          content: form.content,
-          type: recType,
-          statusTags: JSON.stringify(form.statusTags),
-          staff: form.staff.join(','),
-        }),
-      });
+      let res;
+      const hasNewPhotos = newPhotoFiles.length > 0;
+      const hasExistingPhotos = existingPhotos.length > 0;
+
+      if (hasNewPhotos) {
+        // Use FormData to upload new photos + preserve existing ones
+        const fd = new FormData();
+        fd.append("familyId", form.familyId);
+        fd.append("visitDate", form.visitDate);
+        fd.append("content", form.content);
+        fd.append("type", recType);
+        fd.append("statusTags", JSON.stringify(form.statusTags));
+        fd.append("staff", form.staff.join(","));
+        if (hasExistingPhotos) {
+          fd.append("photos", JSON.stringify(existingPhotos));
+        }
+        newPhotoFiles.forEach(f => fd.append("photos", f));
+        res = await fetch('/api/records/' + params.id, { method: 'PUT', body: fd });
+      } else {
+        // JSON mode — include existingPhotos so API preserves them
+        res = await fetch('/api/records/' + params.id, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            familyId: form.familyId,
+            visitDate: form.visitDate,
+            content: form.content,
+            type: recType,
+            statusTags: JSON.stringify(form.statusTags),
+            staff: form.staff.join(","),
+            photos: JSON.stringify(existingPhotos),
+          }),
+        });
+      }
       if (res.ok) {
         router.push('/visits');
       } else {
@@ -119,13 +155,13 @@ export default function EditVisitPage() {
             visitDate: form.visitDate,
             content: form.content,
             statusTags: JSON.stringify(form.statusTags),
-          staff: form.staff.join(','),
+            staff: form.staff.join(","),
           }),
         });
         if (res2.ok) {
           router.push('/visits');
         } else {
-          const err = await res.json();
+          const err = await res.json().catch(() => ({}));
           alert('保存失败: ' + (err.error || ''));
         }
       }
@@ -135,6 +171,8 @@ export default function EditVisitPage() {
       setSaving(false);
     }
   };
+
+  const typeLabel = recType === 'visit' ? '走访' : recType === 'condolence' ? '慰问' : '来访';
 
   if (loading) {
     return (
@@ -193,7 +231,7 @@ export default function EditVisitPage() {
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            <Calendar className="w-4 h-4 inline mr-1" />{recType === 'visit' ? '走访' : '慰问'}日期
+            <Calendar className="w-4 h-4 inline mr-1" />{typeLabel}日期
           </label>
           <input
             type="date"
@@ -244,8 +282,32 @@ export default function EditVisitPage() {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            <FileText className="w-4 h-4 inline mr-1" />{recType === 'visit' ? '走访' : '慰问'}内容
+            <FileText className="w-4 h-4 inline mr-1" />{typeLabel}内容
           </label>
+          <RichTextEditor
+            content={form.content}
+            onChange={(html) => setForm((p) => ({ ...p, content: html }))}
+            placeholder="记录走访情况..."
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2"><Image className="w-4 h-4 inline mr-1" />照片</label>
+          {existingPhotos.length > 0 && (<div className="flex flex-wrap gap-2 mb-2">{existingPhotos.map((url, i) => (
+            <div key={'old-'+i} className="relative w-20 h-20 rounded-lg overflow-hidden border group">
+              <img src={url} alt="" className="w-full h-full object-cover" />
+              <button onClick={() => removeExistingPhoto(i)} className="absolute top-0 right-0 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"><X className="w-3 h-3" /></button>
+            </div>))}</div>)}
+          {newPhotoPreviews.length > 0 && (<div className="flex flex-wrap gap-2 mb-2">{newPhotoPreviews.map((url, i) => (
+            <div key={'new-'+i} className="relative w-20 h-20 rounded-lg overflow-hidden border group">
+              <img src={url} alt="" className="w-full h-full object-cover" />
+              <button onClick={() => removeNewPhoto(i)} className="absolute top-0 right-0 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center">×</button>
+            </div>))}</div>)}
+          <label className="inline-flex items-center gap-1.5 px-3 py-2 text-sm border rounded-lg cursor-pointer hover:bg-gray-50">
+            <Plus className="w-4 h-4" /> 添加照片
+            <input type="file" accept="image/*" multiple className="hidden" onChange={handleAddPhotos} />
+          </label>
+        </div>
+        <div>
           <RichTextEditor
             content={form.content}
             onChange={(html) => setForm((p) => ({ ...p, content: html }))}

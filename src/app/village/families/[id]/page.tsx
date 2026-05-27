@@ -5,7 +5,7 @@ import Link from "next/link";
 import {
   ArrowLeft, Phone, MapPin, Users, User, Camera, Save, X, Pencil,
   AlertTriangle, Footprints, Heart, Home, Calendar, Plus, Trash2, Image as ImageIcon,
-  Upload, Link as LinkIcon, FileText, Download, Eye
+  Upload, Link as LinkIcon, FileText, Download, Eye, Map, Navigation
 } from "lucide-react";
 
 var attrColor: Record<string,string> = {
@@ -44,6 +44,7 @@ export default function FamilyDetail() {
   var [editMemberId, setEditMemberId] = useState<string | null>(null);
   var [memberForm, setMemberForm] = useState({ name: "", relation: "", gender: "", idCard: "", phone: "", birthDate: "", education: "", occupation: "", healthStatus: "", healthNote: "" });
   var [memberSaving, setMemberSaving] = useState(false);
+  var [tab, setTab] = useState<"info" | "members" | "timeline" | "map" | "alerts">("info");
 
   // 家庭成员增删改
   var openAddMember = function() { setEditMemberId(null); setMemberForm({ name: "", relation: "", gender: "", idCard: "", phone: "", birthDate: "", education: "", occupation: "", healthStatus: "", healthNote: "" }); setShowMemberForm(true); };
@@ -277,6 +278,31 @@ export default function FamilyDetail() {
         </div>
       </div>
 
+      {/* Tab Bar */}
+      <div className="flex gap-1 bg-gray-100 rounded-lg p-1 overflow-x-auto">
+        {[
+          { key: "info" as const, label: "基本信息", icon: User },
+          { key: "members" as const, label: "家庭成员", icon: Users },
+          { key: "timeline" as const, label: "走访记录", icon: Footprints },
+          { key: "map" as const, label: "地图位置", icon: Map },
+          { key: "alerts" as const, label: "预警信息", icon: AlertTriangle },
+        ].map(function(t) {
+          return (
+            <button key={t.key} onClick={function() { setTab(t.key); }}
+              className={"flex items-center gap-1.5 px-4 py-2 rounded-md text-sm font-medium transition-colors whitespace-nowrap " +
+                (tab === t.key ? "bg-white text-gray-900 shadow-sm" : "text-gray-600 hover:text-gray-900")}>
+              <t.icon className="w-4 h-4" /> {t.label}
+              {t.key === "members" && f.members ? " (" + f.members.length + ")" : ""}
+              {t.key === "timeline" ? " (" + ((f.visits?.length || 0) + (f.records?.length || 0) + (f.condolences?.length || 0)) + ")" : ""}
+              {t.key === "alerts" ? " (" + (f.alerts?.length || 0) + ")" : ""}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Tab: 基本信息 */}
+      {tab === "info" && (<>
+
       {/* Basic Info Card */}
       <div className="bg-white rounded-xl border shadow-sm p-6">
         <h2 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
@@ -496,7 +522,9 @@ export default function FamilyDetail() {
         )}
       </div>
 
-      
+      {/* Tab: 基本信息 — END */}
+      </>)}
+      {tab === "members" && (<>
       {true && (
         <div className="bg-white rounded-xl border shadow-sm p-6">
           <h2 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
@@ -535,6 +563,113 @@ export default function FamilyDetail() {
         </div>
       )}
 
+      {/* Tab: 家庭成员 — END */}
+      </>)}
+
+      {/* Tab: 走访记录 */}
+      {tab === "timeline" && (<>
+        <div className="bg-white rounded-xl border shadow-sm p-6">
+          <h2 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+            <Footprints className="w-4 h-4 text-emerald-600" /> 走访慰问记录
+          </h2>
+          {(() => {
+            var visits = f.visits || [];
+            var condolences = f.condolences || [];
+            var records = f.records || [];
+            var all: any[] = [];
+            visits.forEach(function(v: any) { all.push({ ...v, _kind: "visit", _date: v.visitDate, _summary: v.content?.replace(/<[^>]*>/g, "").substring(0, 100) || "" }); });
+            condolences.forEach(function(c: any) { all.push({ ...c, _kind: "condolence", _date: c.condolenceDate, _summary: c.content?.replace(/<[^>]*>/g, "").substring(0, 100) || "" }); });
+            records.forEach(function(r: any) { all.push({ ...r, _kind: r.type || "record", _date: r.recordDate, _summary: r.content?.replace(/<[^>]*>/g, "").substring(0, 100) || "" }); });
+            all.sort(function(a, b) { return new Date(b._date).getTime() - new Date(a._date).getTime(); });
+            if (all.length === 0) return <p className="text-sm text-gray-400 text-center py-8">暂无走访记录</p>;
+            return (
+              <div className="space-y-2 max-h-[500px] overflow-y-auto">
+                {all.slice(0, 50).map(function(item: any, i: number) {
+                  var kindLabel = item._kind === "visit" ? "走访" : item._kind === "condolence" ? "慰问" : item._kind === "reception" ? "来访" : "记录";
+                  var kindColor = item._kind === "visit" ? "bg-emerald-100 text-emerald-700" : item._kind === "condolence" ? "bg-rose-100 text-rose-700" : "bg-blue-100 text-blue-700";
+                  return (
+                    <div key={i} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg border-l-4 border-emerald-400 hover:bg-gray-100 transition-colors">
+                      <div className={"text-xs px-2 py-0.5 rounded whitespace-nowrap " + kindColor}>{kindLabel}</div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-gray-700 line-clamp-2">{item._summary || "无内容"}</p>
+                        <p className="text-xs text-gray-400 mt-0.5">
+                          {item._date ? new Date(item._date).toLocaleDateString("zh-CN") : ""}
+                          {item.visitor?.name ? " · " + item.visitor.name : ""}
+                          {item.staff ? " · " + (typeof item.staff === "string" ? item.staff : "") : ""}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })()}
+        </div>
+
+        {/* 政策享受 */}
+        {f.policies && f.policies.length > 0 && (
+          <div className="bg-white rounded-xl border shadow-sm p-6">
+            <h2 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+              <Heart className="w-4 h-4 text-pink-600" /> 政策享受
+            </h2>
+            <div className="space-y-2">
+              {f.policies.map(function(pol: any, i: number) {
+                return (
+                  <div key={i} className="flex items-center justify-between p-3 bg-pink-50 rounded-lg">
+                    <div>
+                      <span className="text-sm font-medium text-gray-800">{pol.policyName}</span>
+                      <span className="text-xs text-gray-500 ml-2">{pol.policyType}</span>
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {pol.benefitAmount ? "¥" + pol.benefitAmount.toLocaleString() : ""}
+                      <span className={"ml-2 px-1.5 py-0.5 rounded " + (pol.status === "享受中" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500")}>{pol.status}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </>)}
+
+      {/* Tab: 地图位置 */}
+      {tab === "map" && (<>
+        <div className="bg-white rounded-xl border shadow-sm p-6">
+          <h2 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+            <Map className="w-4 h-4 text-cyan-600" /> 地图位置
+          </h2>
+          {f.latitude && f.longitude ? (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div className="bg-blue-50 rounded-lg p-3">
+                  <span className="text-xs text-gray-500">纬度</span>
+                  <p className="font-mono font-semibold text-gray-800">{f.latitude}</p>
+                </div>
+                <div className="bg-green-50 rounded-lg p-3">
+                  <span className="text-xs text-gray-500">经度</span>
+                  <p className="font-mono font-semibold text-gray-800">{f.longitude}</p>
+                </div>
+              </div>
+              <a
+                href={"/village/satellite-map?lat=" + f.latitude + "&lng=" + f.longitude + "&zoom=18"}
+                target="_blank" rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 w-full py-3 bg-cyan-600 text-white rounded-lg text-sm font-medium hover:bg-cyan-700 transition-colors"
+              >
+                <Navigation className="w-4 h-4" /> 在卫星地图中查看位置
+              </a>
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <MapPin className="w-12 h-12 mx-auto text-gray-300 mb-3" />
+              <p className="text-sm text-gray-400">尚未标记房屋位置</p>
+              <p className="text-xs text-gray-400 mt-1">请在编辑模式下设置 GPS 坐标</p>
+            </div>
+          )}
+        </div>
+      </>)}
+
+      {/* Tab: 预警信息 */}
+      {tab === "alerts" && (<>
       {/* Warnings Card */}
       <div className="bg-white rounded-xl border shadow-sm p-6">
         <div className="flex items-center justify-between mb-4">
@@ -566,8 +701,9 @@ export default function FamilyDetail() {
           </div>
         )}
       </div>
+      </>)}
 
-      {/* Save button when editing */}
+      {/* Save button when editing (all tabs) */}
       {editMode && (
         <div className="flex justify-end">
           <button onClick={handleSave} disabled={saving}
