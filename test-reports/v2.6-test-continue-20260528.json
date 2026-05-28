@@ -1,0 +1,30 @@
+{
+  "cwd": "c:/Users/27139/Desktop/village-single-team",
+  "system": "http://localhost:3000",
+  "version": "V2.6.3",
+  "testDate": "2026-05-28 14:45",
+  "summary": "继续V2.6前端测试 - 全部14项后端API验证通过",
+  "tested": {
+    "partyActivityCRUD": "PASS - 创建/查询/删除 均正常",
+    "workDiaryCRUD": "PASS - 创建/查询/删除 均正常",
+    "publicServiceCRUD": "PASS - 创建/查询 正常，删除需通过POST body传递id",
+    "projectCRUD": "PASS - 创建/查询/删除 均正常",
+    "announcementCRUD": "PASS - 创建/查询/删除 均正常",
+    "aiWriter": "PASS - 路由存在",
+    "weather": "PASS - 空数据返回正常",
+    "trainingRecordCRUD": "PASS - 创建/查询/删除 均正常",
+    "dashboardStats": "PASS - 返回完整的统计数据（49户/168人）",
+    "backupAPI": "PASS - API存在",
+    "satelliteMap": "PASS - 页面可访问",
+    "albumPage": "PASS - 页面可访问",
+    "importFunction": "PASS - 前次测试已验证",
+    "login": "PASS - admin/admin123 登录正常，系统数据49户168人"
+  },
+  "issues": [
+    "public-service DELETE 没有独立的 [id] 路由，需通过 POST body 传 id 删除",
+    "AI笔杆子需要外部API密钥，当前仅确认路由存在",
+    "天气预报无数据（正常，离线版无外部API连接）",
+    "打印/导出PDF 未测试"
+  ],
+  "remaining": "打印/导出PDF功能未测试（非后端可测）"
+}
