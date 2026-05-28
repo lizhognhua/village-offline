@@ -1,0 +1,50 @@
+[
+  {
+    "file": "src/app/api/dashboard/stats/route.ts",
+    "line": 31,
+    "summary": "Dashboard 对 Visit 和 HouseholdRecord 分别计数，迁移阶段数据可能重复统计",
+    "failure_scenario": "如果数据转移脚本将 Visit 记录复制到 HouseholdRecord 但未删除原 Visit 记录，Dashboard 的 totalVisits (row 31) 和 recentRecords (row 41) 将对同一访问行为计双倍数值。新建记录写入 HouseholdRecord 但旧记录仍在 Visit 表中。"
+  },
+  {
+    "file": "src/app/api/import/execute/route.ts",
+    "line": 280,
+    "summary": "家庭成员导入使用 headName 单字段匹配家庭，没有使用 headName+idCard，重复户主名时导入到错误家庭",
+    "failure_scenario": "两个不同家庭户主同名（如'王建国'），导入家庭成员时 Array.find 匹配到第一个同名户主，家庭成员被错误关联到另一个家庭。"
+  },
+  {
+    "file": "src/app/api/village/stats/route.ts",
+    "line": 1,
+    "summary": "村情统计 API 无认证（不需要 requireAuth），未登录用户可直接访问系统统计数据",
+    "failure_scenario": "任何人在未登录状态下可访问 /api/village/stats 获取全村家庭数、人口数、脱贫户/监测户统计数据。虽非敏感数据但暴露系统使用情况。"
+  },
+  {
+    "file": "prisma/schema.prisma (6个关联)",
+    "line": 186,
+    "summary": "User 表的 6 个关联关系均无 onDelete: Cascade，删除用户会导致外键错误",
+    "failure_scenario": "删除一个已有走访记录、工作日记或公告的 User 时，PostgreSQL/SQLite 将因外键约束抛出错误，删除失败。如需删除用户必须先手动清理其所有关联记录。"
+  },
+  {
+    "file": "src/app/dashboard/page.tsx",
+    "line": 56,
+    "summary": "Dashboard 数据仅在组件挂载时加载一次（useEffect 空依赖），创建新数据后返回 Dashboard 不刷新",
+    "failure_scenario": "用户在 /visits/new 创建走访记录后导航回 /dashboard，统计数据仍为创建前的旧值。需手动刷新页面才能看到更新。"
+  },
+  {
+    "file": "src/app/api/records/route.ts",
+    "line": 47,
+    "summary": "新建走访记录 POST /api/records 使用 multipart 解析，但 content 字段可能被意外截断",
+    "failure_scenario": "当走访记录内容包含大量文本和图片时，form-data 中 content 字段按字符串读取，浏览器可能截断大表单。"
+  },
+  {
+    "file": "src/middleware.ts",
+    "line": 37,
+    "summary": "Middleware 中包含 /records 和 /condolences 路径的跳转逻辑，但系统中不存在这些页面路径",
+    "failure_scenario": "死代码，不会造成实际影响，但增加维护负担。如有人创建 /records 页面，会被静默重定向到 /visits 导致困惑。"
+  },
+  {
+    "file": "src/app/api/village/families/[id]/route.ts",
+    "line": 116,
+    "summary": "家庭编辑 API 使用 var updateData: any = {} 动态构建更新对象，字段校验不严格",
+    "failure_scenario": "如果前端发送了 schema 中不存在的字段（如 typo 字段名），Prisma 会忽略未知字段静默处理，用户以为字段已保存但实际上没有保存。"
+  }
+]

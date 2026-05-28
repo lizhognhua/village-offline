@@ -277,7 +277,11 @@ async function doImportMember(
 
   let familyId = "";
   if (values.headName) {
-    const f = families.find(x => x.headName === values.headName);
+    const byName = families.filter(x => x.headName === values.headName);
+    let f = byName.length === 1 ? byName[0] : null;
+    if (!f && values.headPhone) f = families.find(x => x.headName === values.headName && x.headPhone === values.headPhone);
+    if (!f && values.headIdCard) f = families.find(x => x.headName === values.headName && x.headIdCard === values.headIdCard);
+    if (!f && byName.length > 0) f = byName[0];
     if (f) familyId = f.id;
   }
   if (!familyId) {
