@@ -1,3 +1,16 @@
+## 离线版 V2.7 (2026-05-28)
+
+### 修复
+- 全面代码审查修复：charAt空值保护、var→const统一、Dashboard统计去重
+- 跨页面关联修复：家庭成员导入匹配优化、清理孤立目录
+- 构建错误修复：const变量重新赋值改为let
+- 数据库seed补充relocatedHouseholds字段
+- package.json版本号同步
+
+### 在线版
+- Docker版同步charAt保护 + var→const
+- 代码已推送到GitHub
+
 # 驻村帮扶管理系统 — 版本更新记录
 
 ---
