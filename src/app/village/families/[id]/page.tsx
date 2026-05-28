@@ -260,7 +260,7 @@ export default function FamilyDetail() {
       <div className="bg-white rounded-xl border shadow-sm p-6">
         <div className="flex items-center gap-4">
           <div className="w-16 h-16 rounded-full bg-primary-100 flex items-center justify-center flex-shrink-0">
-            <span className="text-primary-700 font-bold text-2xl">{f.headName.charAt(0)}</span>
+            <span className="text-primary-700 font-bold text-2xl">{(f.headName || '?').charAt(0)}</span>
           </div>
           <div>
             {editMode ? (
@@ -559,7 +559,7 @@ export default function FamilyDetail() {
                     <button onClick={function(e) { e.stopPropagation(); deleteMember(m.id); }} className="p-1 rounded hover:bg-red-100 text-gray-400 hover:text-red-600" title="删除"><Trash2 className="w-3 h-3" /></button>
                   </div>
                   <div className="w-10 h-10 mx-auto rounded-full bg-primary-100 flex items-center justify-center mb-1.5">
-                    <span className="text-primary-700 font-bold text-sm">{m.name.charAt(0)}</span>
+                    <span className="text-primary-700 font-bold text-sm">{(m.name || '?').charAt(0)}</span>
                   </div>
                   <p className="text-sm font-medium text-gray-900">{m.name}</p>
                   <p className="text-xs text-gray-400">{m.relation}</p>

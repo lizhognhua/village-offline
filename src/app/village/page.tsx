@@ -174,7 +174,7 @@ export default function VillagePage() {
                           return <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 border-2 border-gray-100 group-hover:border-primary-300 transition-colors"><img src={photoUrl} alt="" className="w-full h-full object-cover" /></div>;
                         }
                       } catch(e) {}
-                      return <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center flex-shrink-0"><span className="text-primary-700 font-bold">{f.headName.charAt(0)}</span></div>;
+                      return <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center flex-shrink-0"><span className="text-primary-700 font-bold">{(f.headName || "?").charAt(0)}</span></div>;
                     }()}
                     <div className="min-w-0">
                       <p className="font-semibold text-gray-900 truncate group-hover:text-primary-700">{f.headName}</p>

@@ -1,6 +1,6 @@
 {
   "name": "village-single-team",
-  "version": "1.0.0",
+  "version": "2.6.3",
   "private": true,
   "scripts": {
     "dev": "next dev -p 3000",
