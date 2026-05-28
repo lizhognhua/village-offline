@@ -35,7 +35,7 @@ function stripHtml(text: string) {
 function parsePhotos(s: string) {
   if (!s) return [];
   try {
-    var arr = JSON.parse(s);
+    const arr = JSON.parse(s);
     if (!Array.isArray(arr)) return [];
     return arr.filter(function(p: any) { return typeof p === "string" && p.length > 0; })
       .map(function(p: string) { return p.startsWith("/uploads/") ? p.replace("/uploads/", "/api/uploads/") : p; });
@@ -62,10 +62,10 @@ export default function DiaryListPage() {
   const fetchDiaries = async function(p: number) {
     setLoading(true);
     try {
-      var url = "/api/diary?page=" + p + "&limit=" + limit;
+      const url = "/api/diary?page=" + p + "&limit=" + limit;
       if (search) url += "&search=" + encodeURIComponent(search);
-      var res = await fetch(url);
-      var json = await res.json();
+      const res = await fetch(url);
+      const json = await res.json();
       setData(json);
     } catch (e) {
       console.error(e);
@@ -82,8 +82,8 @@ export default function DiaryListPage() {
   const syncSiyuan = async function() {
     setSyncing(true);
     try {
-      var res = await fetch("/api/diary/sync-siyuan", { method: "POST" });
-      var d = await res.json();
+      const res = await fetch("/api/diary/sync-siyuan", { method: "POST" });
+      const d = await res.json();
       if (d.success) {
         alert("思源同步完成：" + d.summary);
         fetchDiaries(page);
@@ -152,7 +152,7 @@ export default function DiaryListPage() {
           {viewMode === "card" && (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
             {data?.diaries.map(function(diary) {
-              var photos = parsePhotos(diary.images || diary.photos || "");
+              const photos = parsePhotos(diary.images || diary.photos || "");
               return (
                 <Link
                   key={diary.id}

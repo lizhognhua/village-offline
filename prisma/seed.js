@@ -45,6 +45,8 @@ async function main() {
         poorHouseholds: 85,
         monitoredHouseholds: 15,
         dibaoHouseholds: 32,
+        relocatedHouseholds: 0,
+        relocatedPopulation: 0,
         villageSecretary: "张建国",
         secretaryPhone: "13912345678",
         fillPerson: "工作队",

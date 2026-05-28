@@ -66,8 +66,8 @@ export async function DELETE(req: NextRequest) {
   const a = await requireAdmin();
   if (a.error) return a.error;
   try {
-    var url = new URL(req.url);
-    var id = url.searchParams.get("id");
+    const url = new URL(req.url);
+    const id = url.searchParams.get("id");
     if (!id) return NextResponse.json({ error: "缺少ID" }, { status: 400 });
     // Check team ownership
     const existing = await prisma.villageGroup.findUnique({ where: { id } });

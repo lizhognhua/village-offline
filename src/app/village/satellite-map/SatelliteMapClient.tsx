@@ -150,12 +150,12 @@ function pointInPolygon(point, polygon) {
       if(selectModeRef.current){
         if(polygonDoneRef.current){
           // Check if click is inside the polygon
-          var pts=selectCornersRef.current.map(function(p){return L.latLng(p[0],p[1]);});
+          const pts=selectCornersRef.current.map(function(p){return L.latLng(p[0],p[1]);});
           if(true){
             try{if(pointInPolygon([e.latlng.lat,e.latlng.lng],selectCornersRef.current)){clickLatLng.current=e.latlng;setPickerOpen(true);return;}}catch{}
           }
           // Bounding box check as fallback
-          var minLat=999,maxLat=-999,minLng=999,maxLng=-999;
+          const minLat=999,maxLat=-999,minLng=999,maxLng=-999;
           for(var pi=0;pi<pts.length;pi++){minLat=Math.min(minLat,pts[pi].lat);maxLat=Math.max(maxLat,pts[pi].lat);minLng=Math.min(minLng,pts[pi].lng);maxLng=Math.max(maxLng,pts[pi].lng);}
           if(e.latlng.lat>=minLat&&e.latlng.lat<=maxLat&&e.latlng.lng>=minLng&&e.latlng.lng<=maxLng){clickLatLng.current=e.latlng;setPickerOpen(true);return;}
           return;
@@ -172,12 +172,12 @@ function pointInPolygon(point, polygon) {
   },[loading]);
 
   const finishSelect = function(){
-    var pts=selectCornersRef.current;
+    const pts=selectCornersRef.current;
     if(pts.length<3){alert("请至少选择3个点构成区域");return;}
     polygonDoneRef.current=true;setPolygonDone(true);
-    var minLat=999,maxLat=-999,minLng=999,maxLng=-999;
+    const minLat=999,maxLat=-999,minLng=999,maxLng=-999;
     for(var pi=0;pi<pts.length;pi++){minLat=Math.min(minLat,pts[pi][0]);maxLat=Math.max(maxLat,pts[pi][0]);minLng=Math.min(minLng,pts[pi][1]);maxLng=Math.max(maxLng,pts[pi][1]);}
-    var inR=function(lat:number,lng:number){return lat>=minLat&&lat<=maxLat&&lng>=minLng&&lng<=maxLng;};
+    const inR=function(lat:number,lng:number){return lat>=minLat&&lat<=maxLat&&lng>=minLng&&lng<=maxLng;};
     setSelectResults({markers:markers.filter(function(m){return inR(m.latitude,m.longitude);}),families:families.filter(function(f){return f.latitude&&f.longitude&&inR(f.latitude,f.longitude);})});
   };
 
@@ -221,8 +221,8 @@ function pointInPolygon(point, polygon) {
 
   if(loading)return <div className="flex items-center justify-center h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"/></div>;
 
-  var lk=Object.keys(TILE_LAYERS);
-  var filteredFamilies = allFamilies.filter(function(f:any){var q=familySearchText.toLowerCase();return (f.headName||"").toLowerCase().includes(q);}).slice(0,50);
+  const lk=Object.keys(TILE_LAYERS);
+  const filteredFamilies = allFamilies.filter(function(f:any){var q=familySearchText.toLowerCase();return (f.headName||"").toLowerCase().includes(q);}).slice(0,50);
 
   return (
     <div className="h-[calc(100vh-64px)] flex flex-col">

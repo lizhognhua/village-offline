@@ -89,8 +89,8 @@ export default function IndustriesPage() {
       const r = await fetch("/api/photos/upload", { method: "POST", body: fd });
       const d = await r.json();
       if (d.success || d.url) {
-        var imgUrl = d.url || ("/api/uploads/" + file.name);
-        var current = (function() { try { var arr = JSON.parse(form.photos || "[]"); return Array.isArray(arr) ? arr : []; } catch { return []; } })();
+        const imgUrl = d.url || ("/api/uploads/" + file.name);
+        const current = (function() { try { var arr = JSON.parse(form.photos || "[]"); return Array.isArray(arr) ? arr : []; } catch { return []; } })();
         current.push(imgUrl);
         setForm(function(f) { return {...f, photos: JSON.stringify(current)}; });
       } else {

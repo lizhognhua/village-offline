@@ -196,7 +196,7 @@ export default function AlbumsPage() {
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files; if (!files || files.length === 0) return;
     setUploading(true); setAddMsg("");
-    var success = 0;
+    const success = 0;
     for (const file of Array.from(files)) {
       try {
         const fd = new FormData(); fd.append("file", file);

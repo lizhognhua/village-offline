@@ -8,7 +8,7 @@ import {
   Upload, Link as LinkIcon, FileText, Download, Eye, Map, Navigation
 } from "lucide-react";
 
-var attrColor: Record<string,string> = {
+const attrColor: Record<string,string> = {
   "脱贫户":"bg-green-100 text-green-700",
   "监测户":"bg-orange-100 text-orange-700",
   "低保户":"bg-blue-100 text-blue-700",
@@ -16,59 +16,59 @@ var attrColor: Record<string,string> = {
 };
 
 function fmtDate(d: string) {
-  var dt = new Date(d);
+  const dt = new Date(d);
   return dt.getFullYear() + "年" + (dt.getMonth() + 1) + "月" + dt.getDate() + "日";
 }
 
 export default function FamilyDetail() {
-  var p = useParams();
-  var r = useRouter();
-  var [data, setData] = useState<any>(null);
-  var [warnings, setWarnings] = useState<any[]>([]);
-  var [loading, setLoading] = useState(true);
-  var [saving, setSaving] = useState(false);
-  var [editMode, setEditMode] = useState(false);
-  var [editForm, setEditForm] = useState<any>({});
-  var [newPhotos, setNewPhotos] = useState<File[]>([]);
-  var [photoPreviews, setPhotoPreviews] = useState<string[]>([]);
-  var [photoMode, setPhotoMode] = useState<"upload" | "url">("upload");
-  var [editPhotoUrls, setEditPhotoUrls] = useState<string[]>([]);
-  var [urlInput, setUrlInput] = useState("");
-  var fileRef = useRef<HTMLInputElement>(null);
+  const p = useParams();
+  const r = useRouter();
+  const [data, setData] = useState<any>(null);
+  const [warnings, setWarnings] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+  const [editForm, setEditForm] = useState<any>({});
+  const [newPhotos, setNewPhotos] = useState<File[]>([]);
+  const [photoPreviews, setPhotoPreviews] = useState<string[]>([]);
+  const [photoMode, setPhotoMode] = useState<"upload" | "url">("upload");
+  const [editPhotoUrls, setEditPhotoUrls] = useState<string[]>([]);
+  const [urlInput, setUrlInput] = useState("");
+  const fileRef = useRef<HTMLInputElement>(null);
   // 附件（一户一策等）
-  var [newFiles, setNewFiles] = useState<File[]>([]);
-  var [newFileNames, setNewFileNames] = useState<string[]>([]);
+  const [newFiles, setNewFiles] = useState<File[]>([]);
+  const [newFileNames, setNewFileNames] = useState<string[]>([]);
   // 家庭成员详情弹窗
-  var [selectedMember, setSelectedMember] = useState<any>(null);
-  var [showMemberForm, setShowMemberForm] = useState(false);
-  var [editMemberId, setEditMemberId] = useState<string | null>(null);
-  var [memberForm, setMemberForm] = useState({ name: "", relation: "", gender: "", idCard: "", phone: "", birthDate: "", education: "", occupation: "", healthStatus: "", healthNote: "" });
-  var [memberSaving, setMemberSaving] = useState(false);
-  var [tab, setTab] = useState<"info" | "members" | "timeline" | "map" | "alerts">("info");
+  const [selectedMember, setSelectedMember] = useState<any>(null);
+  const [showMemberForm, setShowMemberForm] = useState(false);
+  const [editMemberId, setEditMemberId] = useState<string | null>(null);
+  const [memberForm, setMemberForm] = useState({ name: "", relation: "", gender: "", idCard: "", phone: "", birthDate: "", education: "", occupation: "", healthStatus: "", healthNote: "" });
+  const [memberSaving, setMemberSaving] = useState(false);
+  const [tab, setTab] = useState<"info" | "members" | "timeline" | "map" | "alerts">("info");
 
   // 家庭成员增删改
-  var openAddMember = function() { setEditMemberId(null); setMemberForm({ name: "", relation: "", gender: "", idCard: "", phone: "", birthDate: "", education: "", occupation: "", healthStatus: "", healthNote: "" }); setShowMemberForm(true); };
-  var openEditMember = function(m: any) { setEditMemberId(m.id); setMemberForm({ name: m.name || "", relation: m.relation || "", gender: m.gender || "", idCard: m.idCard || "", phone: m.phone || "", birthDate: m.birthDate ? new Date(m.birthDate).toISOString().slice(0,10) : "", education: m.education || "", occupation: m.occupation || "", healthStatus: m.healthStatus || "", healthNote: m.healthNote || "" }); setShowMemberForm(true); };
-  var saveMember = async function() {
+  const openAddMember = function() { setEditMemberId(null); setMemberForm({ name: "", relation: "", gender: "", idCard: "", phone: "", birthDate: "", education: "", occupation: "", healthStatus: "", healthNote: "" }); setShowMemberForm(true); };
+  const openEditMember = function(m: any) { setEditMemberId(m.id); setMemberForm({ name: m.name || "", relation: m.relation || "", gender: m.gender || "", idCard: m.idCard || "", phone: m.phone || "", birthDate: m.birthDate ? new Date(m.birthDate).toISOString().slice(0,10) : "", education: m.education || "", occupation: m.occupation || "", healthStatus: m.healthStatus || "", healthNote: m.healthNote || "" }); setShowMemberForm(true); };
+  const saveMember = async function() {
     if (!memberForm.name || !memberForm.relation) { alert("请填写姓名和与户主关系"); return; }
     setMemberSaving(true);
-    var url = editMemberId ? "/api/village/families/" + f.id + "/members/" + editMemberId : "/api/village/families/" + f.id + "/members";
-    var r = await fetch(url, { method: editMemberId ? "PATCH" : "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(memberForm) });
+    const url = editMemberId ? "/api/village/families/" + f.id + "/members/" + editMemberId : "/api/village/families/" + f.id + "/members";
+    const r = await fetch(url, { method: editMemberId ? "PATCH" : "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(memberForm) });
     if (r.ok) { setShowMemberForm(false); loadData(); }
     else { var d = await r.json().catch(function() { return { error: "操作失败" }; }); alert(d.error || "操作失败"); }
     setMemberSaving(false);
   };
-  var deleteMember = async function(memberId: string) {
+  const deleteMember = async function(memberId: string) {
     if (!confirm("确定删除该成员？")) return;
-    var r = await fetch("/api/village/families/" + f.id + "/members?memberId=" + memberId, { method: "DELETE" });
+    const r = await fetch("/api/village/families/" + f.id + "/members?memberId=" + memberId, { method: "DELETE" });
     if (r.ok) loadData(); else alert("删除失败");
   };
 
-  var loadData = async function() {
+  const loadData = async function() {
     setLoading(true);
     try {
-      var res = await fetch("/api/village/families/" + p.id);
-      var family = await res.json();
+      const res = await fetch("/api/village/families/" + p.id);
+      const family = await res.json();
       setData(family);
       setEditForm({
         headName: family.headName || "",
@@ -82,8 +82,8 @@ export default function FamilyDetail() {
       });
       if (family?.headName) {
         try {
-          var wr = await fetch("/api/warnings/records?search=" + encodeURIComponent(family.headName) + "&limit=50");
-          var wd = await wr.json();
+          const wr = await fetch("/api/warnings/records?search=" + encodeURIComponent(family.headName) + "&limit=50");
+          const wd = await wr.json();
           setWarnings(wd.records || []);
         } catch(e) {}
       }
@@ -93,16 +93,16 @@ export default function FamilyDetail() {
 
   useEffect(function() { loadData(); }, [p.id]);
 
-  var photos = (function() {
+  const photos = (function() {
     try { return JSON.parse(data?.photos || "[]"); } catch(e) { return []; }
   })();
-  var allPhotos = photos.map(function(p: string) { return p.startsWith("/uploads/") ? p.replace("/uploads/", "/api/uploads/") : p; });
+  const allPhotos = photos.map(function(p: string) { return p.startsWith("/uploads/") ? p.replace("/uploads/", "/api/uploads/") : p; });
 
   // Save edits
-  var handleSave = async function() {
+  const handleSave = async function() {
     setSaving(true);
     try {
-      var fd = new FormData();
+      const fd = new FormData();
       fd.append("headName", editForm.headName);
       fd.append("headGender", editForm.headGender);
       fd.append("headPhone", editForm.headPhone);
@@ -118,7 +118,7 @@ export default function FamilyDetail() {
       if (editPhotoUrls.length > 0) {
         fd.append("photoUrls", JSON.stringify(editPhotoUrls));
       }
-      var res = await fetch("/api/village/families/" + p.id, {
+      const res = await fetch("/api/village/families/" + p.id, {
         method: "PUT",
         body: fd,
       });
@@ -129,16 +129,16 @@ export default function FamilyDetail() {
         setEditPhotoUrls([]);
         setUrlInput("");
         // Upload new files to Paperless in background
-        var filesToUpload = newFiles;
+        const filesToUpload = newFiles;
         if (filesToUpload.length > 0) {
           (async function() {
-            var uploaded = 0;
+            const uploaded = 0;
             for (var i = 0; i < filesToUpload.length; i++) {
               try {
-                var fd2 = new FormData();
+                const fd2 = new FormData();
                 fd2.append("file", filesToUpload[i]);
                 fd2.append("title", filesToUpload[i].name);
-                var pr = await fetch("/api/paperless/training", { method: "POST", body: fd2 });
+                const pr = await fetch("/api/paperless/training", { method: "POST", body: fd2 });
                 if (pr.ok) uploaded++;
               } catch {}
             }
@@ -149,7 +149,7 @@ export default function FamilyDetail() {
         setNewFileNames([]);
         loadData();
       } else {
-        var err = await res.json();
+        const err = await res.json();
         alert("保存失败: " + (err.error || "未知错误"));
       }
     } catch(e: any) { alert("保存失败: " + e.message); }
@@ -158,38 +158,38 @@ export default function FamilyDetail() {
 
 
   // Delete family
-  var handleDelete = async function() {
+  const handleDelete = async function() {
     if (!confirm("确定要删除" + data.headName + "么？")) return;
     setLoading(true);
     try {
-      var res = await fetch("/api/village/families/" + p.id, { method: "DELETE" });
+      const res = await fetch("/api/village/families/" + p.id, { method: "DELETE" });
       if (res.ok) {
         r.push("/village");
       } else {
-        var err = await res.json();
+        const err = await res.json();
         alert("删除失败: " + (err.error || "未知错误"));
         setLoading(false);
       }
     } catch(e: any) { alert("删除失败: " + e.message); setLoading(false); }
   };
 
-  var handlePhotoSelect = function(e: React.ChangeEvent<HTMLInputElement>) {
-    var files = Array.from(e.target.files || []);
+  const handlePhotoSelect = function(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files || []);
     setNewPhotos(function(prev) { return prev.concat(files); });
     files.forEach(function(f) {
-      var reader = new FileReader();
+      const reader = new FileReader();
       reader.onload = function(ev) { setPhotoPreviews(function(p) { return p.concat([ev.target?.result as string]); }); };
       reader.readAsDataURL(f);
     });
   };
 
-  var removeNewPhoto = function(i: number) {
+  const removeNewPhoto = function(i: number) {
     setNewPhotos(function(p) { return p.filter(function(_, idx) { return idx !== i; }); });
     setPhotoPreviews(function(p) { return p.filter(function(_, idx) { return idx !== i; }); });
   };
 
-  var addEditUrl = function() {
-    var url = urlInput.trim();
+  const addEditUrl = function() {
+    const url = urlInput.trim();
     if (!url) return;
     if (!url.startsWith("http://") && !url.startsWith("https://")) {
       alert("请输入有效的 URL（以 http:// 或 https:// 开头）");
@@ -199,35 +199,35 @@ export default function FamilyDetail() {
     setUrlInput("");
   };
 
-  var removeEditUrl = function(i: number) {
+  const removeEditUrl = function(i: number) {
     setEditPhotoUrls(function(p) { return p.filter(function(_, idx) { return idx !== i; }); });
   };
 
   // 附件选择
-  var handleFileSelect = function(e: React.ChangeEvent<HTMLInputElement>) {
-    var fls = Array.from(e.target.files || []);
+  const handleFileSelect = function(e: React.ChangeEvent<HTMLInputElement>) {
+    const fls = Array.from(e.target.files || []);
     setNewFiles(function(prev: File[]) { return prev.concat(fls); });
     setNewFileNames(function(prev: string[]) { return prev.concat(fls.map(function(f: File) { return f.name; })); });
   };
 
-  var removeNewFile = function(i: number) {
+  const removeNewFile = function(i: number) {
     setNewFiles(function(p: File[]) { return p.filter(function(_: File, idx: number) { return idx !== i; }); });
     setNewFileNames(function(p: string[]) { return p.filter(function(_: string, idx: number) { return idx !== i; }); });
   };
 
   // 删除已有照片
-  var handleDeleteExistingPhoto = function(i: number) {
+  const handleDeleteExistingPhoto = function(i: number) {
     if (!confirm("确定删除这张照片？保存后生效。")) return;
-    var currentPhotos = (function() { try { return JSON.parse(data?.photos || "[]"); } catch(e) { return []; } })();
+    const currentPhotos = (function() { try { return JSON.parse(data?.photos || "[]"); } catch(e) { return []; } })();
     currentPhotos.splice(i, 1);
     data.photos = JSON.stringify(currentPhotos);
     setData({ ...data });
   };
 
   // 删除已有档案文件
-  var handleDeleteExistingFile = function(i: number) {
+  const handleDeleteExistingFile = function(i: number) {
     if (!confirm("确定删除该档案文件？保存后生效。")) return;
-    var currentFiles = (function() { try { return JSON.parse(data?.files || "[]"); } catch(e) { return []; } })();
+    const currentFiles = (function() { try { return JSON.parse(data?.files || "[]"); } catch(e) { return []; } })();
     currentFiles.splice(i, 1);
     data.files = JSON.stringify(currentFiles);
     setData({ ...data });
@@ -235,7 +235,7 @@ export default function FamilyDetail() {
 
   if (loading) return <div className="flex justify-center py-32"><div className="animate-spin h-8 w-8 border-b-2 border-primary-700 rounded-full" /></div>;
   if (!data) return <div className="text-center py-20 text-gray-400">未找到农户信息</div>;
-  var f = data;
+  const f = data;
 
   return (
     <div className="max-w-4xl mx-auto space-y-5 p-4">
@@ -336,7 +336,7 @@ export default function FamilyDetail() {
             type="textarea" span={2} />
           {/* 人口与家庭成员不一致警告 */}
           {(() => {
-            var expectedPop = 1 + (f.members ? f.members.length : 0);
+            const expectedPop = 1 + (f.members ? f.members.length : 0);
             if (f.population !== expectedPop) {
               return (
                 <div className="col-span-full bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-800">
@@ -352,10 +352,10 @@ export default function FamilyDetail() {
               <label className="block text-sm font-medium text-gray-700 mb-1">属性/标签（可多选）</label>
               <div className="flex flex-wrap gap-2">
                 {["一般农户","脱贫户","监测户","低保户","五保户","党员","村委会成员","高龄老人","赡养儿童","重疾重病","残疾","丧失劳动能力"].map(function(a) {
-                  var sel = (editForm.familyAttr || "").split(",").filter(Boolean);
+                  const sel = (editForm.familyAttr || "").split(",").filter(Boolean);
                   return <label key={a} className="flex items-center gap-1 text-sm cursor-pointer">
                     <input type="checkbox" checked={sel.includes(a)} onChange={function() {
-                      var u = sel.includes(a) ? sel.filter(function(x){return x!==a;}) : sel.concat([a]);
+                      const u = sel.includes(a) ? sel.filter(function(x){return x!==a;}) : sel.concat([a]);
                       setEditForm(function(p:any){return{...p,familyAttr:u.join(",")};});
                     }} className="rounded" />{a}
                   </label>;
@@ -478,12 +478,12 @@ export default function FamilyDetail() {
 
         {/* 已有文件 */}
         {(() => {
-          var existingFiles = (function() { try { return JSON.parse(data?.files || "[]"); } catch(e) { return []; } })();
+          const existingFiles = (function() { try { return JSON.parse(data?.files || "[]"); } catch(e) { return []; } })();
           if (existingFiles.length > 0) {
             return (
               <div className="flex flex-wrap gap-2 mb-4">
                 {existingFiles.map(function(url: string, i: number) {
-                  var name = url.split("/").pop() || "附件" + (i + 1);
+                  const name = url.split("/").pop() || "附件" + (i + 1);
                   return (
                     <div key={i} className="relative group flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-lg border hover:border-primary-300 transition-colors text-sm">
                       <a href={url.startsWith("/uploads/") ? url.replace("/uploads/", "/api/uploads/") : url} target="_blank" rel="noopener noreferrer"
@@ -592,10 +592,10 @@ export default function FamilyDetail() {
             <Footprints className="w-4 h-4 text-emerald-600" /> 走访慰问记录
           </h2>
           {(() => {
-            var visits = f.visits || [];
-            var condolences = f.condolences || [];
-            var records = f.records || [];
-            var all: any[] = [];
+            const visits = f.visits || [];
+            const condolences = f.condolences || [];
+            const records = f.records || [];
+            const all: any[] = [];
             visits.forEach(function(v: any) { all.push({ ...v, _kind: "visit", _date: v.visitDate, _summary: v.content?.replace(/<[^>]*>/g, "").substring(0, 100) || "" }); });
             condolences.forEach(function(c: any) { all.push({ ...c, _kind: "condolence", _date: c.condolenceDate, _summary: c.content?.replace(/<[^>]*>/g, "").substring(0, 100) || "" }); });
             records.forEach(function(r: any) { all.push({ ...r, _kind: r.type || "record", _date: r.recordDate, _summary: r.content?.replace(/<[^>]*>/g, "").substring(0, 100) || "" }); });
@@ -604,8 +604,8 @@ export default function FamilyDetail() {
             return (
               <div className="space-y-2 max-h-[500px] overflow-y-auto">
                 {all.slice(0, 50).map(function(item: any, i: number) {
-                  var kindLabel = item._kind === "visit" ? "走访" : item._kind === "condolence" ? "慰问" : item._kind === "reception" ? "来访" : "记录";
-                  var kindColor = item._kind === "visit" ? "bg-emerald-100 text-emerald-700" : item._kind === "condolence" ? "bg-rose-100 text-rose-700" : "bg-blue-100 text-blue-700";
+                  const kindLabel = item._kind === "visit" ? "走访" : item._kind === "condolence" ? "慰问" : item._kind === "reception" ? "来访" : "记录";
+                  const kindColor = item._kind === "visit" ? "bg-emerald-100 text-emerald-700" : item._kind === "condolence" ? "bg-rose-100 text-rose-700" : "bg-blue-100 text-blue-700";
                   return (
                     <Link href={"/visits/" + (item._kind === "visit" ? item.id : item._kind === "condolence" ? item.id : item.id)} key={i} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg border-l-4 border-emerald-400 hover:bg-gray-100 transition-colors cursor-pointer">
                       <div className={"text-xs px-2 py-0.5 rounded whitespace-nowrap " + kindColor}>{kindLabel}</div>
@@ -793,10 +793,10 @@ export default function FamilyDetail() {
                 <span className="text-sm text-gray-400">健康状态</span>
                 <div className="flex gap-2 mt-1">
                   {["健康","慢性病","重病","残疾","其他"].map(function(s: string) {
-                    var isActive = selectedMember.healthStatus === s;
+                    const isActive = selectedMember.healthStatus === s;
                     return (
                       <button key={s} onClick={async function() {
-                        var newStatus = isActive ? null : s;
+                        const newStatus = isActive ? null : s;
                         await fetch("/api/village/families/" + p.id + "/members/" + selectedMember.id, {
                           method: "PATCH",
                           headers: { "Content-Type": "application/json" },
@@ -835,7 +835,7 @@ function InfoField({ label, value, edit, editValue, onChange, icon, type, option
   onChange: (v: string) => void; icon?: React.ReactNode; type?: string;
   options?: string[]; span?: number;
 }) {
-  var colSpan = span ? "col-span-" + span : "";
+  const colSpan = span ? "col-span-" + span : "";
   return (
     <div className={colSpan}>
       <p className="text-xs text-gray-400 mb-0.5">{label}</p>

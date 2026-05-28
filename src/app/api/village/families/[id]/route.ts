@@ -113,7 +113,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     if (body.spousePhone !== undefined) body.spousePhone = clean.phone(body.spousePhone);
 
     // Build update data — only set fields that are provided
-    var updateData: any = {};
+    const updateData: any = {};
     if (body.headName !== undefined) updateData.headName = body.headName;
     if (body.headGender !== undefined) updateData.headGender = body.headGender;
     if (body.headPhone !== undefined) updateData.headPhone = body.headPhone;
@@ -132,11 +132,11 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 
     // Merge photos
     if (newPhotoPaths.length > 0 || body.existingPhotos !== undefined) {
-      var existing: string[] = [];
+      const existing: string[] = [];
       if (body.existingPhotos) {
         try { existing = JSON.parse(body.existingPhotos); } catch(e) { existing = []; }
       } else {
-        var current = await prisma.family.findUnique({ where: { id }, select: { photos: true } });
+        const current = await prisma.family.findUnique({ where: { id }, select: { photos: true } });
         try { existing = JSON.parse(current?.photos || "[]"); } catch(e) { existing = []; }
       }
       updateData.photos = JSON.stringify(existing.concat(newPhotoPaths));
@@ -144,11 +144,11 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 
     // Merge files (档案文件)
     if (newFilePaths.length > 0 || body.existingFiles !== undefined) {
-      var existingFiles: string[] = [];
+      const existingFiles: string[] = [];
       if (body.existingFiles) {
         try { existingFiles = JSON.parse(body.existingFiles); } catch(e) { existingFiles = []; }
       } else {
-        var currentF = await prisma.family.findUnique({ where: { id }, select: { files: true } });
+        const currentF = await prisma.family.findUnique({ where: { id }, select: { files: true } });
         try { existingFiles = JSON.parse(currentF?.files || "[]"); } catch(e) { existingFiles = []; }
       }
       updateData.files = JSON.stringify(existingFiles.concat(newFilePaths));

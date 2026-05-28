@@ -24,7 +24,7 @@ export default function Announcements() {
   const [expanded, setExpanded] = useState<string | null>(null);
 
   useEffect(() => {
-    var url = "/api/announcements";
+    const url = "/api/announcements";
     fetch(url)
       .then((r) => r.json())
       .then((data) => {

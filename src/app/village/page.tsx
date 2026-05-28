@@ -7,8 +7,8 @@ import {
   Phone, Home, Footprints, Heart, Wheat
 } from "lucide-react";
 
-var CATS = ["全部","一般农户","脱贫户","监测户","低保户","五保户","党员","村委会成员","高龄老人","残疾","重疾重病","赡养儿童","丧失劳动能力"];
-var attrColor: Record<string,string> = {
+const CATS = ["全部","一般农户","脱贫户","监测户","低保户","五保户","党员","村委会成员","高龄老人","残疾","重疾重病","赡养儿童","丧失劳动能力"];
+const attrColor: Record<string,string> = {
   "脱贫户":"bg-green-100 text-green-700",
   "监测户":"bg-orange-100 text-orange-700",
   "低保户":"bg-blue-100 text-blue-700",
@@ -40,21 +40,21 @@ interface VillageStats {
 }
 
 export default function VillagePage() {
-  var [groups, setGroups] = useState<VillageGroup[]>([]);
-  var [selectedGroup, setSelectedGroup] = useState<string | null>(null);
-  var [stats, setStats] = useState<VillageStats | null>(null);
-  var [data, setData] = useState<any[]>([]);
-  var [loading, setLoading] = useState(true);
-  var [page, setPage] = useState(1);
-  var [total, setTotal] = useState(0);
-  var [totalPages, setTotalPages] = useState(0);
-  var [villageName, setVillageName] = useState("");
-  var [cat, setCat] = useState("全部");
-  var [search, setSearch] = useState("");
-  var limit = 25;
-  var catRef = useRef<HTMLDivElement>(null);
+  const [groups, setGroups] = useState<VillageGroup[]>([]);
+  const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
+  const [stats, setStats] = useState<VillageStats | null>(null);
+  const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [villageName, setVillageName] = useState("");
+  const [cat, setCat] = useState("全部");
+  const [search, setSearch] = useState("");
+  const limit = 25;
+  const catRef = useRef<HTMLDivElement>(null);
 
-  var scrollToCat = function(c: string) {
+  const scrollToCat = function(c: string) {
     setCat(c);
     setPage(1);
     setTimeout(function() {
@@ -67,9 +67,9 @@ export default function VillagePage() {
     fetch("/api/village/stats").then(function(r) { return r.json(); }).then(function(d) { setStats(d.stats); }).catch(console.error);
   }, []);
 
-  var loadFamilies = function() {
+  const loadFamilies = function() {
     setLoading(true);
-    var url = "/api/village/families?limit=" + limit + "&page=" + page;
+    const url = "/api/village/families?limit=" + limit + "&page=" + page;
     if (cat !== "全部") url += "&attr=" + encodeURIComponent(cat);
     if (search) url += "&search=" + encodeURIComponent(search);
     if (selectedGroup) url += "&groupId=" + selectedGroup;
@@ -85,7 +85,7 @@ export default function VillagePage() {
   useEffect(function() { loadFamilies(); }, [page, cat, selectedGroup]);
   useEffect(function() { fetch("/api/team/profile").then(function(r) { return r.json(); }).then(function(d) { setVillageName(d?.team?.villageName || ""); }).catch(function() {}); }, []);
 
-  var handleSearch = function() { setPage(1); loadFamilies(); };
+  const handleSearch = function() { setPage(1); loadFamilies(); };
 
   return (
     <div className="space-y-5">
@@ -167,8 +167,8 @@ export default function VillagePage() {
                   <div className="flex items-center gap-3 mb-3">
                     {function() {
                       try {
-                        var photos = JSON.parse(f.photos || "[]");
-                        var photoUrl = photos.length > 0 ? photos[0] : null;
+                        const photos = JSON.parse(f.photos || "[]");
+                        const photoUrl = photos.length > 0 ? photos[0] : null;
                         if (photoUrl && photoUrl.startsWith("/uploads/")) { photoUrl = photoUrl.replace("/uploads/", "/api/uploads/"); }
                         if (photoUrl) {
                           return <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 border-2 border-gray-100 group-hover:border-primary-300 transition-colors"><img src={photoUrl} alt="" className="w-full h-full object-cover" /></div>;
@@ -187,7 +187,7 @@ export default function VillagePage() {
                     {f.familyAttr && (
                       <div className="flex flex-wrap gap-1">
                         {f.familyAttr.split(",").map(function(tag: string) {
-                          var t = tag.trim();
+                          const t = tag.trim();
                           return (
                             <span key={t} className={"inline-block px-1.5 py-0.5 rounded text-[10px] " + (attrColor[t] || "bg-gray-100 text-gray-500")}>
                               {t}

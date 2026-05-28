@@ -5,17 +5,17 @@ import { Footprints, Heart, ArrowLeft, Trash2, User, Calendar, MapPin, X, Pencil
 import { sanitizeHtml } from "@/lib/sanitize";
 
 function fmtDate(d: string) {
-  var dt = new Date(d);
+  const dt = new Date(d);
   return dt.getFullYear() + "年" + (dt.getMonth() + 1) + "月" + dt.getDate() + "日";
 }
 
 export default function VisitDetailPage() {
-  var params = useParams();
-  var router = useRouter();
-  var [record, setRecord] = useState<any>(null);
-  var [loading, setLoading] = useState(true);
-  var [viewPhoto, setViewPhoto] = useState<string | null>(null);
-  var [confirmDelete, setConfirmDelete] = useState(false);
+  const params = useParams();
+  const router = useRouter();
+  const [record, setRecord] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [viewPhoto, setViewPhoto] = useState<string | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   useEffect(function() {
     fetch("/api/records/" + params.id)
@@ -32,20 +32,20 @@ export default function VisitDetailPage() {
       .finally(function() { setLoading(false); });
   }, [params.id]);
 
-  var handleDelete = async function() {
-    var res = await fetch("/api/records/" + params.id, { method: "DELETE" });
+  const handleDelete = async function() {
+    const res = await fetch("/api/records/" + params.id, { method: "DELETE" });
     if (res.ok) { router.push("/visits"); }
     else {
-      var res2 = await fetch("/api/visits/" + params.id, { method: "DELETE" });
+      const res2 = await fetch("/api/visits/" + params.id, { method: "DELETE" });
       if (res2.ok) { router.push("/visits"); }
       else { alert("删除失败"); }
     }
   };
 
-  var parsePhotos = function(s: string) {
+  const parsePhotos = function(s: string) {
     if (!s) return [];
     try {
-      var arr = JSON.parse(s);
+      const arr = JSON.parse(s);
       if (!Array.isArray(arr)) return [];
       return arr.filter(function(p: any) { return typeof p === "string" && p.length > 0; })
         .map(function(p: string) { return p.startsWith("/uploads/") ? p.replace("/uploads/", "/api/uploads/") : p; });
@@ -65,9 +65,9 @@ export default function VisitDetailPage() {
     <div className="text-center py-16"><p className="text-gray-400">记录不存在</p></div>
   );
 
-  var photos = parsePhotos(record.photos);
-  var recType = record.type || "visit";
-  var isCondolence = recType === "condolence";
+  const photos = parsePhotos(record.photos);
+  const recType = record.type || "visit";
+  const isCondolence = recType === "condolence";
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">

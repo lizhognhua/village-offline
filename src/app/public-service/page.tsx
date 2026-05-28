@@ -98,7 +98,7 @@ export default function PublicServicePage() {
       fetch("/api/public-service/search-families?q=" + encodeURIComponent(value))
         .then(function(r) { if (!r.ok) throw new Error("API error"); return r.json(); })
         .then(function(d) {
-          var results = Array.isArray(d) ? d : [];
+          const results = Array.isArray(d) ? d : [];
           setSearchResults(results);
           setShowSearch(results.length > 0);
         }).catch(function() { setSearchResults([]); setShowSearch(false); });

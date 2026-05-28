@@ -16,7 +16,7 @@ export default function TeamMembers() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    var url = "/api/team-members";
+    const url = "/api/team-members";
     fetch(url)
       .then((r) => r.json())
       .then((data) => {

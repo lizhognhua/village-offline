@@ -4,18 +4,18 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, Save, User, Phone, MapPin, Users, FileText, Image as ImageIcon, X, Link, Upload } from "lucide-react";
 
 export default function NewFamilyPage() {
-  var router = useRouter();
-  var [groups, setGroups] = useState<any[]>([]);
-  var [saving, setSaving] = useState(false);
-  var [photos, setPhotos] = useState<File[]>([]);
-  var [previews, setPreviews] = useState<string[]>([]);
-  var [photoMode, setPhotoMode] = useState<"upload" | "url">("upload");
-  var [photoUrls, setPhotoUrls] = useState<string[]>([]);
-  var [urlInput, setUrlInput] = useState("");
+  const router = useRouter();
+  const [groups, setGroups] = useState<any[]>([]);
+  const [saving, setSaving] = useState(false);
+  const [photos, setPhotos] = useState<File[]>([]);
+  const [previews, setPreviews] = useState<string[]>([]);
+  const [photoMode, setPhotoMode] = useState<"upload" | "url">("upload");
+  const [photoUrls, setPhotoUrls] = useState<string[]>([]);
+  const [urlInput, setUrlInput] = useState("");
   // 附件上传
-  var [files, setFiles] = useState<File[]>([]);
-  var [fileNames, setFileNames] = useState<string[]>([]);
-  var [form, setForm] = useState({
+  const [files, setFiles] = useState<File[]>([]);
+  const [fileNames, setFileNames] = useState<string[]>([]);
+  const [form, setForm] = useState({
     headName: "", headGender: "", headIdCard: "", headPhone: "",
     registeredAddr: "", actualAddr: "", population: "1",
     familyAttr: "", residenceStatus: "常住户", riskLevel: "低",
@@ -26,23 +26,23 @@ export default function NewFamilyPage() {
     fetch("/api/village/groups").then(function(r) { return r.json(); }).then(setGroups).catch(console.error);
   }, []);
 
-  var handlePhotos = function(e: React.ChangeEvent<HTMLInputElement>) {
-    var files = Array.from(e.target.files || []);
+  const handlePhotos = function(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files || []);
     setPhotos(function(prev) { return prev.concat(files); });
     files.forEach(function(f) {
-      var reader = new FileReader();
+      const reader = new FileReader();
       reader.onload = function(ev) { setPreviews(function(p) { return p.concat([ev.target?.result as string]); }); };
       reader.readAsDataURL(f);
     });
   };
 
-  var removePhoto = function(i: number) {
+  const removePhoto = function(i: number) {
     setPhotos(function(p) { return p.filter(function(_, idx) { return idx !== i; }); });
     setPreviews(function(p) { return p.filter(function(_, idx) { return idx !== i; }); });
   };
 
-  var addUrl = function() {
-    var url = urlInput.trim();
+  const addUrl = function() {
+    const url = urlInput.trim();
     if (!url) return;
     if (!url.startsWith("http://") && !url.startsWith("https://")) {
       alert("请输入有效的 URL（以 http:// 或 https:// 开头）");
@@ -52,26 +52,26 @@ export default function NewFamilyPage() {
     setUrlInput("");
   };
 
-  var removeUrl = function(i: number) {
+  const removeUrl = function(i: number) {
     setPhotoUrls(function(p) { return p.filter(function(_, idx) { return idx !== i; }); });
   };
 
   // 附件处理
-  var handleFiles = function(e: React.ChangeEvent<HTMLInputElement>) {
-    var fls = Array.from(e.target.files || []);
+  const handleFiles = function(e: React.ChangeEvent<HTMLInputElement>) {
+    const fls = Array.from(e.target.files || []);
     setFiles(function(prev) { return prev.concat(fls); });
     setFileNames(function(prev) { return prev.concat(fls.map(function(f) { return f.name; })); });
   };
-  var removeFile = function(i: number) {
+  const removeFile = function(i: number) {
     setFiles(function(p) { return p.filter(function(_, idx) { return idx !== i; }); });
     setFileNames(function(p) { return p.filter(function(_, idx) { return idx !== i; }); });
   };
 
-  var submit = async function() {
+  const submit = async function() {
     if (!form.headName.trim()) { alert("请输入户主姓名"); return; }
     setSaving(true);
     try {
-      var fd = new FormData();
+      const fd = new FormData();
       fd.append("headName", form.headName);
       fd.append("headGender", form.headGender);
       fd.append("headIdCard", form.headIdCard);
@@ -89,7 +89,7 @@ export default function NewFamilyPage() {
       if (photoUrls.length > 0) {
         fd.append("photoUrls", JSON.stringify(photoUrls));
       }
-      var r = await fetch("/api/village/families", { method: "POST", body: fd });
+      const r = await fetch("/api/village/families", { method: "POST", body: fd });
       if (r.ok) { router.push("/village"); }
       else { var d = await r.json(); alert("创建失败: " + (d.error || "未知错误")); }
     } catch (e: any) { alert("提交失败: " + e.message); }
@@ -140,11 +140,11 @@ export default function NewFamilyPage() {
               <p className="text-xs text-gray-500 font-medium">户属性（可多选）</p>
               <div className="flex flex-wrap gap-2">
                 {["一般农户","脱贫户","监测户","低保户","五保户","党员","村委会成员","高龄老人","赡养儿童","重疾重病","残疾","丧失劳动能力"].map(function(a) {
-                  var selected = (form.familyAttr || "").split(",").filter(Boolean);
-                  var isChecked = selected.includes(a);
+                  const selected = (form.familyAttr || "").split(",").filter(Boolean);
+                  const isChecked = selected.includes(a);
                   return <label key={a} className="flex items-center gap-1.5 text-sm cursor-pointer">
                     <input type="checkbox" checked={isChecked} onChange={function() {
-                      var updated = isChecked ? selected.filter(function(x) { return x !== a; }) : selected.concat([a]);
+                      const updated = isChecked ? selected.filter(function(x) { return x !== a; }) : selected.concat([a]);
                       setForm(function(f) { return {...f, familyAttr: updated.join(",")}; });
                     }} className="rounded" /> {a}
                   </label>;

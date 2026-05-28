@@ -14,7 +14,7 @@ export default function Carousel() {
   const [lightbox, setLightbox] = useState(false);
 
   useEffect(() => {
-    var url = "/api/carousel?t=" + Date.now();
+    const url = "/api/carousel?t=" + Date.now();
     fetch(url)
       .then((r) => r.json())
       .then((data) => { setImages(data.images || []); setLoading(false); })

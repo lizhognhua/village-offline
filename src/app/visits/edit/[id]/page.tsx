@@ -32,7 +32,7 @@ export default function EditVisitPage() {
     fetch("/api/team-members")
       .then(r => r.json())
       .then(d => {
-        var names = (d.members || []).map((m: any) => m.name).filter(Boolean);
+        const names = (d.members || []).map((m: any) => m.name).filter(Boolean);
         setStaffOptions([...GENERIC_STAFF, ...names]);
       })
       .catch(() => {});

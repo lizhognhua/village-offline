@@ -72,7 +72,7 @@ export default function ReportsPage() {
       {/* Stat Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {statCards.map(function(s) {
-          var Icon = s.icon;
+          const Icon = s.icon;
           return (
             <div key={s.label} className="bg-white rounded-xl border p-5 shadow-sm hover:shadow-md transition-shadow">
               <div className="flex items-center justify-between">
@@ -97,7 +97,7 @@ export default function ReportsPage() {
           </h2>
           <div className="flex items-end gap-2 h-48">
             {(data?.monthlyVisits || []).map(function(v, i) {
-              var h = v.count > 0 ? Math.max((v.count / maxMonthlyVisit) * 100, 4) : 0;
+              const h = v.count > 0 ? Math.max((v.count / maxMonthlyVisit) * 100, 4) : 0;
               return (
                 <div key={v.month} className="flex-1 flex flex-col items-center gap-1 h-full justify-end">
                   <span className="text-xs font-medium text-gray-700">{v.count}</span>
@@ -119,8 +119,8 @@ export default function ReportsPage() {
           </h2>
           <div className="space-y-3">
             {attrStats.map(function(a, i) {
-              var pct = Math.round((a._count / totalAttr) * 100);
-              var label = ATTR_LABELS[a.familyAttr || ""] || a.familyAttr || "未知";
+              const pct = Math.round((a._count / totalAttr) * 100);
+              const label = ATTR_LABELS[a.familyAttr || ""] || a.familyAttr || "未知";
               return (
                 <div key={a.familyAttr || "未知"}>
                   <div className="flex items-center justify-between text-sm mb-1">

@@ -8,35 +8,35 @@ const STATUS_OPTIONS = ["在家", "外出务工", "出门", "健康", "生病", 
 const GENERIC_STAFF = ["局领导", "县领导", "乡领导", "村委会", "屯组长", "医疗行业", "民政"];
 
 export default function NewVisitPage() {
-  var router = useRouter();
-  var [families, setFamilies] = useState<any[]>([]);
-  var [staffOptions, setStaffOptions] = useState<string[]>(GENERIC_STAFF);
-  var [saving, setSaving] = useState(false);
-  var [recType, setRecType] = useState<"visit" | "condolence" | "reception">("visit");
-  var [files, setFiles] = useState<File[]>([]);
+  const router = useRouter();
+  const [families, setFamilies] = useState<any[]>([]);
+  const [staffOptions, setStaffOptions] = useState<string[]>(GENERIC_STAFF);
+  const [saving, setSaving] = useState(false);
+  const [recType, setRecType] = useState<"visit" | "condolence" | "reception">("visit");
+  const [files, setFiles] = useState<File[]>([]);
 
   // Fetch team members for dynamic staff list
   useEffect(() => {
     fetch("/api/team-members")
       .then(r => r.json())
       .then(d => {
-        var names = (d.members || []).map((m: any) => m.name).filter(Boolean);
+        const names = (d.members || []).map((m: any) => m.name).filter(Boolean);
         setStaffOptions([...GENERIC_STAFF, ...names]);
       })
       .catch(() => {});
   }, []);
-  var [previews, setPreviews] = useState<string[]>([]);
-  var [syncSiyuan, setSyncSiyuan] = useState(true);
-  var [searchText, setSearchText] = useState("");
-  var [dropdownOpen, setDropdownOpen] = useState(false);
-  var [showNewFamily, setShowNewFamily] = useState(false);
-  var [newFamily, setNewFamily] = useState({ headName: "", phone: "", familyAttr: "一般农户" });
-  var dropdownRef = useRef<HTMLDivElement>(null);
-  var [form, setForm] = useState({
+  const [previews, setPreviews] = useState<string[]>([]);
+  const [syncSiyuan, setSyncSiyuan] = useState(true);
+  const [searchText, setSearchText] = useState("");
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [showNewFamily, setShowNewFamily] = useState(false);
+  const [newFamily, setNewFamily] = useState({ headName: "", phone: "", familyAttr: "一般农户" });
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [form, setForm] = useState({
     familyId: "", visitDate: new Date().toISOString().split("T")[0], content: "", statusTags: [] as string[], staff: [] as string[]
   });
-  var [customStaffInput, setCustomStaffInput] = useState("");
-  var [otherStatusInput, setOtherStatusInput] = useState("");
+  const [customStaffInput, setCustomStaffInput] = useState("");
+  const [otherStatusInput, setOtherStatusInput] = useState("");
 
   useEffect(function() {
     fetch("/api/village/families?limit=2000").then(function(r) { return r.json(); })
@@ -45,7 +45,7 @@ export default function NewVisitPage() {
   }, []);
 
   useEffect(function() {
-    var handleClick = function(e: MouseEvent) {
+    const handleClick = function(e: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setDropdownOpen(false);
       }
@@ -54,17 +54,17 @@ export default function NewVisitPage() {
     return function() { document.removeEventListener("mousedown", handleClick); };
   }, []);
 
-  var selectedFamily = families.find(function(f) { return f.id === form.familyId; });
+  const selectedFamily = families.find(function(f) { return f.id === form.familyId; });
 
-  var filtered = families.filter(function(f) {
-    var q = searchText.toLowerCase();
+  const filtered = families.filter(function(f) {
+    const q = searchText.toLowerCase();
     return (f.headName || "").toLowerCase().includes(q) ||
            (f.idNumber || "").includes(q) ||
            (f.phone || "").includes(q) ||
            (f.familyAttr || "").includes(q);
   }).slice(0, 50);
 
-  var toggleTag = function(tag: string) {
+  const toggleTag = function(tag: string) {
     if (tag === "其他") {
       const val = prompt("请输入其他状态:");
       if (val && val.trim() && !form.statusTags.includes(val.trim())) {
@@ -75,36 +75,36 @@ export default function NewVisitPage() {
     setForm(function(f) { return {...f, statusTags: f.statusTags.includes(tag) ? f.statusTags.filter(function(t) { return t !== tag; }) : [...f.statusTags, tag]}; });
   };
 
-  var toggleStaff = function(s: string) {
+  const toggleStaff = function(s: string) {
     setForm(function(f) { return {...f, staff: f.staff.includes(s) ? f.staff.filter(function(x) { return x !== s; }) : [...f.staff, s]}; });
   };
-  var addCustomStaff = function() {
-    var name = customStaffInput.trim();
+  const addCustomStaff = function() {
+    const name = customStaffInput.trim();
     if (name && !form.staff.includes(name)) {
       setForm(function(f) { return {...f, staff: [...f.staff, name]}; });
       setCustomStaffInput("");
     }
   };
 
-  var handleFiles = function(e: React.ChangeEvent<HTMLInputElement>) {
-    var fl = Array.from(e.target.files || []);
+  const handleFiles = function(e: React.ChangeEvent<HTMLInputElement>) {
+    const fl = Array.from(e.target.files || []);
     setFiles(function(prev) { return [...prev, ...fl]; });
     fl.forEach(function(file) {
-      var reader = new FileReader();
+      const reader = new FileReader();
       reader.onload = function(ev) { setPreviews(function(p) { return [...p, ev.target?.result as string]; }); };
       reader.readAsDataURL(file);
     });
   };
 
-  var removeFile = function(i: number) {
+  const removeFile = function(i: number) {
     setFiles(function(f) { return f.filter(function(_, idx) { return idx !== i; }); });
     setPreviews(function(p) { return p.filter(function(_, idx) { return idx !== i; }); });
   };
 
-  var createFamily = async function() {
+  const createFamily = async function() {
     if (!newFamily.headName.trim()) return;
     try {
-      var r = await fetch("/api/village/families", {
+      const r = await fetch("/api/village/families", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -114,7 +114,7 @@ export default function NewVisitPage() {
         }),
       });
       if (r.ok) {
-        var d = await r.json();
+        const d = await r.json();
         setFamilies(function(prev) { return [d, ...prev]; });
         setForm(function(f) { return {...f, familyId: d.id}; });
         setShowNewFamily(false);
@@ -124,14 +124,14 @@ export default function NewVisitPage() {
     } catch(e) { console.error(e); }
   };
 
-  var submit = async function() {
+  const submit = async function() {
     if (!form.familyId || !form.content.trim()) {
       if (!form.familyId) alert("请选择或新增农户");
       return;
     }
     setSaving(true);
     try {
-      var fd = new FormData();
+      const fd = new FormData();
       fd.append("familyId", form.familyId);
       fd.append("visitDate", form.visitDate);
       fd.append("content", form.content);
@@ -140,7 +140,7 @@ export default function NewVisitPage() {
       fd.append("staff", form.staff.join(","));
       fd.append("syncSiyuan", String(syncSiyuan));
       files.forEach(function(f) { fd.append("photos", f); });
-      var r = await fetch("/api/records", { method: "POST", body: fd });
+      const r = await fetch("/api/records", { method: "POST", body: fd });
       if (r.ok) { router.push("/visits"); }
       else { var d = await r.json(); alert("失败: " + (d.error || "")); }
     } catch(e: any) { alert("提交失败: " + e.message); }
@@ -233,10 +233,10 @@ export default function NewVisitPage() {
                 className="px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-1 focus:ring-primary-500" />
               <div className="flex flex-wrap gap-1.5">
                 {["一般农户","脱贫户","监测户","低保户","五保户"].map(function(a) {
-                  var sel = (newFamily.familyAttr || "").split(",").filter(Boolean);
+                  const sel = (newFamily.familyAttr || "").split(",").filter(Boolean);
                   return <label key={a} className="flex items-center gap-0.5 text-xs cursor-pointer">
                     <input type="checkbox" checked={sel.includes(a)} onChange={function() {
-                      var u = sel.includes(a) ? sel.filter(function(x){return x!==a;}) : sel.concat([a]);
+                      const u = sel.includes(a) ? sel.filter(function(x){return x!==a;}) : sel.concat([a]);
                       setNewFamily(function(f) { return {...f, familyAttr: u.join(",")}; });
                     }} className="rounded" />{a}
                   </label>;
