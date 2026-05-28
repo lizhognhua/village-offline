@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
     }
 
     // 合并照片和文件到 files 字段
-    const allFiles: any[] = [];
+    let allFiles: any[] = [];
     try {
       if (body.files) allFiles = typeof body.files === "string" ? JSON.parse(body.files) : body.files;
     } catch {}

@@ -150,12 +150,12 @@ function pointInPolygon(point, polygon) {
       if(selectModeRef.current){
         if(polygonDoneRef.current){
           // Check if click is inside the polygon
-          const pts=selectCornersRef.current.map(function(p){return L.latLng(p[0],p[1]);});
+          let pts=selectCornersRef.current.map(function(p){return L.latLng(p[0],p[1]);});
           if(true){
             try{if(pointInPolygon([e.latlng.lat,e.latlng.lng],selectCornersRef.current)){clickLatLng.current=e.latlng;setPickerOpen(true);return;}}catch{}
           }
           // Bounding box check as fallback
-          const minLat=999,maxLat=-999,minLng=999,maxLng=-999;
+          let minLat=999,maxLat=-999,minLng=999,maxLng=-999;
           for(var pi=0;pi<pts.length;pi++){minLat=Math.min(minLat,pts[pi].lat);maxLat=Math.max(maxLat,pts[pi].lat);minLng=Math.min(minLng,pts[pi].lng);maxLng=Math.max(maxLng,pts[pi].lng);}
           if(e.latlng.lat>=minLat&&e.latlng.lat<=maxLat&&e.latlng.lng>=minLng&&e.latlng.lng<=maxLng){clickLatLng.current=e.latlng;setPickerOpen(true);return;}
           return;
@@ -172,10 +172,10 @@ function pointInPolygon(point, polygon) {
   },[loading]);
 
   const finishSelect = function(){
-    const pts=selectCornersRef.current;
+    let pts=selectCornersRef.current;
     if(pts.length<3){alert("请至少选择3个点构成区域");return;}
     polygonDoneRef.current=true;setPolygonDone(true);
-    const minLat=999,maxLat=-999,minLng=999,maxLng=-999;
+    let minLat=999,maxLat=-999,minLng=999,maxLng=-999;
     for(var pi=0;pi<pts.length;pi++){minLat=Math.min(minLat,pts[pi][0]);maxLat=Math.max(maxLat,pts[pi][0]);minLng=Math.min(minLng,pts[pi][1]);maxLng=Math.max(maxLng,pts[pi][1]);}
     const inR=function(lat:number,lng:number){return lat>=minLat&&lat<=maxLat&&lng>=minLng&&lng<=maxLng;};
     setSelectResults({markers:markers.filter(function(m){return inR(m.latitude,m.longitude);}),families:families.filter(function(f){return f.latitude&&f.longitude&&inR(f.latitude,f.longitude);})});

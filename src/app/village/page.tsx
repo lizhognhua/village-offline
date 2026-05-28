@@ -69,7 +69,7 @@ export default function VillagePage() {
 
   const loadFamilies = function() {
     setLoading(true);
-    const url = "/api/village/families?limit=" + limit + "&page=" + page;
+    let url = "/api/village/families?limit=" + limit + "&page=" + page;
     if (cat !== "全部") url += "&attr=" + encodeURIComponent(cat);
     if (search) url += "&search=" + encodeURIComponent(search);
     if (selectedGroup) url += "&groupId=" + selectedGroup;
@@ -168,7 +168,7 @@ export default function VillagePage() {
                     {function() {
                       try {
                         const photos = JSON.parse(f.photos || "[]");
-                        const photoUrl = photos.length > 0 ? photos[0] : null;
+                        let photoUrl = photos.length > 0 ? photos[0] : null;
                         if (photoUrl && photoUrl.startsWith("/uploads/")) { photoUrl = photoUrl.replace("/uploads/", "/api/uploads/"); }
                         if (photoUrl) {
                           return <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 border-2 border-gray-100 group-hover:border-primary-300 transition-colors"><img src={photoUrl} alt="" className="w-full h-full object-cover" /></div>;

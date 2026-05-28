@@ -29,7 +29,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 
     // 合并 files 和 photos（TrainingRecord 没有 photos 字段）
     if (body.files !== undefined || body.photos !== undefined) {
-      const merged: any[] = [];
+      let merged: any[] = [];
       try {
         if (body.files) merged = typeof body.files === "string" ? JSON.parse(body.files) : body.files;
       } catch {}

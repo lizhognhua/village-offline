@@ -132,7 +132,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 
     // Merge photos
     if (newPhotoPaths.length > 0 || body.existingPhotos !== undefined) {
-      const existing: string[] = [];
+      let existing: string[] = [];
       if (body.existingPhotos) {
         try { existing = JSON.parse(body.existingPhotos); } catch(e) { existing = []; }
       } else {
@@ -144,7 +144,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 
     // Merge files (档案文件)
     if (newFilePaths.length > 0 || body.existingFiles !== undefined) {
-      const existingFiles: string[] = [];
+      let existingFiles: string[] = [];
       if (body.existingFiles) {
         try { existingFiles = JSON.parse(body.existingFiles); } catch(e) { existingFiles = []; }
       } else {
@@ -170,7 +170,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     const { id } = await params;
     const a = await requireAuth(); if (a.error) return a.error;
     // Check ownership
-    const existing = await prisma.family.findUnique({ where: { id } });
+    let existing = await prisma.family.findUnique({ where: { id } });
     if (!existing) {
       return NextResponse.json({ error: "无权操作" }, { status: 403 });
     }

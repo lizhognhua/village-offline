@@ -57,12 +57,12 @@ export default function DiaryListPage() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [viewMode, setViewMode] = useState<"card" | "list">("card");
-  const limit = 24;
+  let limit = 24;
 
   const fetchDiaries = async function(p: number) {
     setLoading(true);
     try {
-      const url = "/api/diary?page=" + p + "&limit=" + limit;
+      let url = "/api/diary?page=" + p + "&limit=" + limit;
       if (search) url += "&search=" + encodeURIComponent(search);
       const res = await fetch(url);
       const json = await res.json();
@@ -83,7 +83,7 @@ export default function DiaryListPage() {
     setSyncing(true);
     try {
       const res = await fetch("/api/diary/sync-siyuan", { method: "POST" });
-      const d = await res.json();
+      let d = await res.json();
       if (d.success) {
         alert("思源同步完成：" + d.summary);
         fetchDiaries(page);

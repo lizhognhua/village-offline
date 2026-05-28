@@ -132,7 +132,7 @@ export default function FamilyDetail() {
         const filesToUpload = newFiles;
         if (filesToUpload.length > 0) {
           (async function() {
-            const uploaded = 0;
+            let uploaded = 0;
             for (var i = 0; i < filesToUpload.length; i++) {
               try {
                 const fd2 = new FormData();
