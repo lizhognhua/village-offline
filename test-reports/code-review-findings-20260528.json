@@ -1,0 +1,66 @@
+[
+  {
+    "file": "src/app/village/families/[id]/page.tsx",
+    "line": 263,
+    "summary": "charAt(0) 在 headName 为 null/空字符串时崩溃",
+    "failure_scenario": "户主姓名字段在数据库中是 String (required)，但前端 `charAt(0)` 在空字符串 `\"\"` 时仍会返回 `undefined` → React render `undefined` 不崩溃但显示空白。真正风险是如果未来数据导入产生空户主，第263行（户主头像）和第562行（成员头像）会直接白屏。第777行使用了 `name?.charAt(0)` 有保护但前两处没有。",
+    "severity": "P1",
+    "fix": "统一改为 `(f.headName || '?').charAt(0)` 或 `f.headName?.charAt(0)`"
+  },
+  {
+    "file": "src/app/village/page.tsx",
+    "line": 177,
+    "summary": "village/page.tsx 同样存在 charAt(0) 未保护问题",
+    "failure_scenario": "农户卡片头像 `f.headName.charAt(0)` 与详情页第263行是同一类问题，headName为空时空字符渲染。",
+    "severity": "P1",
+    "fix": "`f.headName?.charAt(0) || '?'`"
+  },
+  {
+    "file": "next.config.mjs",
+    "line": 5,
+    "summary": "TypeScript ignoreBuildErrors = true 掩盖所有类型错误",
+    "failure_scenario": "整个代码库有 205+ 处 `: any` 类型标注，33个文件中使用 `any`。`charAt(0)` 等空值问题本可通过 strict TS 编译捕获但被忽略。构建产物可能包含 silent 类型错误。",
+    "severity": "P1",
+    "fix": "逐步修复类型后改为 `false`，或至少开启 `strictNullChecks`"
+  },
+  {
+    "file": "package.json",
+    "line": 2,
+    "summary": "package.json 版本号 1.0.0 与实际版本 V2.6.3 严重不一致",
+    "failure_scenario": "用户/自动化工具无法从 package.json 判断当前版本。最新 git tag 是 `v2.5-before-phase1-20260527`，也落后。",
+    "severity": "P2",
+    "fix": "package.json version 更新为 2.6.3，同步 git tag"
+  },
+  {
+    "file": "prisma/seed.js",
+    "line": 46,
+    "summary": "seed.js 未填充 relocatedHouseholds/relocatedPopulation 字段",
+    "failure_scenario": "虽然前端 `value != null` 判断覆盖了 null 显示为 `--`，但 `suffix` 中 `stats.relocatedPopulation || 0` 在 seed 后显示为 `--户/0人`（value为null时显示`--`，suffix单独计算），视觉不协调。",
+    "severity": "P2",
+    "fix": "seed.js 中添加 relocatedHouseholds: 0, relocatedPopulation: 0"
+  },
+  {
+    "file": "src/lib/sanitize.ts",
+    "line": 1,
+    "summary": "sanitizeHtml 使用正则替换而非标准 HTML sanitizer，存在绕过风险",
+    "failure_scenario": "当前使用正则黑名单方式过滤危险标签和事件处理器。攻击者可利用 HTML 实体编码、属性包裹变体、嵌套结构等方式绕过正则过滤。例如 `onclick` 可以用 `oncli​ck` 零宽字符绕过。虽然在线版使用受限，但仍是一个潜在 XSS 入口。",
+    "severity": "P2",
+    "fix": "使用 DOMPurify 等标准 HTML 净化库替代正则实现"
+  },
+  {
+    "file": "src/app/village/families/[id]/page.tsx",
+    "line": 1,
+    "summary": "全文使用 var 而非 const/let，可能产生意外闭包行为",
+    "failure_scenario": "var 具有函数作用域而非块级作用域，在 for 循环闭包中（如异步回调引用循环变量）会产生预期外的行为。例如 `for(var i=0; i<n; i++) { fetch(...).then(() => use(i)) }` 中所有回调看到的都是 n+1。当前代码中的 var 主要用在内联函数外，实际风险较低，但存在隐患。",
+    "severity": "P3",
+    "fix": "统一 var 改为 const/let，配合 ESLint no-var 规则"
+  },
+  {
+    "file": "src/lib/auth-utils.ts",
+    "line": 38,
+    "summary": "登录速率限制使用内存 Map，服务器重启后重置",
+    "failure_scenario": "Map 中的登录失败计数不会持久化到任何地方。如果容器重启（Docker 在线版）或开发服务器重启（离线版），所有计数归零。攻击者可在每次重启后重新尝试暴力破解。",
+    "severity": "P3",
+    "fix": "将登录失败计数存入数据库 SystemConfig 表，或至少使用文件持久化"
+  }
+]
